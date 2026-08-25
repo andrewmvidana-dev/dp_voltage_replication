@@ -1,62 +1,44 @@
-# Feeder loading, network cleanup, and the Kron reduction that produces the
-# reduced admittance matrix Y everything else is built on.
+# Feeder loading, network cleanup, and the Kron reduction producing the reduced
+# admittance matrix Y that everything else is built on.
 #
-# The cleanup step (merge switches, prune stubs) is NOT in the paper. Without
-# it kappa_Kron comes out at 2e25 instead of 3e6, which makes Theorem 1 vacuous.
+# The cleanup step (merge switches, prune stubs) is NOT in the paper. Without it
+# kappa_Kron comes out at 2e25 instead of 3e6, which makes Theorem 1 vacuous.
 
 from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
 
-import numpy as np              # fast numerical arrays and linear algebra
-import scipy.sparse as sp       # "sparse" matrices: mostly-zero matrices
-import opendssdirect as dss     # Python control of OpenDSS, the power-flow
-                                # engine used by real utilities
+import numpy as np
+import scipy.sparse as sp
+import opendssdirect as dss      # OpenDSS, the power-flow engine used by utilities
 
 
-# =============================================================================
-# SECTION 1 -- Containers
-#
-# These two classes are just labelled boxes. They hold results so we can pass
-# many related values around as a single object instead of twelve separate
-# ones.
-# =============================================================================
+# ---------------------------------------------------------------------------
+# 1. Containers
+# ---------------------------------------------------------------------------
 
 @dataclass
 class Feeder:
-    """Everything extracted from one solved OpenDSS feeder.
+    """Everything extracted from one solved OpenDSS feeder, before reduction."""
 
-    Think of this as the raw ingredients, before any reduction happens.
-    """
-
-    Y_full: np.ndarray          # (N, N) complex admittance matrix. Entry
-                                #   [i,j] says how strongly nodes i and j are
-                                #   electrically connected.
+    Y_full: np.ndarray          # (N, N) complex admittance matrix
     node_names: list[str]       # e.g. "83.2" == bus 83, phase 2
-    bus_of_node: list[str]      # e.g. "83"   == just the bus part
+    bus_of_node: list[str]      # e.g. "83"
     V_node: np.ndarray          # (N,) solved complex voltages, in volts
     Vbase: np.ndarray           # (N,) nominal voltage per node, for per-unit
     load_nodes: np.ndarray      # indices of nodes with a load attached
-    slack_nodes: np.ndarray     # indices of the substation / source nodes
+    slack_nodes: np.ndarray     # substation / source nodes
     zero_inj_nodes: np.ndarray  # everything else: no load, no generation
 
     @property
     def N(self) -> int:
-        """Total number of nodes.
-
-        'property' means you read it like a value: write feeder.N, not
-        feeder.N().
-        """
         return len(self.node_names)
 
     @property
     def V_pu(self) -> np.ndarray:
-        """Voltages in per-unit, where 1.0 == nominal.
-
-        ANSI C84.1 (and the paper's Definition 2) wants every voltage inside
-        the band [0.95, 1.05].
-        """
+        """Voltages in per-unit. ANSI C84.1 (and the paper's Definition 2)
+        wants every one inside [0.95, 1.05]."""
         return self.V_node / self.Vbase
 
 
@@ -67,19 +49,19 @@ class KronResult:
     Y_red: np.ndarray           # (n, n) reduced admittance matrix, eq. (3)
     Phi: np.ndarray             # recovery map: v_Z = Phi @ v_R, eq. (2)
     b: np.ndarray               # (n,) constant-current slack offset, eq. (7)
-    kappa_kron: float           # Kron amplification factor, eq. (4).
-                                #   THIS IS THE NUMBER THAT MATTERS MOST.
-    retained: np.ndarray        # which nodes survived (the "R" set)
-    zero_inj: np.ndarray        # which nodes were eliminated (the "Z" set)
+    kappa_kron: float           # Kron amplification factor, eq. (4) -- the
+                                #   number that matters most
+    retained: np.ndarray        # nodes that survived (the "R" set)
+    zero_inj: np.ndarray        # nodes eliminated (the "Z" set)
     slack: np.ndarray
     names_retained: list[str]
     residual: float = np.nan    # correctness check; should be around 1e-10
     cond_Y_ZZ: float = np.nan   # conditioning diagnostic; want well below 1e12
 
 
-# =============================================================================
-# SECTION 2 -- Loading the feeder from disk
-# =============================================================================
+# ---------------------------------------------------------------------------
+# 2. Loading the feeder
+# ---------------------------------------------------------------------------
 
 def load_feeder(
     master_path: str,
@@ -89,45 +71,34 @@ def load_feeder(
 ) -> Feeder:
     """Compile an OpenDSS feeder, solve it, and extract the model.
 
-    Parameters
-    ----------
-    master_path
-        Path to the feeder's master .dss file on your computer.
     network_only_Y
         OpenDSS quietly folds an approximate *load* admittance into its system
         Y. The paper's Y is the wiring ONLY, with loads appearing separately as
-        power injections s_k. So we rebuild Y with the loads switched off. The
-        difference is small (about 0.06 percent) but it is a difference between
-        our model and the paper's, so we remove it.
-    merge_switches
-        See _merge_switch_nodes below. Fixes a 5-orders-of-magnitude problem.
-    prune_stubs
-        See _prune_dangling_stubs below. Fixes a further 14 orders of
-        magnitude. Together these take kappa_Kron from 2e25 down to 3e6.
+        power injections s_k, so we rebuild Y with loads switched off. The
+        difference is small (~0.06%) but it is a difference from the paper.
+    merge_switches, prune_stubs
+        See the two functions in section 3. Together they take kappa_Kron from
+        2e25 down to 3e6.
     """
 
-    # ---- Solve the feeder in its normal, fully-loaded state ---------------
-    # "Clear" wipes any circuit left over from a previous run. Forgetting this
-    # is a classic source of baffling bugs when you run a script twice.
+    # "Clear" wipes any circuit left from a previous run -- forgetting it is a
+    # classic source of baffling bugs when a script is run twice.
     dss.Text.Command("Clear")
-    dss.Text.Command(f"Redirect {master_path}")   # load the feeder definition
-    dss.Text.Command("Solve")                     # run the power flow
+    dss.Text.Command(f"Redirect {master_path}")
+    dss.Text.Command("Solve")
 
     if not dss.Solution.Converged():
         raise RuntimeError(
             "The base-case power flow did not converge. Check master_path."
         )
 
-    # YNodeOrder is the authoritative list of node names, in exactly the same
-    # order as the rows and columns of Y. Everything downstream depends on
-    # this ordering, so we grab it once and never re-derive it.
+    # YNodeOrder is the authoritative node ordering, matching Y's rows and
+    # columns. Everything downstream depends on it, so grab it once.
     node_names = [s.lower() for s in dss.Circuit.YNodeOrder()]
     N = len(node_names)
     bus_of_node = [nm.split(".")[0] for nm in node_names]
 
-    # Solved voltages. OpenDSS returns these as a flat list of alternating
-    # real, imaginary, real, imaginary... so we de-interleave into complex
-    # numbers. In NumPy, [0::2] means "every 2nd element starting at index 0".
+    # OpenDSS returns voltages as flat alternating real/imag.
     v = np.asarray(dss.Circuit.YNodeVArray())
     V_node = v[0::2] + 1j * v[1::2]
 
@@ -135,20 +106,19 @@ def load_feeder(
     slack_nodes = _slack_nodes(node_names)
     load_nodes = _load_nodes(node_names)
 
-    # Record which node pairs are joined by a closed switch BEFORE we start
-    # disabling elements, because the element list changes as we edit.
+    # Record closed-switch node pairs BEFORE disabling anything, since the
+    # element list changes as we edit.
     switch_pairs = _switch_node_pairs(node_names) if merge_switches else []
 
-    # ---- Extract Y --------------------------------------------------------
     Y_full = _extract_Y(N, network_only_Y)
 
-    # ---- Clean the network up ---------------------------------------------
+    # ---- cleanup -----------------------------------------------------------
     if merge_switches:
         (Y_full, node_names, bus_of_node, V_node, Vbase,
          keep_map) = _merge_switch_nodes(
             Y_full, node_names, bus_of_node, V_node, Vbase, switch_pairs
         )
-        # Node indices have shifted, so translate our bookkeeping across.
+        # Node indices have shifted; translate the bookkeeping across.
         load_nodes = np.array(sorted({keep_map[i] for i in load_nodes}))
         slack_nodes = np.array(sorted({keep_map[i] for i in slack_nodes}))
 
@@ -165,13 +135,11 @@ def load_feeder(
             sorted({keep_map[i] for i in slack_nodes if i in keep_map})
         )
 
-    # ---- Whatever is left over is a zero-injection node -------------------
-    # np.ones(N, dtype=bool) makes an array full of True. We set False for
-    # every node already accounted for; whatever stays True is the remainder.
+    # Whatever is left over is zero-injection.
     mask = np.ones(len(node_names), dtype=bool)
     mask[slack_nodes] = False
     mask[load_nodes] = False
-    zero_inj_nodes = np.flatnonzero(mask)     # positions where mask is True
+    zero_inj_nodes = np.flatnonzero(mask)
 
     return Feeder(
         Y_full=Y_full,
@@ -186,30 +154,28 @@ def load_feeder(
 
 
 def _extract_Y(N: int, network_only: bool) -> np.ndarray:
-    """Pull the admittance matrix out of OpenDSS as a dense NumPy array.
+    """Pull the admittance matrix out of OpenDSS as a dense array.
 
-    TWO TRAPS ARE HANDLED HERE. Both cost real debugging time.
+    TWO TRAPS, both of which cost real debugging time.
 
-    TRAP 1 -- Regulator taps.
-        If you disable the loads and re-solve, OpenDSS's regulator controls
-        notice the feeder is now unloaded and re-tap every regulator. On IEEE
-        123 the taps swing from (6,0,2,0,10,4,6) to (-1,-1,0,0,2,2,2). The Y
-        you capture then describes a DIFFERENT transformer configuration from
-        the voltages you solved for, and every downstream check fails. We saw
-        total slack power come out as -216 MW instead of +3.6 MW.
-        Fix: "Set ControlMode=OFF" freezes the taps where they are.
+    1. REGULATOR TAPS. Disabling loads and re-solving makes OpenDSS's regulator
+       controls notice the feeder is now unloaded and re-tap. On IEEE 123 taps
+       swing from (6,0,2,0,10,4,6) to (-1,-1,0,0,2,2,2), so the captured Y
+       describes a different transformer configuration from the voltages we
+       solved for, and every downstream check fails -- we saw total slack power
+       come out as -216 MW instead of +3.6 MW. "Set ControlMode=OFF" freezes
+       the taps.
 
-    TRAP 2 -- Memory views.
-        getYsparse() hands back arrays pointing directly into OpenDSS's own
-        internal memory. The next Solve() overwrites that memory underneath
-        you. Fix: np.array(..., copy=True) takes a private copy first.
+    2. MEMORY VIEWS. getYsparse() returns arrays pointing into OpenDSS's own
+       internal memory, which the next Solve() overwrites underneath you.
+       np.array(..., copy=True) takes a private copy first.
     """
     if network_only:
-        dss.Text.Command("Set ControlMode=OFF")            # TRAP 1
+        dss.Text.Command("Set ControlMode=OFF")            # trap 1
         dss.Text.Command("BatchEdit Load..* enabled=no")
         dss.Text.Command("Solve")
         raw = dss.YMatrix.getYsparse()
-        data, indices, indptr = (np.array(a, copy=True) for a in raw)  # TRAP 2
+        data, indices, indptr = (np.array(a, copy=True) for a in raw)  # trap 2
         # Put the circuit back exactly as we found it.
         dss.Text.Command("BatchEdit Load..* enabled=yes")
         dss.Text.Command("Set ControlMode=STATIC")
@@ -218,19 +184,13 @@ def _extract_Y(N: int, network_only: bool) -> np.ndarray:
         raw = dss.YMatrix.getYsparse()
         data, indices, indptr = (np.array(a, copy=True) for a in raw)
 
-    # OpenDSS gives Y in "compressed sparse column" format: three plain arrays
-    # that SciPy knows how to reassemble. We then convert to a normal dense
-    # array, because at a few hundred rows it is small and dense linear
-    # algebra is easier to reason about.
+    # OpenDSS hands back compressed sparse column format. Dense is fine and
+    # easier to reason about at a few hundred rows.
     return sp.csc_matrix((data, indices, indptr), shape=(N, N)).toarray()
 
 
 def _node_base_voltages(node_names: list[str]) -> np.ndarray:
-    """Look up each node's nominal line-to-neutral voltage, in volts.
-
-    Needed to convert volts into per-unit, which is how power engineers (and
-    the paper's Definition 2) express voltage limits.
-    """
+    """Each node's nominal line-to-neutral voltage in volts, for per-unit."""
     lookup = {}
     for bus in dss.Circuit.AllBusNames():
         dss.Circuit.SetActiveBus(bus)
@@ -243,14 +203,13 @@ def _node_base_voltages(node_names: list[str]) -> np.ndarray:
 
 
 def _slack_nodes(node_names: list[str]) -> np.ndarray:
-    """Find the substation nodes, where the transmission system feeds in.
+    """The substation nodes, where the transmission system feeds in.
 
-    In power-flow terms this is the 'slack' or 'swing' bus: its voltage is
-    held fixed and it supplies whatever power the rest of the feeder needs.
-    On IEEE 123 this is bus 150.
+    The power-flow 'slack' bus: voltage held fixed, supplies whatever the
+    feeder needs. On IEEE 123 this is bus 150.
     """
     buses = set()
-    i = dss.Vsources.First()             # loop over every voltage source
+    i = dss.Vsources.First()
     while i > 0:
         buses.add(dss.CktElement.BusNames()[0].split(".")[0].lower())
         i = dss.Vsources.Next()
@@ -261,11 +220,10 @@ def _slack_nodes(node_names: list[str]) -> np.ndarray:
 
 
 def _terminal_nodes(bus_spec: str) -> list[str]:
-    """Turn an OpenDSS bus specification into a list of node names.
+    """Expand an OpenDSS bus spec into node names.
 
-    OpenDSS writes connections like "83.1.2", meaning bus 83, phases 1 and 2.
-    A bare "83" implicitly means all three phases. A ".0" means neutral or
-    ground, which is not a node in Y, so we drop it.
+    "83.1.2" means bus 83, phases 1 and 2. A bare "83" implies all three
+    phases. ".0" is neutral/ground, which is not a node in Y, so we drop it.
     """
     parts = bus_spec.lower().split(".")
     bus = parts[0]
@@ -276,12 +234,12 @@ def _terminal_nodes(bus_spec: str) -> list[str]:
 
 
 def _load_nodes(node_names: list[str]) -> np.ndarray:
-    """Find nodes carrying a load, PV system, generator or storage unit.
+    """Nodes carrying a load, PV system, generator or storage unit.
 
-    Capacitors are deliberately EXCLUDED. A capacitor is a fixed shunt
-    admittance, so it already lives inside Y and its external power injection
-    is zero. Under the paper's Definition 1 that makes it a zero-injection
-    bus, not a retained one. Getting this wrong silently changes n.
+    Capacitors are deliberately EXCLUDED: a capacitor is a fixed shunt
+    admittance, so it already lives inside Y and its external injection is
+    zero. Under Definition 1 that makes it zero-injection, not retained.
+    Getting this wrong silently changes n.
     """
     name_to_idx = {nm: i for i, nm in enumerate(node_names)}
     hits = set()
@@ -302,16 +260,15 @@ def _load_nodes(node_names: list[str]) -> np.ndarray:
 
 
 def _switch_node_pairs(node_names: list[str]) -> list[tuple[int, int]]:
-    """List every pair of nodes joined by a closed switch."""
+    """Every pair of nodes joined by a closed switch."""
     name_to_idx = {nm: i for i, nm in enumerate(node_names)}
     pairs = []
     i = dss.Lines.First()
     while i > 0:
-        # A "switch" in OpenDSS is a Line flagged as such, or any line short
-        # enough that its impedance is effectively zero.
+        # A "switch" is a Line flagged as such, or one short enough that its
+        # impedance is effectively zero.
         if dss.Lines.IsSwitch() or dss.Lines.Length() <= 1e-3:
             b1, b2 = dss.CktElement.BusNames()[:2]
-            # zip() pairs phase 1 with phase 1, phase 2 with phase 2, and so on
             for a, b in zip(_terminal_nodes(b1), _terminal_nodes(b2)):
                 if a in name_to_idx and b in name_to_idx:
                     pairs.append((name_to_idx[a], name_to_idx[b]))
@@ -319,50 +276,37 @@ def _switch_node_pairs(node_names: list[str]) -> list[tuple[int, int]]:
     return pairs
 
 
-# =============================================================================
-# SECTION 3 -- Network cleanup  (NOT in the paper -- this is our addition)
-# =============================================================================
+# ---------------------------------------------------------------------------
+# 3. Network cleanup  (NOT in the paper -- our addition)
+# ---------------------------------------------------------------------------
 
 def _merge_switch_nodes(Y, node_names, bus_of_node, V, Vbase, pairs):
     """Collapse each closed switch so its two ends become ONE node.
 
-    WHY THIS IS NECESSARY
-    ---------------------
     IEEE 123 models its 8 switches as lines with essentially zero impedance.
-    Admittance is 1 divided by impedance, so "essentially zero impedance"
-    becomes "enormous admittance": those nodes get diagonal entries around
-    1,000,000 against a median of 44 for a normal node.
+    Admittance is 1/impedance, so those nodes get diagonal entries around 1e6
+    against a median of 44. When the Kron reduction then inverts the
+    zero-injection block, that 5-order spread makes the inversion numerically
+    catastrophic and kappa_Kron -- which depends on ||Y_ZZ^-1|| -- explodes.
 
-    When the Kron reduction then tries to invert the zero-injection block of
-    Y, that 5-orders-of-magnitude spread makes the inversion numerically
-    catastrophic, and kappa_Kron -- which depends on the size of Y_ZZ inverse
-    -- explodes.
-
-    The fix is physical, not numerical. A CLOSED switch means the two buses
-    genuinely ARE the same electrical point. So we merge them topologically
+    The fix is physical, not numerical: a CLOSED switch means the two buses
+    genuinely ARE the same electrical point, so we merge them topologically
     rather than asking linear algebra to eliminate a near-infinite admittance.
 
-    HOW IT WORKS (union-find)
-    -------------------------
-    "Union-find" is a standard algorithm for grouping things. Every node
-    starts in its own group. Each switch merges two groups. At the end every
-    node knows which group it belongs to, and we add up the rows and columns
-    of Y within each group.
+    Grouping is union-find: each node starts alone, each switch merges two
+    groups, then we sum rows and columns within each group.
     """
     N = len(node_names)
 
-    # parent[i] records who represents node i's group. Initially: itself.
     parent = list(range(N))
 
     def find(a):
-        """Walk up to the group's representative, flattening the path."""
         while parent[a] != a:
-            parent[a] = parent[parent[a]]      # path compression, a speedup
+            parent[a] = parent[parent[a]]      # path compression
             a = parent[a]
         return a
 
     def union(a, b):
-        """Merge the groups containing a and b."""
         ra, rb = find(a), find(b)
         if ra != rb:
             parent[max(ra, rb)] = min(ra, rb)
@@ -370,11 +314,9 @@ def _merge_switch_nodes(Y, node_names, bus_of_node, V, Vbase, pairs):
     for a, b in pairs:
         union(a, b)
 
-    # Build a projection matrix P, where P[i, j] = 1 means "old node i belongs
-    # to new merged node j". Then P.T @ Y @ P adds together the rows and
-    # columns of each group. That is exactly the right way to merge nodes in
-    # an admittance matrix, because Kirchhoff's current law adds currents at
-    # a node.
+    # P[i, j] = 1 means "old node i belongs to new merged node j". P.T @ Y @ P
+    # then sums the rows and columns of each group -- the right way to merge
+    # nodes in an admittance matrix, since Kirchhoff's law adds currents.
     groups = sorted({find(k) for k in range(N)})
     gmap = {g: j for j, g in enumerate(groups)}
     P = np.zeros((N, len(groups)))
@@ -382,7 +324,7 @@ def _merge_switch_nodes(Y, node_names, bus_of_node, V, Vbase, pairs):
         P[k, gmap[find(k)]] = 1.0
 
     keep_map = {k: gmap[find(k)] for k in range(N)}   # old index -> new index
-    reps = list(groups)                               # representative old node
+    reps = list(groups)
 
     return (
         P.T @ Y @ P,
@@ -396,44 +338,29 @@ def _merge_switch_nodes(Y, node_names, bus_of_node, V, Vbase, pairs):
 
 def _prune_dangling_stubs(Y, node_names, bus_of_node, V, Vbase,
                           protected, tol=1e-8):
-    """Remove dead-end buses that have no load and no generation.
+    """Remove dead-end buses with no load and no generation.
 
-    WHY THIS IS NECESSARY
-    ---------------------
-    On IEEE 123, buses 151, 250, 300, 450, 61 and 610 each have exactly one
-    element attached and carry no load. They are dead ends: electrical
-    cul-de-sacs.
-
-    A zero-injection dead end breaks the Kron reduction. Its block of the
-    admittance matrix looks like
-
-            [  y   -y ]
-            [ -y    y ]
-
-    which is SINGULAR: the two rows are copies of each other up to sign.
-    Inverting it is impossible in exact arithmetic and disastrous in floating
-    point. On our feeder this showed up as a smallest singular value of 2e-7
+    On IEEE 123, buses 151, 250, 300, 450, 61 and 610 each have one element
+    attached and carry no load. A zero-injection dead end breaks the Kron
+    reduction: its block looks like [[y, -y], [-y, y]], which is SINGULAR --
+    the rows are copies up to sign. Inverting it is impossible exactly and
+    disastrous in floating point; we saw a smallest singular value of 2e-7
     against a largest of 2.7e4.
 
-    Physically the resolution is obvious. No current flows into a dead end
-    that consumes nothing, so its voltage simply equals its parent's. It
-    carries no information, so we delete it rather than eliminate it.
+    Physically, no current flows into a dead end that consumes nothing, so its
+    voltage just equals its parent's. It carries no information, so delete it
+    rather than eliminate it.
 
-    ONE SUBTLETY WE GOT WRONG FIRST TIME
-    ------------------------------------
-    A dead end is a leaf at the BUS level, not the NODE level. A three-phase
-    line has mutual coupling between its phases, so node "250.2" connects to
-    250.1, 250.3, 251.1, 251.2 and 251.3 -- degree 5, not degree 1. You have
-    to collapse the node graph down to a bus graph before testing.
-
-    Pruning repeats until nothing changes, because removing one stub can
-    expose another sitting behind it.
+    SUBTLETY WE GOT WRONG FIRST TIME: a dead end is a leaf at the BUS level,
+    not the NODE level. Three-phase lines couple phases, so node "250.2"
+    connects to 250.1, 250.3, 251.1, 251.2, 251.3 -- degree 5, not 1. Collapse
+    the node graph to a bus graph before testing. Pruning repeats until nothing
+    changes, since removing one stub can expose another behind it.
     """
     keep = list(range(len(node_names)))
     removed_buses = []
 
     while True:
-        # Adjacency: A[i,j] is True when nodes i and j are directly connected.
         A = np.abs(Y[np.ix_(keep, keep)]) > tol
         np.fill_diagonal(A, False)          # a node is not its own neighbour
 
@@ -448,7 +375,7 @@ def _prune_dangling_stubs(Y, node_names, bus_of_node, V, Vbase,
                 for other in np.flatnonzero(A[pos]):
                     neighbours[bus].add(bus_of_node[keep[other]])
         for bus in neighbours:
-            neighbours[bus].discard(bus)             # ignore self-connections
+            neighbours[bus].discard(bus)
 
         protected_buses = {
             bus_of_node[k] for k in protected if k < len(bus_of_node)
@@ -458,28 +385,25 @@ def _prune_dangling_stubs(Y, node_names, bus_of_node, V, Vbase,
         drop = [b for b, nb in neighbours.items()
                 if len(nb) <= 1 and b not in protected_buses]
         if not drop:
-            break                                    # nothing left to prune
+            break
 
         removed_buses += drop
         drop_set = set(drop)
 
-        # IMPORTANT: we must ELIMINATE the stub, not merely delete its rows.
+        # IMPORTANT: ELIMINATE the stub, do not merely delete its rows.
         #
-        # A stub is connected to its parent by a branch of admittance y. If we
-        # just delete the stub's row and column, the parent keeps +y on its
-        # diagonal with nothing on the other end of it -- an invented shunt to
-        # ground. Power balance then fails by hundreds of MVA, which is
-        # exactly what our Check A caught the first time we wrote this.
+        # A stub connects to its parent by a branch of admittance y. Deleting
+        # its row and column leaves the parent with +y on its diagonal and
+        # nothing on the other end -- an invented shunt to ground. Power balance
+        # then fails by hundreds of MVA, which is exactly what verify.py's
+        # zero-injection check caught the first time we wrote this.
         #
-        # The correct operation is the same Schur complement used by the Kron
+        # The correct operation is the same Schur complement as the Kron
         # reduction, applied just to the stub:
-        #
-        #     Y_new = Y_kk  -  Y_kd @ inverse(Y_dd) @ Y_dk
-        #
-        # For a leaf this subtracts precisely y from the parent's diagonal,
-        # removing the branch cleanly. Doing it one stub at a time is
-        # well-conditioned (Y_dd is a small 1x1 or 3x3 block), whereas folding
-        # these nodes into the big Y_ZZ inversion is what was singular.
+        #     Y_new = Y_kk - Y_kd @ inv(Y_dd) @ Y_dk
+        # For a leaf this subtracts precisely y from the parent's diagonal.
+        # One stub at a time is well-conditioned (Y_dd is 1x1 or 3x3), whereas
+        # folding these nodes into the big Y_ZZ inversion is what was singular.
         d_pos = [j for j, k in enumerate(keep) if bus_of_node[k] in drop_set]
         k_pos = [j for j, k in enumerate(keep) if bus_of_node[k] not in drop_set]
 
@@ -490,7 +414,6 @@ def _prune_dangling_stubs(Y, node_names, bus_of_node, V, Vbase,
 
         Y_reduced = Y_kk - Y_kd @ np.linalg.solve(Y_dd, Y_dk)
 
-        # Rebuild the bookkeeping around the surviving nodes.
         surviving = [keep[j] for j in k_pos]
         Y = _reindex(Y, Y_reduced, surviving)
         keep = surviving
@@ -509,52 +432,38 @@ def _prune_dangling_stubs(Y, node_names, bus_of_node, V, Vbase,
 def _reindex(Y_old, Y_small, surviving):
     """Write the reduced block back into a full-size matrix.
 
-    The pruning loop keeps working with original node indices for readability,
-    so after each elimination we place the smaller matrix back into a matrix of
-    the original size, leaving the removed rows as zeros. Only the surviving
-    indices are ever read afterwards.
+    The pruning loop keeps original node indices for readability, so after each
+    elimination we place the smaller matrix back at full size with removed rows
+    zeroed. Only surviving indices are ever read afterwards.
     """
     Y_new = np.zeros_like(Y_old)
     Y_new[np.ix_(surviving, surviving)] = Y_small
     return Y_new
 
 
-# =============================================================================
-# SECTION 4 -- The Kron reduction  (Section II-A of the paper)
-# =============================================================================
+# ---------------------------------------------------------------------------
+# 4. The Kron reduction  (Section II-A of the paper)
+# ---------------------------------------------------------------------------
 
 def kron_reduce(feeder: Feeder, verify: bool = True) -> KronResult:
-    """Eliminate zero-injection buses using the Schur complement.
+    """Eliminate zero-injection buses via the Schur complement.
 
-    THE IDEA
-    --------
-    Split the buses into three groups:
-        R  retained   -- buses with a load or generator on them
-        Z  zero-inj   -- buses with nothing attached
-        S  slack      -- the substation
+    Split the buses into R (retained: load or generator), Z (zero-injection,
+    nothing attached) and S (slack / substation). Because Z buses inject no
+    power their voltages are fully determined by the R buses, so we solve them
+    out algebraically and work with a smaller system of identical physics.
+    Eliminating the Z rows gives eq. (3):
 
-    Because the Z buses inject no power, their voltages are completely
-    determined by the R buses. So we can solve them out algebraically and work
-    with a smaller system describing exactly the same physics.
+        Y_red = Y_RR - Y_RZ @ inv(Y_ZZ) @ Y_ZR
 
-    Writing Y in blocks and eliminating the Z rows gives the paper's eq. (3):
+    (the Schur complement; in power systems, Kron reduction).
 
-        Y_red = Y_RR  -  Y_RZ @ inverse(Y_ZZ) @ Y_ZR
-
-    Mathematicians call this the "Schur complement". In power systems
-    specifically it is called Kron reduction, after Gabriel Kron.
-
-    WHY kappa_Kron MATTERS SO MUCH
-    ------------------------------
-    The paper's privacy guarantee only holds when
-
-        alpha = ||M_tilde inverse|| * C_star * kappa_Kron * r  <  1/4
-
-    where r is how large a change to the network the mechanism is supposed to
-    hide. kappa_Kron multiplies r directly, so if kappa_Kron is 1e25 then r
-    must be below about 1e-27 for the theorem to apply at all -- meaning it
-    protects against essentially nothing. Getting kappa_Kron down to 3e6 is
-    what makes this whole replication viable.
+    WHY kappa_Kron MATTERS. The privacy guarantee only holds when
+        alpha = ||M~^-1|| * C_star * kappa_Kron * r  <  1/4
+    where r is how large a network change the mechanism must hide. kappa_Kron
+    multiplies r directly, so at kappa_Kron = 1e25, r must be below ~1e-27 for
+    the theorem to apply at all -- protecting against essentially nothing.
+    Getting it down to 3e6 is what makes this replication viable.
     """
     Y = feeder.Y_full
     R = feeder.load_nodes
@@ -564,16 +473,13 @@ def kron_reduce(feeder: Feeder, verify: bool = True) -> KronResult:
     if len(Z) == 0:
         raise RuntimeError("No zero-injection nodes found -- check classification.")
 
-    # np.ix_ pulls out a rectangular sub-block: it means "take these rows AND
-    # these columns", not "take these individual cells".
     Y_RR = Y[np.ix_(R, R)]
     Y_RZ = Y[np.ix_(R, Z)]
     Y_ZR = Y[np.ix_(Z, R)]
     Y_ZZ = Y[np.ix_(Z, Z)]
 
-    # The condition number measures how trustworthy an inversion is. Roughly,
-    # you lose log10(cond) digits of accuracy. Above 1e12 you have lost
-    # everything a 64-bit float can offer.
+    # You lose roughly log10(cond) digits in an inversion; above 1e12 nothing
+    # a 64-bit float offers survives.
     cond = float(np.linalg.cond(Y_ZZ))
     if cond > 1e10:
         warnings.warn(
@@ -581,8 +487,7 @@ def kron_reduce(feeder: Feeder, verify: bool = True) -> KronResult:
             "unreliable. Are merge_switches and prune_stubs both switched on?"
         )
 
-    # np.linalg.solve(A, B) computes inverse(A) @ B, but more accurately and
-    # faster than forming the inverse explicitly. Prefer it wherever possible.
+    # solve(A, B) computes inv(A) @ B more accurately than forming the inverse.
     Y_ZZ_inv_Y_ZR = np.linalg.solve(Y_ZZ, Y_ZR)
 
     Y_red = Y_RR - Y_RZ @ Y_ZZ_inv_Y_ZR      # eq. (3)
@@ -591,37 +496,30 @@ def kron_reduce(feeder: Feeder, verify: bool = True) -> KronResult:
     # eq. (7): the substation acts as a fixed current source on the retained
     # buses.
     #
-    # SUBTLETY THAT COST US A BUG. The naive reading is b = Y[R, S] @ v_S.
-    # On IEEE 123 that evaluates to exactly ZERO, because no load bus is
-    # directly adjacent to the substation -- bus 150 reaches the network only
-    # through the regulator and a chain of zero-injection buses.
+    # SUBTLETY THAT COST US A BUG. The naive reading b = Y[R, S] @ v_S
+    # evaluates to exactly ZERO on IEEE 123, because no load bus is directly
+    # adjacent to the substation -- bus 150 reaches the network only through
+    # the regulator and a chain of zero-injection buses. The slack does drive
+    # the retained buses, just along paths through Z, so the coupling must be
+    # pushed through the same Schur complement:
     #
-    # But the slack DOES drive the retained buses; it just does so along paths
-    # that run through the eliminated set Z. So the coupling has to be pushed
-    # through the same Schur complement as everything else:
+    #     b = (Y_RS - Y_RZ @ inv(Y_ZZ) @ Y_ZS) @ v_S
     #
-    #     b = (Y_RS  -  Y_RZ @ inverse(Y_ZZ) @ Y_ZS) @ v_S
-    #
-    # Getting this wrong is quietly catastrophic. With b = 0 the reduced
-    # system has no voltage reference at all, Y_red is nearly singular, and
-    # the normalised Jacobian's inverse blows up to about 1e16 -- which then
-    # makes alpha astronomically large and Theorem 1 return infinity for
+    # With b = 0 the reduced system has no voltage reference, Y_red is nearly
+    # singular, ||M~^-1|| blows up to ~1e16, and Theorem 1 returns infinity for
     # every adjacency radius.
     Y_RS = Y[np.ix_(R, S)]
     Y_ZS = Y[np.ix_(Z, S)]
     b = (Y_RS - Y_RZ @ np.linalg.solve(Y_ZZ, Y_ZS)) @ feeder.V_node[S]
 
     # eq. (4): the Kron amplification factor.
-    #   np.linalg.norm(M, 2) is the "operator norm" -- the largest factor by
-    #   which the matrix M can stretch any vector.
     op_RZ = np.linalg.norm(Y_RZ, 2)
     op_ZZinv = np.linalg.norm(np.linalg.inv(Y_ZZ), 2)
     kappa = 1.0 + 2.0 * op_RZ * op_ZZinv + (op_RZ * op_ZZinv) ** 2
 
-    # ---- Correctness check ------------------------------------------------
-    # The reduction claims v_Z can be recovered from v_R. We already know the
-    # true v_Z from OpenDSS, so we can check that claim directly. If this
-    # residual is not tiny, something above is wrong.
+    # ---- correctness check -------------------------------------------------
+    # The reduction claims v_Z is recoverable from v_R, and we know the true
+    # v_Z from OpenDSS, so check it directly.
     residual = np.nan
     if verify:
         vR, vZ = feeder.V_node[R], feeder.V_node[Z]
@@ -638,13 +536,11 @@ def kron_reduce(feeder: Feeder, verify: bool = True) -> KronResult:
 
 
 def injection_check(feeder: Feeder) -> dict:
-    """Independent sanity check on our node classification.
+    """Independent sanity check on the node classification.
 
-    Ohm's law in matrix form says  I = Y @ V.  Complex power is S = V * conj(I).
-
-    If we labelled the nodes correctly then S must be essentially ZERO at
-    every node we called zero-injection. If it is not, the classification is
-    wrong and every number after this point is meaningless.
+    I = Y @ V and S = V * conj(I). If we labelled nodes correctly, |S| must be
+    essentially zero at every node we called zero-injection; if not, the
+    classification is wrong and every number after this point is meaningless.
     """
     I = feeder.Y_full @ feeder.V_node
     S = feeder.V_node * np.conj(I)                # complex power, in VA

@@ -1,5 +1,5 @@
-# Figures 2 and 3. Run after run_days2_4.py; takes about two minutes and
-# writes two PNGs into figures/ alongside the numbers behind them.
+# Figures 2 and 3. Run after run_days2_4.py; takes about two minutes and writes
+# two PNGs into figures/ alongside the numbers behind them.
 #
 #   figure2_wasserstein.png   statistical fidelity against privacy budget
 #   figure3_recovery.png      does the released data train a useful model?
@@ -49,7 +49,7 @@ def banner(text):
 
 
 def feeder_load_ratings():
-    """Read each Load element's kW rating and power factor from the feeder."""
+    """Each Load element's kW rating and power factor angle, from the feeder."""
     dss.Text.Command("Clear")
     dss.Text.Command(f"Redirect {MASTER}")
     dss.Text.Command("Solve")
@@ -87,8 +87,7 @@ def dp_model(archive, classes, model, theta, epsilon, rng):
 
 def main():
     if not os.path.exists(MASTER):
-        print("Could not find the feeder files.")
-        print("Open get_feeder.py and press Run first, then come back here.")
+        print("Feeder files not found. Run get_feeder.py first.")
         return
 
     warnings.filterwarnings("ignore")
@@ -122,7 +121,7 @@ def main():
           f"({time.time() - t0:.1f}s)")
 
     # =====================================================================
-    banner("DAY 5  --  Figure 2: Wasserstein-1 against privacy budget")
+    banner("Figure 2: Wasserstein-1 against privacy budget")
     # =====================================================================
 
     print(f"  {'epsilon':>9} {'proposed':>12} {'gaussian':>12} {'ratio':>9}")
@@ -163,14 +162,14 @@ def main():
     print(f"\n  saved {f2}")
 
     print("\n  The proposed curve is nearly FLAT in epsilon while the baseline")
-    print("  falls steeply. That is the paper's central claim made visible:")
-    print("  the proposed method never adds noise to the voltages at all, so")
-    print("  its error comes only from the load model being slightly off. The")
-    print("  baseline's error comes from noise sprayed directly onto the")
-    print("  quantity you wanted to publish, so it scales as 1/epsilon.")
+    print("  falls steeply -- the paper's central claim made visible. The")
+    print("  proposed method never adds noise to the voltages, so its error")
+    print("  comes only from the load model being slightly off. The baseline's")
+    print("  error is noise sprayed onto the published quantity itself, so it")
+    print("  scales as 1/epsilon.")
 
     # =====================================================================
-    banner("DAY 6  --  Figure 3: does the released data train a useful model?")
+    banner("Figure 3: does the released data train a useful model?")
     # =====================================================================
 
     # Test set is ALWAYS real voltages. That is the point of the experiment.
@@ -228,15 +227,13 @@ def main():
     plt.close()
     print(f"\n  saved {f3}")
 
-    print("\n  Read the gap between 'proposed' and 'noise-free'. That gap is")
-    print("  the true cost of privacy on the task you actually care about.")
-    print("  The gap to the Gaussian baseline is what the paper's method buys")
-    print("  you for the same epsilon.")
+    print("\n  The gap between 'proposed' and 'noise-free' is the true cost of")
+    print("  privacy on the task you actually care about. The gap to the")
+    print("  Gaussian baseline is what the paper's method buys at equal eps.")
 
     banner("DONE")
     print(f"  Both figures are in {FIGDIR}/")
-    print("  Next: run verify.py to check every correctness invariant, and")
-    print("  read FINDINGS.md for the writeup.")
+    print("  Next: run verify.py to check every correctness invariant.")
     print()
 
 

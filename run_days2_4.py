@@ -1,12 +1,12 @@
 # The load model, the DP mechanism, and Theorem 1. Run after run_day1.py;
 # takes roughly a minute.
 #
-#   Day 2  split buses into consumer classes, build stand-in historical data,
-#          fit a log-normal load model, sample synthetic loads from it
-#   Day 3  refit under differential privacy, then push the private synthetic
-#          loads through AC power flow on the TRUE admittance matrix
-#   Day 4  evaluate Theorem 1, and calibrate ||M~^-1||, the one constant it
-#          cannot compute in closed form
+#   1. split buses into consumer classes, build stand-in historical data, fit a
+#      log-normal load model, sample synthetic loads from it
+#   2. refit under differential privacy, then push the private synthetic loads
+#      through AC power flow on the TRUE admittance matrix
+#   3. evaluate Theorem 1, and calibrate ||M~^-1||, the one constant it cannot
+#      compute in closed form
 
 import os
 import time
@@ -40,7 +40,7 @@ def banner(text):
 
 
 def feeder_load_ratings():
-    """Read each Load element's kW rating and power factor from the feeder."""
+    """Each Load element's kW rating and power factor angle, from the feeder."""
     dss.Text.Command("Clear")
     dss.Text.Command(f"Redirect {MASTER}")
     dss.Text.Command("Solve")
@@ -53,22 +53,20 @@ def feeder_load_ratings():
         i = dss.Loads.Next()
 
     kw = np.array(kw)
-    # Power factor is cos(theta), so the angle is its arccos.
-    theta = np.arccos(np.clip(np.array(pf), -1.0, 1.0))
+    theta = np.arccos(np.clip(np.array(pf), -1.0, 1.0))   # pf = cos(theta)
     return kw, theta
 
 
 def main():
     if not os.path.exists(MASTER):
-        print("Could not find the feeder files.")
-        print("Open get_feeder.py and press Run first, then come back here.")
+        print("Feeder files not found. Run get_feeder.py first.")
         return
 
     warnings.filterwarnings("ignore")
     rng = np.random.default_rng(SEED)
 
     # =====================================================================
-    banner("DAY 2  --  The load model")
+    banner("PART 1  --  The load model")
     # =====================================================================
 
     kw, theta = feeder_load_ratings()
@@ -76,14 +74,13 @@ def main():
           f"{kw.min():.0f}-{kw.max():.0f} kW each")
 
     classes = assign_classes(kw, L=3)
-    print("\n  Consumer classes (split by demand size, smallest first):")
+    print("\n  Consumer classes (by demand size, smallest first):")
     for label, members in classes.items():
         print(f"     class {label}: {len(members):2d} buses, {kw[members].sum():6.0f} kW")
 
     archive = make_historical(kw, classes, n_days=N_HIST_DAYS, rng=rng)
     daily_mean = archive.sum(axis=0).mean() * 1000.0
-    print(f"\n  Historical archive: {archive.shape} "
-          f"(buses, days, 15-min steps)")
+    print(f"\n  Historical archive: {archive.shape} (buses, days, 15-min steps)")
     print(f"     mean total demand {daily_mean:.0f} kW "
           f"against the feeder's {kw.sum():.0f} kW")
 
@@ -104,16 +101,16 @@ def main():
     synth_c = np.log(synth[classes[0]].reshape(-1, model.T))
     lag_real = np.corrcoef(real_c.T)[0, 1:6]
     lag_synth = np.corrcoef(synth_c.T)[0, 1:6]
-    print("\n  Temporal correlation, lags 1 to 5 (the thing worth preserving):")
+    print("\n  Temporal correlation, lags 1-5 (the thing worth preserving):")
     print(f"     real      {np.round(lag_real, 3)}")
     print(f"     synthetic {np.round(lag_synth, 3)}")
 
     # =====================================================================
-    banner("DAY 3  --  Differential privacy, then AC power flow")
+    banner("PART 2  --  Differential privacy, then AC power flow")
     # =====================================================================
 
-    print("  Refitting each class under DP. Half the budget goes to the mean,")
-    print("  half to the covariance, by composition.\n")
+    print("  Refitting each class under DP; half the budget to the mean, half")
+    print("  to the covariance, by composition.\n")
     print(f"  {'eps':>6} {'class':>6} {'records':>9} {'sigma_cov':>11} "
           f"{'eig floored':>12} {'KL from true':>13}")
 
@@ -128,10 +125,9 @@ def main():
                   f"{rep.sigma_cov:11.5f} {rep.eig_clipped:8d}/{model.T:<3d} "
                   f"{rep.kl_to_true:13.1f}")
 
-    print("\n  Note how many eigenvalues have to be floored. Privately")
-    print("  estimating a 96-by-96 covariance is genuinely expensive, and")
-    print("  that is the honest reason the paper works at epsilon 25 to 200")
-    print("  rather than the single digits you see elsewhere in DP.")
+    print("\n  Note how many eigenvalues need flooring. Privately estimating a")
+    print("  96x96 covariance is genuinely expensive -- the honest reason the")
+    print("  paper works at eps 25-200 rather than single digits.")
 
     runner = PowerFlowRunner(MASTER)
     q_synth = reactive_from_active(synth, theta)
@@ -144,16 +140,15 @@ def main():
     vmag = np.abs(V[ok])
     print(f"     released |V| spans {vmag.min():.4f} to {vmag.max():.4f} per-unit")
     outside = np.mean((vmag < 0.95) | (vmag > 1.05))
-    print(f"     {outside:.2%} of released voltages fall outside ANSI [0.95, 1.05]")
+    print(f"     {outside:.2%} of released voltages outside ANSI [0.95, 1.05]")
     if outside > 0.001:
-        print("     -> worth flagging. We froze the regulator taps so that Y")
-        print("        stays fixed, as the paper's analysis requires, which")
-        print("        means the regulators cannot respond to synthetic load")
-        print("        excursions. Definition 2's 'good voltage set' is then")
-        print("        not strictly satisfied everywhere.")
+        print("     -> worth flagging. We froze the regulator taps so Y stays")
+        print("        fixed as the analysis requires, so regulators cannot")
+        print("        respond to synthetic load excursions; Definition 2's")
+        print("        'good voltage set' is then not strictly satisfied.")
 
     # =====================================================================
-    banner("DAY 4  --  Theorem 1")
+    banner("PART 3  --  Theorem 1")
     # =====================================================================
 
     feeder = load_feeder(MASTER)
@@ -187,7 +182,7 @@ def main():
     V_flat = V.reshape(-1, V.shape[-1])[:, sel]
 
     cal = calibrate_M_inv(V_flat[:120], Y_pu, b_pu)
-    print(f"\n  Monte Carlo calibration of ||M~^-1||, the paper's Remark 2:")
+    print(f"\n  Monte Carlo calibration of ||M~^-1|| (the paper's Remark 2):")
     print(f"     median {cal['norm_median']:.3f}, "
           f"99th percentile mu_0 {cal['mu_0']:.3f}, max {cal['norm_max']:.3f}")
     print(f"     delta_M {cal['delta_M']:.4f} "
@@ -223,30 +218,28 @@ def main():
               f"{B.jacobian_term:10.3e} {B.bias_term:11.3e} "
               f"{B.tail_term:11.3e} {B.epsilon:11.2f}")
 
-    print("\n  Read that table carefully -- it is the paper's central mechanism")
-    print("  made visible. The covariance floor controls how NOISY the private")
-    print("  load model is. A noisier model has a larger Sigma, hence a smaller")
-    print("  precision sum gamma, hence a smaller psi_bar, hence a smaller")
-    print("  epsilon. More load noise really does buy more topology privacy,")
-    print("  exactly as the paper claims.")
+    print("\n  That table is the paper's central mechanism made visible. The")
+    print("  covariance floor controls how noisy the private load model is:")
+    print("  noisier model -> larger Sigma -> smaller precision sum gamma ->")
+    print("  smaller psi_bar -> smaller epsilon. More load noise really does")
+    print("  buy more topology privacy.")
     print()
-    print("  Note also that the Jacobian term barely moves. That is the FLOOR")
-    print("  the paper describes: no amount of load noise crosses it. Only")
-    print("  shrinking the adjacency radius r does.")
+    print("  Note the Jacobian term barely moves. That is the FLOOR: no amount")
+    print("  of load noise crosses it, only shrinking r does.")
 
     banner("WHERE THIS LEAVES US")
     print("  Reproduced: the pipeline end to end, and epsilon values in the")
-    print("  paper's own 25-to-200 band once the covariance floor is set so")
-    print("  that our substitute mechanism is as noisy as their DP-GMM.")
+    print("  paper's own 25-200 band once the covariance floor is set so our")
+    print("  substitute mechanism is as noisy as their DP-GMM.")
     print()
-    print("  Still open: the adjacency radius r that achieves those epsilons")
-    print("  is around 1e-13 in per-unit admittance, against ||Y_pu||_F of")
-    print("  about 1500. That is a relative perturbation of 1e-16 -- far too")
-    print("  small to represent the 'line switching' the paper motivates.")
-    print("  Whether that gap is our parameterisation or the bound's own")
-    print("  looseness is the single best question to put to the authors.")
+    print("  Still open: the adjacency radius r achieving those epsilons is")
+    print("  ~1e-13 in per-unit admittance, against ||Y_pu||_F of ~1500 -- a")
+    print("  relative perturbation of 1e-16, far too small to represent the")
+    print("  'line switching' the paper motivates. Whether that gap is our")
+    print("  parameterisation or the bound's own looseness is the single best")
+    print("  question to put to the authors.")
     print()
-    print("  Next: Days 5 and 6, the Wasserstein sweep and the MLP task.")
+    print("  Next: run_days5_6.py")
     print()
 
 

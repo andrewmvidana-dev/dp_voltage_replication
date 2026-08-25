@@ -17,12 +17,14 @@ import numpy as np
 from scipy.stats import wasserstein_distance
 
 
-# =============================================================================
-# SECTION 1 -- Figure 2: statistical fidelity
-# =============================================================================
+# ---------------------------------------------------------------------------
+# 1. Figure 2: statistical fidelity
+# ---------------------------------------------------------------------------
 
 def voltage_wasserstein(V_true: np.ndarray, V_released: np.ndarray) -> float:
-   
+    """Mean per-node Wasserstein-1 distance between voltage MAGNITUDE
+    distributions. Per-node then averaged, so a method cannot hide a badly
+    wrong node behind well-modelled ones."""
     mag_true = np.abs(V_true)
     mag_rel = np.abs(V_released)
 
@@ -43,7 +45,14 @@ def empirical_voltage_sensitivity(
     rng: np.random.Generator,
     n_trials: int = 12,
 ) -> float:
-   
+    """Largest observed ||V1 - V0|| when one bus's whole daily trajectory is
+    replaced -- the L2 sensitivity calibrating the output-perturbation
+    baseline, under the same bounded-record adjacency used for the loads.
+
+    Empirical, so a lower bound on the true sensitivity; a closed form would
+    require worst-casing the power flow. It is the same figure the baseline
+    would be given in practice, so the comparison stays fair.
+    """
     from dpvolt.loads import sample_loads, reactive_from_active
 
     n_loads = len(runner.load_names)
@@ -74,9 +83,9 @@ def empirical_voltage_sensitivity(
     return worst
 
 
-# =============================================================================
-# SECTION 2 -- Figure 3: does the released data train a useful model?
-# =============================================================================
+# ---------------------------------------------------------------------------
+# 2. Figure 3: does the released data train a useful model?
+# ---------------------------------------------------------------------------
 
 def build_masked_dataset(
     V: np.ndarray,
@@ -84,7 +93,13 @@ def build_masked_dataset(
     mask_len: int = 24,
     stride: int = 6,
 ):
-   
+    """Masked-recovery task: from a d_w-step window of one node's voltage
+    magnitude with the last mask_len steps hidden, predict the hidden tail.
+
+    V is (days, T, nodes). Each x is the masked series concatenated with the
+    mask itself, so the model can tell a hidden step from a genuine zero.
+    Returns X (n, 2 * d_w) and Y (n, mask_len).
+    """
     mag = np.abs(V)                                   # (days, T, nodes)
     n_days, T, n_nodes = mag.shape
 
@@ -105,15 +120,18 @@ def build_masked_dataset(
 
 
 class SmallMLP:
-   
+    """Two-hidden-layer ReLU MLP with Adam, in plain NumPy.
+
+    Hand-written rather than pulled from a framework so the whole pipeline
+    depends only on numpy/scipy, and so the training is fully seed-controlled
+    for the multi-seed averaging Figure 3 needs.
+    """
 
     def __init__(self, d_in: int, d_out: int, hidden: int = 32, seed: int = 0):
         rng = np.random.default_rng(seed)
         dims = [d_in, hidden, hidden, d_out]
 
-        # He initialisation: scale the starting weights by sqrt(2 / fan_in).
-        # Too large and activations explode through the layers; too small and
-        # the signal dies. This scaling is the standard choice for ReLU.
+        # He initialisation, sqrt(2 / fan_in): the standard choice for ReLU.
         self.W, self.B = [], []
         for a, b in zip(dims[:-1], dims[1:]):
             self.W.append(rng.normal(0.0, np.sqrt(2.0 / a), size=(a, b)))
@@ -131,8 +149,7 @@ class SmallMLP:
         h = X
         for i, (w, b) in enumerate(zip(self.W, self.B)):
             z = h @ w + b
-            # ReLU on the hidden layers; the output layer stays linear,
-            # because we are predicting real-valued voltages, not classes.
+            # Output layer stays linear: we predict real-valued voltages.
             h = np.maximum(z, 0.0) if i < len(self.W) - 1 else z
             acts.append(h)
         return acts
@@ -151,12 +168,10 @@ class SmallMLP:
             acts = self.forward(xb)
             pred = acts[-1]
 
-            # Mean squared error, and its derivative with respect to pred.
-            err = pred - yb
+            err = pred - yb                       # MSE and its gradient
             total += float(np.mean(err ** 2)) * len(idx)
             grad = 2.0 * err / len(idx)
 
-            # Backward pass: walk the layers in reverse.
             gW = [None] * len(self.W)
             gB = [None] * len(self.B)
             for i in reversed(range(len(self.W))):
@@ -178,8 +193,8 @@ class SmallMLP:
             self.mB[i] = b1 * self.mB[i] + (1 - b1) * gB[i]
             self.vB[i] = b2 * self.vB[i] + (1 - b2) * gB[i] ** 2
 
-            # Bias correction: the running averages start at zero, so early
-            # steps are biased towards zero until this rescaling fixes them.
+            # Bias correction: the averages start at zero and are biased
+            # towards it until rescaled.
             mw = self.mW[i] / (1 - b1 ** self.t)
             vw = self.vW[i] / (1 - b2 ** self.t)
             mb = self.mB[i] / (1 - b1 ** self.t)
@@ -193,21 +208,25 @@ class SmallMLP:
 
 
 class Standardizer:
-    
+    """Per-column zero mean, unit variance, fitted on the TRAINING set only.
+
+    Fitting on train alone matters here: each method trains on different
+    released data, and standardising against test statistics would leak the
+    real voltages into every method's inputs.
+    """
 
     def __init__(self, A: np.ndarray):
         self.mean = A.mean(axis=0)
         self.std = A.std(axis=0)
-        # Guard against columns that never vary, which would divide by zero.
+        # Guard columns that never vary (the mask flags) against divide-by-zero.
         self.std = np.where(self.std < 1e-12, 1.0, self.std)
 
     def transform(self, A: np.ndarray) -> np.ndarray:
         return (A - self.mean) / self.std
 
     def inverse_scale_mse(self, mse_standardised: float) -> float:
-        """Convert an MSE measured on standardised targets back to the
-        original units, so the reported number is in per-unit volts squared
-        and comparable across methods."""
+        """Convert an MSE on standardised targets back to per-unit volts
+        squared, so the reported number is comparable across methods."""
         return float(mse_standardised * np.mean(self.std ** 2))
 
 
@@ -218,7 +237,8 @@ def train_and_curve(
     lr: float = 1e-3,
     seed: int = 0,
 ):
-    
+    """Train one seed, returning the test-MSE curve in original units, with
+    entry 0 taken before any training."""
     rng = np.random.default_rng(seed)
 
     sx = Standardizer(X_train)
@@ -229,7 +249,7 @@ def train_and_curve(
 
     net = SmallMLP(Xtr.shape[1], Ytr.shape[1], hidden=hidden, seed=seed)
 
-    curve = [sy.inverse_scale_mse(net.mse(Xte, Yte))]   # before any training
+    curve = [sy.inverse_scale_mse(net.mse(Xte, Yte))]
     for _ in range(epochs):
         net.train_epoch(Xtr, Ytr, lr=lr, rng=rng)
         curve.append(sy.inverse_scale_mse(net.mse(Xte, Yte)))
@@ -242,7 +262,11 @@ def run_seeds(
     n_seeds: int = 20,
     **kwargs,
 ):
-    
+    """Mean and standard deviation of the test-MSE curve over n_seeds runs.
+
+    Averaging matters: single-seed differences between methods are within
+    initialisation noise, so one run proves nothing.
+    """
     curves = np.array([
         train_and_curve(X_train, Y_train, X_test, Y_test, seed=s, **kwargs)
         for s in range(n_seeds)

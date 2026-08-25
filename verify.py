@@ -1,12 +1,12 @@
-# Every correctness invariant in the project. Run after any change; takes
-# about 30 seconds and prints PASS/FAIL per check plus a summary.
+# Every correctness invariant in the project. Run after any change; takes about
+# 30 seconds and prints PASS/FAIL per check plus a summary.
 #
 # This exists because every serious bug here was SILENT -- the code ran and
-# produced plausible numbers that were wrong. Deleting stub rows instead of
+# produced plausible but wrong numbers. Deleting stub rows instead of
 # eliminating them produced 238,225 kVA of phantom power; the slack offset b
-# evaluating to zero blew ||M~^-1|| up to 1e16; capturing Y with loads
-# disabled re-tapped the regulators and read -216 MW at the substation. None
-# threw an exception. Each was caught by an invariant with a known answer.
+# evaluating to zero blew ||M~^-1|| up to 1e16; capturing Y with loads disabled
+# re-tapped the regulators and read -216 MW at the substation. None threw an
+# exception. Each was caught by an invariant with a known answer.
 
 import os
 import warnings
