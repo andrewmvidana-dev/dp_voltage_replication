@@ -20,10 +20,12 @@ import opendssdirect as dss
 
 from dpvolt.loads import (assign_classes, make_historical, fit_load_model,
                           sample_loads, reactive_from_active, LoadModel)
-from dpvolt.powerflow import PowerFlowRunner, add_voltage_noise
+from dpvolt.powerflow import (PowerFlowRunner, add_voltage_noise,
+                              add_bounded_voltage_noise, bnp_bound, bnp_delta)
 from dpvolt.privacy import dp_fit_class, gaussian_sigma
 from dpvolt.experiments import (voltage_wasserstein, empirical_voltage_sensitivity,
-                                build_masked_dataset, run_seeds)
+                                build_masked_dataset, run_seeds,
+                                ansi_violation_rate, mean_autocorrelation)
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -124,9 +126,56 @@ def main():
     banner("Figure 2: Wasserstein-1 against privacy budget")
     # =====================================================================
 
-    print(f"  {'epsilon':>9} {'proposed':>12} {'gaussian':>12} {'ratio':>9}")
+    # ---- BNP: why we cannot match it to delta = 1e-5 ----------------------
+    #
+    # The uniform mechanism is (0, S/2B)-private, so it has no epsilon to match
+    # on and delta is the only common axis. But delta = S/2B falls as 1/B, not
+    # exponentially, so a cryptographically small delta demands an enormous
+    # bound: at delta = 1e-5 we would need B = S/(2 delta) = 33497 per-unit,
+    # against voltages of ~1.0. That is not a privacy mechanism, it is erasure.
+    #
+    # So we sweep B instead and report what each buys. This IS the finding:
+    # bounded uniform noise cannot reach the Gaussian mechanism's delta regime
+    # at any usable bound.
+    B_valid = delta_V / 2.0                    # smallest B with S <= 2B
+    B_match = bnp_bound(delta_V, DELTA)
 
-    w_proposed, w_gaussian = [], []
+    print(f"  Voltage sensitivity S = {delta_V:.4f} per-unit.\n")
+    print("  Corollary 1 holds only for S <= 2B, so the SMALLEST admissible")
+    print(f"  bound is B = S/2 = {B_valid:.4f} pu -- already a third of nominal")
+    print("  voltage, and it buys only delta = 0.5. Tighter bounds have no")
+    print("  valid (0, S/2B) guarantee at all.\n")
+
+    print(f"  {'B (pu)':>10} {'delta':>12} {'W-1':>12} {'ANSI viol':>11}")
+    for B in [B_valid, 0.5, 1.0, 5.0, 50.0]:
+        V_tmp = add_bounded_voltage_noise(V_true_flat, B, rng)
+        print(f"  {B:10.4f} {bnp_delta(delta_V, B):12.3e} "
+              f"{voltage_wasserstein(V_true_flat, V_tmp):12.6f} "
+              f"{ansi_violation_rate(V_tmp):10.2%}")
+
+    print(f"\n  And delta = S/2B falls only as 1/B, so matching the Gaussian")
+    print(f"  path's delta = {DELTA:g} would need B = {B_match:,.0f} pu against")
+    print("  voltages of ~1.0. There is no usable operating point: every")
+    print("  admissible bound already destroys the data, and every bound that")
+    print("  preserves it is outside Corollary 1. On per-unit voltages, uniform")
+    print("  BNP is not a viable substitute for the Gaussian mechanism.")
+    print()
+
+    # Curves use the most favourable admissible point -- the smallest B that
+    # Corollary 1 permits. Anything tighter has no guarantee; anything looser
+    # is strictly worse. This is BNP at its best on this data.
+    B_bnp = B_valid
+    print(f"  Curves below use B = {B_bnp:.4f} pu "
+          f"(delta {bnp_delta(delta_V, B_bnp):.2f}) -- the smallest admissible")
+    print("  bound, i.e. BNP shown at its most favourable.")
+    print()
+
+    print(f"  {'epsilon':>9} {'proposed':>12} {'gaussian':>12} {'bnp':>12} "
+          f"{'g/p':>7} {'b/p':>7}")
+
+    w_proposed, w_gaussian, w_bnp = [], [], []
+    viol = {"proposed": [], "gaussian": [], "bnp": []}
+
     for eps in EPSILONS:
         # Proposed: fit privately, sample, push through the TRUE power flow.
         priv = dp_model(archive, classes, model, theta, eps, rng)
@@ -138,16 +187,29 @@ def main():
         sigma = gaussian_sigma(delta_V, eps, DELTA)
         V_g_flat = add_voltage_noise(V_true_flat, sigma, rng)
 
+        # BNP: same true voltages, bounded uniform noise. B does not depend on
+        # epsilon, so this arm is flat by construction -- that is the point.
+        V_b_flat = add_bounded_voltage_noise(V_true_flat, B_bnp, rng)
+
         wp = voltage_wasserstein(V_true_flat, V_p_flat)
         wg = voltage_wasserstein(V_true_flat, V_g_flat)
+        wb = voltage_wasserstein(V_true_flat, V_b_flat)
         w_proposed.append(wp)
         w_gaussian.append(wg)
+        w_bnp.append(wb)
 
-        print(f"  {eps:9.0f} {wp:12.6f} {wg:12.6f} {wg / wp:8.1f}x")
+        viol["proposed"].append(ansi_violation_rate(V_p_flat))
+        viol["gaussian"].append(ansi_violation_rate(V_g_flat))
+        viol["bnp"].append(ansi_violation_rate(V_b_flat))
+
+        print(f"  {eps:9.0f} {wp:12.6f} {wg:12.6f} {wb:12.6f} "
+              f"{wg / wp:6.1f}x {wb / wp:6.1f}x")
 
     plt.figure(figsize=(7, 4.5))
     plt.plot(EPSILONS, w_proposed, "o-", lw=2, label="Proposed (DP loads, true power flow)")
     plt.plot(EPSILONS, w_gaussian, "s--", lw=2, label="Gaussian output perturbation")
+    plt.plot(EPSILONS, w_bnp, "^:", lw=2,
+             label=f"BNP bounded (B={B_bnp}, $\\delta$={bnp_delta(delta_V, B_bnp):.2f})")
     plt.xscale("log")
     plt.yscale("log")
     plt.xlabel("privacy budget $\\varepsilon$ of the load model")
@@ -160,6 +222,22 @@ def main():
     plt.savefig(f2, dpi=150)
     plt.close()
     print(f"\n  saved {f2}")
+
+    # ---- the physical-feasibility axis ------------------------------------
+    print("\n  Voltages outside ANSI C84.1 [0.95, 1.05] -- the axis Wasserstein")
+    print("  and masked recovery both miss:\n")
+    print(f"  {'epsilon':>9} {'proposed':>12} {'gaussian':>12} {'bnp':>12}")
+    for i, eps in enumerate(EPSILONS):
+        print(f"  {eps:9.0f} {viol['proposed'][i]:11.2%} "
+              f"{viol['gaussian'][i]:11.2%} {viol['bnp'][i]:11.2%}")
+
+    print("\n  The proposed method's violations come from freezing the regulator")
+    print("  taps (needed to keep Y fixed), not from noise -- so they do not")
+    print("  shrink as epsilon grows. The Gaussian baseline's violations are")
+    print("  intrinsic: an unbounded tail can put a released voltage anywhere,")
+    print("  and at tight epsilon most of them land outside the band. BNP's are")
+    print("  capped by B -- bounded by construction, at the cost of a delta")
+    print("  orders of magnitude weaker than the Gaussian path's.")
 
     print("\n  The proposed curve is nearly FLAT in epsilon while the baseline")
     print("  falls steeply -- the paper's central claim made visible. The")
@@ -199,6 +277,12 @@ def main():
     curves[f"Gaussian output pert. ($\\varepsilon$={eps_fig3:.0f})"] = run_seeds(
         X_g, Y_g, X_test, Y_test, n_seeds=N_SEEDS, epochs=EPOCHS)
 
+    # 4. BNP: bounded, but still independent per timestep
+    V_b = add_bounded_voltage_noise(V_true[:, :, sel][:8], B_bnp, rng)
+    X_b, Y_b = build_masked_dataset(V_b)
+    curves[f"BNP bounded (B={B_bnp:.3f})"] = run_seeds(
+        X_b, Y_b, X_test, Y_test, n_seeds=N_SEEDS, epochs=EPOCHS)
+
     print(f"\n  trained {N_SEEDS} seeds x {EPOCHS} epochs per method")
     var_test = float(Y_test.var())
     print(f"\n  {'method':<38} {'test MSE':>12} {'R^2':>8}")
@@ -230,6 +314,28 @@ def main():
     print("\n  The gap between 'proposed' and 'noise-free' is the true cost of")
     print("  privacy on the task you actually care about. The gap to the")
     print("  Gaussian baseline is what the paper's method buys at equal eps.")
+
+    # ---- why the ordering comes out that way ------------------------------
+    print("\n  Mean voltage-magnitude autocorrelation, lags 1-5:\n")
+    priv_f3 = dp_model(archive, classes, model, theta, eps_fig3, rng)
+    synth_f3 = sample_loads(priv_f3, 8, rng=rng, sweeps=15)
+    V_p_f3, _ = runner.solve_many(synth_f3, reactive_from_active(synth_f3, theta))
+
+    for name, arr in (
+        ("true (reference)", V_true[:, :, sel][:8]),
+        ("proposed", V_p_f3[:, :, sel]),
+        ("gaussian", V_g),
+        ("bnp", V_b),
+    ):
+        ac = mean_autocorrelation(arr)
+        print(f"    {name:<18} {np.round(ac, 3)}")
+
+    print("\n  This is the mechanism behind Figure 3. Both output-perturbation")
+    print("  baselines add noise independently per timestep, so both flatten")
+    print("  the autocorrelation -- bounding the noise caps how far a voltage")
+    print("  can stray, but does nothing for temporal structure. The proposed")
+    print("  method never touches the voltages, so the correlation induced by")
+    print("  the load model and the network survives.")
 
     banner("DONE")
     print(f"  Both figures are in {FIGDIR}/")

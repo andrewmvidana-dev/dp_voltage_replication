@@ -18,11 +18,14 @@ from dpvolt.network import load_feeder, kron_reduce, injection_check
 from dpvolt.loads import (assign_classes, make_historical, fit_load_model,
                           sample_loads, reactive_from_active, ar1_covariance,
                           diurnal_shape)
-from dpvolt.powerflow import PowerFlowRunner, to_per_unit
+from dpvolt.powerflow import (PowerFlowRunner, to_per_unit, bnp_bound,
+                              bnp_delta, add_bounded_voltage_noise,
+                              add_voltage_noise)
 from dpvolt.privacy import (gaussian_sigma, dp_fit_class, theorem1,
                             calibrate_M_inv, normalised_jacobian, solve_for_r)
 from dpvolt.experiments import (voltage_wasserstein, build_masked_dataset,
-                                Standardizer, train_and_curve)
+                                Standardizer, train_and_curve,
+                                ansi_violation_rate, mean_autocorrelation)
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -410,6 +413,66 @@ def main():
 
     check("the error curve is finite throughout",
           np.all(np.isfinite(curve)))
+
+    # =====================================================================
+    section("8. Bounded-Noise Privacy baseline")
+    # =====================================================================
+
+    # The defining guarantee: no released value may ever exceed B.
+    B_test = 0.02
+    V_small = Vf[:40]
+    V_bnp = add_bounded_voltage_noise(V_small, B_test, np.random.default_rng(7))
+    dev_re = np.abs(np.real(V_bnp - V_small)).max()
+    dev_im = np.abs(np.imag(V_bnp - V_small)).max()
+    check("BNP noise never exceeds the bound B",
+          dev_re <= B_test and dev_im <= B_test,
+          f"max deviation {max(dev_re, dev_im):.6f} against B = {B_test}")
+
+    # Corollary 1 round-trip.
+    check("bnp_bound inverts bnp_delta",
+          np.isclose(bnp_delta(0.67, bnp_bound(0.67, 1e-5)), 1e-5),
+          f"delta {bnp_delta(0.67, bnp_bound(0.67, 1e-5)):.3e}, targeted 1e-5")
+
+    check("larger B gives a smaller delta",
+          bnp_delta(0.67, 100.0) < bnp_delta(0.67, 10.0),
+          f"{bnp_delta(0.67, 100.0):.3e} at B=100 vs "
+          f"{bnp_delta(0.67, 10.0):.3e} at B=10")
+
+    # Corollary 1 requires S <= 2B; a delta above 1 is not a probability.
+    raised = False
+    try:
+        bnp_delta(10.0, 1.0)          # S = 10, 2B = 2
+    except ValueError:
+        raised = True
+    check("bnp_delta rejects S > 2B (Corollary 1 precondition)",
+          raised,
+          "S = 10 with 2B = 2 raises rather than returning delta = 5")
+
+    # The honest limitation: bounding controls magnitude, not time structure.
+    # Both output-perturbation baselines must flatten autocorrelation.
+    V_days = V_pf[:, :, sel_idx]
+    ac_true = mean_autocorrelation(V_days)
+    ac_bnp = mean_autocorrelation(
+        add_bounded_voltage_noise(V_days, 0.02, np.random.default_rng(8)))
+    ac_gauss = mean_autocorrelation(
+        add_voltage_noise(V_days, 0.02, np.random.default_rng(9)))
+    check("bounded noise still destroys temporal correlation",
+          ac_bnp[0] < ac_true[0] and ac_gauss[0] < ac_true[0],
+          f"lag-1: true {ac_true[0]:.3f}, bnp {ac_bnp[0]:.3f}, "
+          f"gaussian {ac_gauss[0]:.3f}")
+
+    # Violation rate: a known-good and a known-bad case.
+    check("violation rate is zero on in-band voltages",
+          ansi_violation_rate(np.ones((5, 5), dtype=complex)) == 0.0)
+
+    check("violation rate is one on out-of-band voltages",
+          ansi_violation_rate(np.full((5, 5), 2.0, dtype=complex)) == 1.0)
+
+    check("bigger bound gives more ANSI violations",
+          ansi_violation_rate(
+              add_bounded_voltage_noise(V_small, 0.5, np.random.default_rng(10)))
+          > ansi_violation_rate(
+              add_bounded_voltage_noise(V_small, 0.001, np.random.default_rng(10))))
 
     # =====================================================================
     print()

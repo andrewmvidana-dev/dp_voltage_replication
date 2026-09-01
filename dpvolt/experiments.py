@@ -38,6 +38,51 @@ def voltage_wasserstein(V_true: np.ndarray, V_released: np.ndarray) -> float:
     return float(np.mean(per_node))
 
 
+def ansi_violation_rate(V: np.ndarray,
+                        v_min: float = 0.95,
+                        v_max: float = 1.05) -> float:
+    """Fraction of released voltage magnitudes outside the ANSI C84.1 band.
+
+    The physical-feasibility axis, which Wasserstein and masked recovery both
+    miss: a method can match the true distribution well on average while still
+    emitting voltages that cannot exist on a real feeder. Definition 2's "good
+    voltage set" is this same band.
+    """
+    mag = np.abs(V)
+    return float(np.mean((mag < v_min) | (mag > v_max)))
+
+
+def mean_autocorrelation(V: np.ndarray, max_lag: int = 5) -> np.ndarray:
+    """Mean lag-1..max_lag autocorrelation of voltage magnitude over time.
+
+    V is (days, T, nodes) -- the time axis must be intact, so this takes the
+    unflattened array. Averaged over every node and day.
+
+    This is what separates the two output-perturbation baselines from the
+    proposed method. Both baselines add noise independently per timestep, so
+    both destroy autocorrelation regardless of whether that noise is bounded;
+    bounding controls magnitude, not temporal structure. The proposed method
+    never touches the voltages, so the correlation induced by the load model
+    and the network survives intact.
+    """
+    mag = np.abs(V)
+    n_days, T, n_nodes = mag.shape
+
+    # (days * nodes, T): one row per series, time along the row.
+    series = mag.transpose(0, 2, 1).reshape(-1, T)
+    series = series - series.mean(axis=1, keepdims=True)
+
+    var = (series ** 2).mean(axis=1)
+    ok = var > 1e-24                      # drop dead-flat series
+    series, var = series[ok], var[ok]
+
+    out = []
+    for lag in range(1, max_lag + 1):
+        cov = (series[:, :-lag] * series[:, lag:]).mean(axis=1)
+        out.append(float(np.mean(cov / var)))
+    return np.array(out)
+
+
 def empirical_voltage_sensitivity(
     runner,
     model,

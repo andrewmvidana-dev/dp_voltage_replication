@@ -152,7 +152,70 @@ def add_voltage_noise(
     as in the paper's Table III baselines. The result no longer satisfies the
     power flow equations at all; that is precisely the damage the proposed
     method avoids, and quantifying it is what Figures 2 and 3 are for.
+
+    Unbounded: the Gaussian tail can push a released voltage arbitrarily far
+    outside the regulation band. See bnp_delta / add_bounded_voltage_noise for
+    the bounded alternative.
     """
     noise = rng.normal(0.0, sigma, size=V.shape) + \
         1j * rng.normal(0.0, sigma, size=V.shape)
+    return V + noise
+
+
+def bnp_bound(sensitivity: float, delta: float) -> float:
+    """Noise bound B giving a target delta under uniform Bounded-Noise Privacy.
+
+    Inverts bnp_delta: B = S / (2 * delta).
+    """
+    if delta <= 0:
+        raise ValueError("need delta > 0")
+    return sensitivity / (2.0 * delta)
+
+
+def bnp_delta(sensitivity: float, B: float) -> float:
+    """delta for uniform noise on [-B, B] (Severtson & Khajenejad, Corollary 1).
+
+    A uniform mechanism has constant density 1/(2B) over its support, so two
+    neighbouring datasets give a density ratio of exactly 1 wherever their
+    supports overlap -- epsilon = 0. The non-overlap region has width S, hence
+    probability mass S/(2B), and that is delta:
+
+        M(D) = f(D) + Unif[-B, B]  satisfies  (0, S / 2B)-DP
+
+    Requires S <= 2B, or the "overlap" is empty and the derivation does not
+    hold -- we raise rather than return a delta above 1.
+
+    Note this is a much weaker guarantee than the Gaussian mechanism's: delta
+    here is a per-release failure probability of order 1e-2, against 1e-5 for
+    the Gaussian path. The trade is that the output is bounded by construction.
+    """
+    if B <= 0:
+        raise ValueError("need B > 0")
+    if sensitivity > 2.0 * B:
+        raise ValueError(
+            f"Corollary 1 needs S <= 2B, got S = {sensitivity:.4g}, "
+            f"2B = {2.0 * B:.4g}"
+        )
+    return sensitivity / (2.0 * B)
+
+
+def add_bounded_voltage_noise(
+    V: np.ndarray,
+    B: float,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Bounded-Noise Privacy output perturbation: uniform noise on [-B, B].
+
+    The bounded counterpart to add_voltage_noise. Every released voltage is
+    guaranteed within B of the true one -- no tail, so no arbitrarily impossible
+    value. That guarantee is the entire point of the mechanism.
+
+    What it does NOT fix: the noise is still independent per node and per
+    timestep, so it destroys temporal correlation exactly as the Gaussian
+    baseline does. Bounding controls how far a released voltage can stray, not
+    whether the released series still behaves like a voltage series. That
+    distinction is what Figure 3 measures.
+    """
+    noise = rng.uniform(-B, B, size=V.shape) + \
+        1j * rng.uniform(-B, B, size=V.shape)
     return V + noise
