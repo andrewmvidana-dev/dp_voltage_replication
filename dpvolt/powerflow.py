@@ -32,6 +32,7 @@ class PowerFlowRunner:
     """
 
     def __init__(self, master_path: str, freeze_controls: bool = True):
+        self.master_path = master_path          # kept so reset() can recompile
         dss.Text.Command("Clear")
         dss.Text.Command(f"Redirect {master_path}")
         dss.Text.Command("Solve")
@@ -120,6 +121,27 @@ class PowerFlowRunner:
             out_ok.append(ok)
 
         return np.array(out_V), np.array(out_ok)
+
+    def reset(self) -> None:
+        """Recompile the feeder, discarding whatever loads were last written.
+
+        OpenDSS is stateful: solve_trajectory leaves the circuit holding the
+        final timestep's loads. That is harmless between ordinary runs, but a
+        solve at extreme loads (from a badly degenerate private model, say)
+        leaves the solver in a state from which EVERY later solve fails to
+        converge and returns nan -- even for perfectly reasonable loads.
+
+        Call this between independent experiments that share one runner, such
+        as the operating points of a parameter sweep. Without it a single bad
+        point silently invalidates all the points after it.
+        """
+        dss.Text.Command("Clear")
+        dss.Text.Command(f"Redirect {self.master_path}")
+        dss.Text.Command("Solve")
+        if not dss.Solution.Converged():
+            raise RuntimeError("base case did not converge after reset")
+        if self.controls_frozen:
+            dss.Text.Command("Set ControlMode=OFF")
 
     def retained_indices(self) -> np.ndarray:
         """Indices of load-carrying nodes -- the "retained" buses of the Kron

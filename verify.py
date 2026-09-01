@@ -507,6 +507,19 @@ def main():
           f"{ratios[0]:.1f} at m=270 vs {ratios[1]:.1f} at m=27000 "
           f"-- averaging cannot close the gap")
 
+    # reset() must recover the runner after absurd loads have been written.
+    # Without it a single degenerate operating point makes every LATER solve
+    # return nan, which is silent and corrupts whole parameter sweeps.
+    absurd = np.full((len(runner.load_names), 1, 3), 1e6)
+    runner.solve_many(absurd, absurd * 0.3)
+    runner.reset()
+    V_after, ok_after = runner.solve_many(synth[:, :1, :],
+                                          reactive_from_active(synth[:, :1, :], theta))
+    check("reset() recovers the runner after a degenerate solve",
+          ok_after.mean() > 0.95 and np.isfinite(V_after).all(),
+          f"{ok_after.mean():.0%} converged, all finite "
+          f"{bool(np.isfinite(V_after).all())}")
+
     check("bigger bound gives more ANSI violations",
           ansi_violation_rate(
               add_bounded_voltage_noise(V_small, 0.5, np.random.default_rng(10)))
