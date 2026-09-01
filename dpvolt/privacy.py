@@ -147,6 +147,99 @@ def dp_fit_class(
     return mu_dp, cov_dp, report
 
 
+def bnp_fit_class(
+    log_data: np.ndarray,
+    lo: float,
+    hi: float,
+    delta: float,
+    rng: np.random.Generator,
+    eig_floor_ratio: float = 1e-3,
+    clip_norm: float | None = None,
+) -> tuple[np.ndarray, np.ndarray, DPFitReport]:
+    """Bounded-Noise Privacy counterpart of dp_fit_class.
+
+    Same estimator, same sensitivities, same budget split -- only the noise
+    distribution changes, from Gaussian to uniform on [-B, B] with B chosen by
+    Corollary 1 to hit the target delta:
+
+        B = sensitivity / (2 * delta)
+
+    WHY THIS IS THE PROMISING PLACE FOR BNP. On the released voltages (see
+    add_bounded_voltage_noise and figure 4) there is no admissible bound: the
+    voltage sensitivity is comparable to the signal itself, so every valid B
+    already exceeds the ANSI band. Here the picture is different -- the
+    per-record sensitivity of a mean over m ~ 2700 records carries a 1/m
+    factor, so B comes out small relative to the log-load range R. Bounding is
+    cheap exactly where the estimator averages over many records.
+
+    The mechanism is (0, delta)-private per released quantity, and we release
+    two (mean and covariance), so delta splits in half across them just as
+    epsilon does in the Gaussian path.
+
+    The returned report reuses DPFitReport. Its `sigma_mu` and `sigma_cov`
+    fields hold the BOUNDS B, not standard deviations -- for uniform noise on
+    [-B, B] the standard deviation is B/sqrt(3), so the two are not
+    interchangeable when comparing against a Gaussian fit.
+    """
+    m, T = log_data.shape
+    R = float(hi - lo)
+
+    delta_half = delta / 2.0
+
+    # ---- private mean, bounded --------------------------------------------
+    sens_mu = np.sqrt(T) * R / m
+    B_mu = bnp_bound_scalar(sens_mu, delta_half)
+    mu_true = log_data.mean(axis=0)
+    mu_dp = mu_true + rng.uniform(-B_mu, B_mu, size=T)
+
+    # ---- private covariance, bounded --------------------------------------
+    if clip_norm is None:
+        clip_norm = np.sqrt(T) * R / 2.0
+
+    centred = log_data - mu_dp
+    norms = np.linalg.norm(centred, axis=1, keepdims=True)
+    scale = np.minimum(1.0, clip_norm / np.maximum(norms, 1e-12))
+    centred = centred * scale
+    n_clipped_records = int((scale < 1.0).sum())
+
+    cov_true = (centred.T @ centred) / m + 1e-12 * np.eye(T)
+
+    sens_cov = 2.0 * clip_norm ** 2 / m
+    B_cov = bnp_bound_scalar(sens_cov, delta_half)
+
+    noise = rng.uniform(-B_cov, B_cov, size=(T, T))
+    cov_dp = cov_true + (noise + noise.T) / 2.0      # symmetrise
+
+    # ---- repair (post-processing, free) -----------------------------------
+    cov_dp = (cov_dp + cov_dp.T) / 2.0
+    evals, evecs = np.linalg.eigh(cov_dp)
+    floor = eig_floor_ratio * max(float(np.trace(cov_true)) / T, 1e-12)
+    n_clipped = int((evals < floor).sum())
+    evals = np.maximum(evals, floor)
+    cov_dp = evecs @ np.diag(evals) @ evecs.T
+
+    report = DPFitReport(
+        epsilon=0.0,                    # uniform BNP is (0, delta)-private
+        delta=delta, n_records=m, log_range=R,
+        sigma_mu=B_mu, sigma_cov=B_cov,   # BOUNDS, not standard deviations
+        eig_clipped=n_clipped, records_clipped=n_clipped_records,
+        clip_norm=float(clip_norm),
+        kl_to_true=gaussian_kl(mu_dp, cov_dp, mu_true, cov_true),
+    )
+    return mu_dp, cov_dp, report
+
+
+def bnp_bound_scalar(sensitivity: float, delta: float) -> float:
+    """Noise bound B giving a target delta: B = S / (2 delta), Corollary 1.
+
+    Duplicated from powerflow.bnp_bound so privacy.py does not import the
+    OpenDSS-dependent module. Kept in sync by a check in verify.py.
+    """
+    if delta <= 0:
+        raise ValueError("need delta > 0")
+    return sensitivity / (2.0 * delta)
+
+
 def gaussian_kl(mu0, cov0, mu1, cov1) -> float:
     """KL from Normal(mu0, cov0) to Normal(mu1, cov1). Lower is better.
 

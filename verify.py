@@ -22,7 +22,8 @@ from dpvolt.powerflow import (PowerFlowRunner, to_per_unit, bnp_bound,
                               bnp_delta, add_bounded_voltage_noise,
                               add_voltage_noise)
 from dpvolt.privacy import (gaussian_sigma, dp_fit_class, theorem1,
-                            calibrate_M_inv, normalised_jacobian, solve_for_r)
+                            calibrate_M_inv, normalised_jacobian, solve_for_r,
+                            bnp_fit_class, bnp_bound_scalar)
 from dpvolt.experiments import (voltage_wasserstein, build_masked_dataset,
                                 Standardizer, train_and_curve,
                                 ansi_violation_rate, mean_autocorrelation)
@@ -467,6 +468,44 @@ def main():
 
     check("violation rate is one on out-of-band voltages",
           ansi_violation_rate(np.full((5, 5), 2.0, dtype=complex)) == 1.0)
+
+    # The two bnp_bound implementations must agree -- privacy.py keeps its own
+    # copy so it need not import the OpenDSS-dependent powerflow module.
+    check("the two bnp_bound implementations agree",
+          np.isclose(bnp_bound_scalar(0.67, 1e-3), bnp_bound(0.67, 1e-3)),
+          f"privacy {bnp_bound_scalar(0.67, 1e-3):.4f} vs "
+          f"powerflow {bnp_bound(0.67, 1e-3):.4f}")
+
+    # The bounded load fit must still return a usable covariance.
+    mu_b, cov_b, rep_b = bnp_fit_class(data, lo_b, hi_b, 0.02,
+                                       np.random.default_rng(11),
+                                       clip_norm=6.0, eig_floor_ratio=0.1)
+    check("bounded load fit returns a positive-definite covariance",
+          np.linalg.eigvalsh(cov_b).min() > 0,
+          f"smallest eigenvalue {np.linalg.eigvalsh(cov_b).min():.3e}")
+
+    check("bounded load fit reports epsilon = 0",
+          rep_b.epsilon == 0.0,
+          "uniform BNP is (0, delta)-private by Corollary 1")
+
+    # The mean perturbation must respect its own bound.
+    B_mu_expected = bnp_bound_scalar(np.sqrt(96) * (hi_b - lo_b) / len(data),
+                                     0.02 / 2)
+    check("bounded mean noise never exceeds its bound",
+          np.abs(mu_b - data.mean(axis=0)).max() <= B_mu_expected + 1e-12,
+          f"max deviation {np.abs(mu_b - data.mean(axis=0)).max():.4f} "
+          f"against B = {B_mu_expected:.4f}")
+
+    # The finding: at matched delta, BNP's bound dwarfs the Gaussian sigma,
+    # and the ratio does not improve with more records.
+    ratios = []
+    for m_test in (270, 27000):
+        s = np.sqrt(96) * 4.6 / m_test
+        ratios.append(bnp_bound_scalar(s, 5e-6) / gaussian_sigma(s, 25, 5e-6))
+    check("BNP/Gaussian noise ratio is independent of sample size",
+          np.isclose(ratios[0], ratios[1]),
+          f"{ratios[0]:.1f} at m=270 vs {ratios[1]:.1f} at m=27000 "
+          f"-- averaging cannot close the gap")
 
     check("bigger bound gives more ANSI violations",
           ansi_violation_rate(
