@@ -23,7 +23,9 @@ from dpvolt.powerflow import (PowerFlowRunner, to_per_unit, bnp_bound,
                               add_voltage_noise)
 from dpvolt.privacy import (gaussian_sigma, dp_fit_class, theorem1,
                             calibrate_M_inv, normalised_jacobian, solve_for_r,
-                            bnp_fit_class, bnp_bound_scalar)
+                            bnp_fit_class, bnp_bound_scalar,
+                            analytic_gaussian_sigma, analytic_gaussian_delta,
+                            zcdp_rho_from_eps_delta)
 from dpvolt.experiments import (voltage_wasserstein, build_masked_dataset,
                                 Standardizer, train_and_curve,
                                 ansi_violation_rate, mean_autocorrelation)
@@ -42,6 +44,15 @@ def check(name, condition, detail=""):
     print(f"  [{status}]  {name}")
     if detail:
         print(f"           {detail}")
+
+
+def _raises(fn, exc=ValueError):
+    """True if fn() raises `exc`. For invariants about rejected input."""
+    try:
+        fn()
+    except exc:
+        return True
+    return False
 
 
 def section(title):
@@ -271,6 +282,96 @@ def main():
           r_tight.kl_to_true > r_loose.kl_to_true,
           f"KL {r_tight.kl_to_true:.1f} at eps=5 vs "
           f"{r_loose.kl_to_true:.1f} at eps=200")
+
+    # ---- calibration audit -------------------------------------------------
+    # The whole point of this block: a sigma is only correct if the delta it
+    # ACTUALLY achieves is at or under the delta claimed. The classical formula
+    # passes every structural check above while failing this one, which is how
+    # the under-noising went unnoticed.
+
+    # The analytic mechanism must hit its target delta exactly, at every
+    # epsilon -- including the 25-200 range this project runs in.
+    exact_ok, exact_detail = True, []
+    for eps_t in (0.5, 1.0, 5.0, 25.0, 50.0, 200.0):
+        for delta_t in (1e-3, 1e-5, 5e-6):
+            sig = analytic_gaussian_sigma(0.0267, eps_t, delta_t)
+            hit = analytic_gaussian_delta(0.0267, sig, eps_t)
+            if hit > delta_t * (1.0 + 1e-6):
+                exact_ok = False
+                exact_detail.append(f"eps={eps_t} delta={delta_t:g} hit {hit:.3e}")
+    check("analytic Gaussian achieves its target delta at every epsilon",
+          exact_ok,
+          "18 (epsilon, delta) pairs checked against Balle-Wang Thm 8"
+          if exact_ok else "; ".join(exact_detail))
+
+    # More noise must buy a smaller delta -- the monotonicity that makes the
+    # bisection in analytic_gaussian_sigma valid in the first place.
+    check("delta decreases as sigma grows",
+          analytic_gaussian_delta(0.0267, 0.02, 50.0)
+          > analytic_gaussian_delta(0.0267, 0.2, 50.0),
+          f"delta {analytic_gaussian_delta(0.0267, 0.02, 50.0):.3e} at "
+          f"sigma=0.02 vs {analytic_gaussian_delta(0.0267, 0.2, 50.0):.3e} "
+          f"at sigma=0.2")
+
+    # THE finding. The paper's stated formula does not deliver its guarantee
+    # above epsilon = 1; this pins the failure so a future edit cannot quietly
+    # reintroduce it as the default.
+    d_classical = analytic_gaussian_delta(
+        0.0267, gaussian_sigma(0.0267, 50.0, 1e-5), 50.0)
+    check("classical formula is confirmed to under-noise at eps=50",
+          d_classical > 1e-5,
+          f"claims delta=1e-5, actually achieves {d_classical:.3e} "
+          f"({d_classical / 1e-5:.0f}x worse) -- why 'analytic' is the default")
+
+    # The default path must be the correct one. A regression here is silent.
+    _, _, r_default = dp_fit_class(data, lo_b, hi_b, 50.0, 1e-5,
+                                   np.random.default_rng(4), clip_norm=6.0)
+    check("dp_fit_class defaults to the analytic calibration",
+          r_default.calibration == "analytic",
+          f"calibration = {r_default.calibration!r}")
+
+    check("the default fit's audited delta meets its claim",
+          r_default.delta_achieved <= 1e-5 * (1.0 + 1e-3),
+          f"claimed 1e-5, audited {r_default.delta_achieved:.3e}")
+
+    # And the classical path, when explicitly requested, must FAIL that audit
+    # -- otherwise the comparison it exists to support is meaningless.
+    _, _, r_cls = dp_fit_class(data, lo_b, hi_b, 50.0, 1e-5,
+                               np.random.default_rng(4), clip_norm=6.0,
+                               calibration="classical")
+    check("the classical path is measurably worse than it claims",
+          r_cls.delta_achieved > 1e-5,
+          f"claimed 1e-5, audited {r_cls.delta_achieved:.3e}")
+
+    # zCDP conversion must round-trip, or the budget split is not accounted.
+    rho_rt = zcdp_rho_from_eps_delta(50.0, 1e-5)
+    eps_rt = rho_rt + 2.0 * np.sqrt(rho_rt * np.log(1e5))
+    check("zCDP conversion round-trips",
+          np.isclose(eps_rt, 50.0),
+          f"rho {rho_rt:.4f} converts back to eps {eps_rt:.6f}")
+
+    # Shifting budget toward the covariance must hold delta while changing the
+    # noise split -- the tunable knob is only sound if delta is unaffected.
+    _, _, r_even = dp_fit_class(data, lo_b, hi_b, 50.0, 1e-5,
+                                np.random.default_rng(5), clip_norm=6.0,
+                                rho_split=0.5)
+    _, _, r_cov = dp_fit_class(data, lo_b, hi_b, 50.0, 1e-5,
+                               np.random.default_rng(5), clip_norm=6.0,
+                               rho_split=0.1)
+    check("shifting budget to the covariance lowers its noise",
+          r_cov.sigma_cov < r_even.sigma_cov
+          and r_cov.sigma_mu > r_even.sigma_mu,
+          f"sigma_cov {r_even.sigma_cov:.3e} -> {r_cov.sigma_cov:.3e}, "
+          f"sigma_mu {r_even.sigma_mu:.3e} -> {r_cov.sigma_mu:.3e}")
+
+    check("the budget split does not change the delta achieved",
+          r_cov.delta_achieved <= 1e-5 * (1.0 + 1e-3),
+          f"audited {r_cov.delta_achieved:.3e} at rho_split=0.1")
+
+    check("dp_fit_class rejects an unknown calibration",
+          _raises(lambda: dp_fit_class(data, lo_b, hi_b, 50.0, 1e-5, rng,
+                                       calibration="nonsense")),
+          "unknown calibration must raise, not silently pick a default")
 
     # =====================================================================
     section("5. Theorem 1")

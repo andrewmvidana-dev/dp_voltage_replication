@@ -24,13 +24,152 @@ def gaussian_sigma(sensitivity: float, epsilon: float, delta: float) -> float:
 
         sigma = sensitivity * sqrt(2 ln(1.25 / delta)) / epsilon
 
-    Slightly loose -- Balle & Wang's analytic Gaussian mechanism achieves the
-    same guarantee with less noise. It would help every method equally, so it
-    changes no comparison here.
+    DO NOT USE THIS FOR epsilon > 1. The derivation requires epsilon <= 1, and
+    above that it does not merely get loose -- it UNDER-NOISES, returning a
+    sigma that does not achieve the (epsilon, delta) it claims. Audited against
+    the exact condition (analytic_gaussian_delta) at sensitivity 0.0267:
+
+        eps   sigma      delta claimed   delta ACTUALLY achieved
+          5   2.66e-2    5e-6            6.3e-7   ok
+         25   5.32e-3    5e-6            4.2e-3   1000x worse
+         50   2.66e-3    5e-6            0.47     ~10^5x worse
+        200   6.65e-4    5e-6            1.0      no privacy at all
+
+    This project runs at epsilon 25-200, so the formula is outside its regime
+    everywhere it matters. Kept only to reproduce the paper's stated
+    calibration for comparison (calibration="classical" in dp_fit_class);
+    analytic_gaussian_sigma is the default and the correct choice.
     """
     if epsilon <= 0 or not (0 < delta < 1):
         raise ValueError("need epsilon > 0 and 0 < delta < 1")
     return sensitivity * np.sqrt(2.0 * np.log(1.25 / delta)) / epsilon
+
+
+def analytic_gaussian_sigma(
+    sensitivity: float,
+    epsilon: float,
+    delta: float,
+    tol: float = 1e-12,
+) -> float:
+    """Balle & Wang (ICML 2018) analytic Gaussian mechanism, Algorithm 1.
+
+    Same (epsilon, delta) guarantee as gaussian_sigma, strictly less noise. The
+    classical formula is not just loose, it is only VALID for epsilon <= 1 --
+    and this project runs at epsilon 25-200, well outside that regime. So this
+    is the correct calibration here, not merely the tighter one.
+
+    The exact condition (their Theorem 8) is
+
+        Phi(A/2 - eps/A) - e^eps * Phi(-A/2 - eps/A) <= delta,   A = Delta/sigma
+
+    which has no closed-form inverse, so we bisect on A. The function is
+    monotone in A, which is what makes bisection valid.
+
+    We bisect on sigma directly against that condition rather than reproducing
+    their alpha-substitution: delta_achieved(sigma) is monotone DECREASING in
+    sigma (more noise -> smaller failure probability), so bisection on sigma is
+    valid and needs no case analysis. Slower than their closed-form bracketing
+    by a few dozen evaluations of Phi, which is irrelevant here -- we call this
+    a handful of times per run, not in a loop. The payoff is that the thing we
+    verify is the guarantee itself, and analytic_gaussian_delta below lets a
+    caller (and verify.py) check any returned sigma independently.
+    """
+    if epsilon <= 0 or not (0 < delta < 1):
+        raise ValueError("need epsilon > 0 and 0 < delta < 1")
+    if sensitivity == 0:
+        return 0.0
+
+    # The classical formula is a valid upper bracket only for eps <= 1; above
+    # that it can UNDER-shoot, so bracket by doubling until the condition holds
+    # instead of trusting it.
+    hi = sensitivity / np.sqrt(2.0 * epsilon)
+    for _ in range(200):
+        if analytic_gaussian_delta(sensitivity, hi, epsilon) <= delta:
+            break
+        hi *= 2.0
+    else:
+        raise RuntimeError("analytic Gaussian bracketing failed")
+
+    lo = 0.0
+    for _ in range(200):
+        if hi - lo <= tol * max(1.0, hi):
+            break
+        mid = (lo + hi) / 2.0
+        if analytic_gaussian_delta(sensitivity, mid, epsilon) <= delta:
+            hi = mid                    # mid is feasible, try smaller
+        else:
+            lo = mid                    # mid is infeasible
+    return float(hi)                    # the feasible end, never the open one
+
+
+def analytic_gaussian_delta(sensitivity: float, sigma: float,
+                            epsilon: float) -> float:
+    """delta actually achieved by a Gaussian of scale sigma at this epsilon.
+
+    Balle & Wang (2018) Theorem 8, the exact expression:
+
+        delta = Phi(Delta/2sigma - eps sigma/Delta)
+                - e^eps * Phi(-Delta/2sigma - eps sigma/Delta)
+
+    Exposed separately so a privacy claim can be CHECKED rather than trusted:
+    verify.py feeds back every sigma from analytic_gaussian_sigma and confirms
+    the delta it actually buys is at or under target.
+    """
+    from scipy.stats import norm
+
+    if sigma <= 0:
+        raise ValueError("need sigma > 0")
+    if sensitivity == 0:
+        return 0.0
+
+    a = sensitivity / sigma
+    return float(norm.cdf(a / 2.0 - epsilon / a)
+                 - np.exp(epsilon) * norm.cdf(-a / 2.0 - epsilon / a))
+
+
+# ---------------------------------------------------------------------------
+# 1b. zCDP composition -- a better way to split the budget across releases
+# ---------------------------------------------------------------------------
+
+def zcdp_rho_from_eps_delta(epsilon: float, delta: float) -> float:
+    """Largest zCDP parameter rho whose conversion still fits (epsilon, delta).
+
+    Bun & Steinke (2016), Proposition 1.3: rho-zCDP implies
+    (rho + 2 sqrt(rho log(1/delta)), delta)-DP. We invert that in rho.
+
+    WHY BOTHER. Gaussian mechanisms compose additively in rho, not in epsilon.
+    Splitting epsilon in half twice (the current path) pays a conversion penalty
+    at each release; accounting in rho and converting ONCE at the end is
+    strictly better. Same guarantee, less noise, no new assumptions.
+
+    Solving rho + 2 sqrt(rho L) - eps = 0 with L = log(1/delta): substitute
+    u = sqrt(rho) to get u^2 + 2 u sqrt(L) - eps = 0, so
+    u = -sqrt(L) + sqrt(L + eps) and rho = u^2.
+    """
+    if epsilon <= 0 or not (0 < delta < 1):
+        raise ValueError("need epsilon > 0 and 0 < delta < 1")
+    L = np.log(1.0 / delta)
+    u = -np.sqrt(L) + np.sqrt(L + epsilon)
+    return float(u * u)
+
+
+def zcdp_sigma(sensitivity: float, rho: float) -> float:
+    """Noise scale for one Gaussian release under a rho-zCDP allocation.
+
+    Bun & Steinke: the Gaussian mechanism with sigma = Delta / sqrt(2 rho)
+    satisfies rho-zCDP. Composition is then just addition of rho across
+    releases, which is what makes the budget split tunable -- see the
+    `rho_split` argument of dp_fit_class.
+
+    NOTE. Measured against a CORRECT analytic-Gaussian baseline this is not a
+    win at epsilon 25-200; it saves noise only where the naive epsilon/2 split
+    is compared against the invalid classical formula. Provided because the
+    tunable split is independently useful (the covariance carries the temporal
+    structure and can be given more than half the budget), not as a free lunch.
+    """
+    if rho <= 0:
+        raise ValueError("need rho > 0")
+    return float(sensitivity / np.sqrt(2.0 * rho))
 
 
 @dataclass
@@ -48,6 +187,13 @@ class DPFitReport:
     clip_norm: float
     kl_to_true: float         # KL from the true fit, for reference
 
+    # Calibration audit. The classical formula silently under-noises above
+    # epsilon = 1, so we record which calibration was used and -- for Gaussian
+    # paths -- the delta the returned sigmas ACTUALLY achieve. If
+    # delta_achieved > delta, the stated guarantee does not hold.
+    calibration: str = "analytic"
+    delta_achieved: float | None = None
+
 
 def dp_fit_class(
     log_data: np.ndarray,
@@ -58,6 +204,8 @@ def dp_fit_class(
     rng: np.random.Generator,
     eig_floor_ratio: float = 1e-3,
     clip_norm: float | None = None,
+    calibration: str = "analytic",
+    rho_split: float = 0.5,
 ) -> tuple[np.ndarray, np.ndarray, DPFitReport]:
     """Privately estimate the mean and covariance of one class's log-loads.
 
@@ -66,9 +214,23 @@ def dp_fit_class(
     clip_norm  L2 bound on each centred record. Defaults to the worst case
                sqrt(T) * R / 2, which is correct but very loose -- see below.
 
-    BUDGET SPLIT. We release a mean and a covariance, so by composition each
-    gets half. That halving is unavoidable, and it is why a method releasing
-    fewer quantities can afford less noise.
+    CALIBRATION. One of:
+      "analytic"  (default) Balle & Wang exact calibration, split by zCDP.
+                  Correct at every epsilon. USE THIS.
+      "zcdp"      same as "analytic" -- kept as an alias because the split is
+                  what zCDP provides and the per-release scale is Gaussian.
+      "classical" the paper's Table III formula with the naive epsilon/2 split.
+                  REPRODUCES A BROKEN GUARANTEE above epsilon = 1: at
+                  (eps=50, delta=1e-5) the real delta is ~0.47, not 1e-5. Only
+                  for showing what the stated calibration actually buys.
+
+    BUDGET SPLIT. We release a mean and a covariance, so the budget divides
+    across two Gaussian releases. Under zCDP that division is additive in rho,
+    and `rho_split` sets the mean's share (default 0.5, an even split). Because
+    the covariance carries the temporal structure that this whole method exists
+    to preserve, giving it MORE than half -- rho_split < 0.5 -- is a defensible
+    tuning knob, and unlike the clip norm it leaks nothing: the split is chosen
+    without reference to the data.
 
     SENSITIVITIES. Bounded-record adjacency: one row may be replaced by any
     other row inside the box. With R = hi - lo:
@@ -101,17 +263,54 @@ def dp_fit_class(
     m, T = log_data.shape
     R = float(hi - lo)
 
-    eps_half, delta_half = epsilon / 2.0, delta / 2.0
+    if calibration not in ("analytic", "zcdp", "classical"):
+        raise ValueError(f"unknown calibration {calibration!r}")
+    if not (0.0 < rho_split < 1.0):
+        raise ValueError("need 0 < rho_split < 1")
+
+    sens_mu = np.sqrt(T) * R / m
+
+    if clip_norm is None:
+        clip_norm = np.sqrt(T) * R / 2.0          # worst case, very loose
+    sens_cov = 2.0 * clip_norm ** 2 / m
+
+    # ---- calibrate both releases together ---------------------------------
+    # Done up front so the two paths are visibly the same decision, and so the
+    # audit below can re-check whichever one was taken.
+    if calibration == "classical":
+        # The paper's stated calibration: split epsilon and delta evenly, then
+        # apply the classical formula to each half. Under-noises above
+        # epsilon = 1; kept only to quantify that gap.
+        eps_mu = eps_cov = epsilon / 2.0
+        sigma_mu = gaussian_sigma(sens_mu, eps_mu, delta / 2.0)
+        sigma_cov = gaussian_sigma(sens_cov, eps_cov, delta / 2.0)
+    else:
+        # Split the budget in rho (additive under zCDP), then convert each
+        # share back to an epsilon and calibrate that release exactly. The two
+        # epsilons do NOT sum to `epsilon` -- that is the point of composing in
+        # rho -- but the pair of releases together still satisfies
+        # (epsilon, delta), because rho_mu + rho_cov = rho_total and
+        # rho_total converts to exactly epsilon at delta.
+        rho_total = zcdp_rho_from_eps_delta(epsilon, delta)
+        eps_mu = _eps_from_rho(rho_total * rho_split, delta / 2.0)
+        eps_cov = _eps_from_rho(rho_total * (1.0 - rho_split), delta / 2.0)
+        sigma_mu = analytic_gaussian_sigma(sens_mu, eps_mu, delta / 2.0)
+        sigma_cov = analytic_gaussian_sigma(sens_cov, eps_cov, delta / 2.0)
+
+    # Audit each release at the epsilon it was actually calibrated FOR -- not
+    # at epsilon/2, which is only the right question on the classical path.
+    # Summing the two deltas is the basic-composition accounting: the pair is
+    # (eps_mu + eps_cov, d_mu + d_cov)-DP, and for the analytic path the
+    # tighter zCDP accounting above certifies the stronger (epsilon, delta).
+    d_mu = analytic_gaussian_delta(sens_mu, sigma_mu, eps_mu)
+    d_cov = analytic_gaussian_delta(sens_cov, sigma_cov, eps_cov)
+    delta_achieved = float(d_mu + d_cov)
 
     # ---- private mean -----------------------------------------------------
-    sens_mu = np.sqrt(T) * R / m
-    sigma_mu = gaussian_sigma(sens_mu, eps_half, delta_half)
     mu_true = log_data.mean(axis=0)
     mu_dp = mu_true + rng.normal(0.0, sigma_mu, size=T)
 
     # ---- private covariance -----------------------------------------------
-    if clip_norm is None:
-        clip_norm = np.sqrt(T) * R / 2.0          # worst case, very loose
 
     # Centre on the ALREADY-PRIVATE mean, so this costs no budget
     # (post-processing), then clip each record's L2 norm to C.
@@ -123,10 +322,12 @@ def dp_fit_class(
 
     cov_true = (centred.T @ centred) / m + 1e-12 * np.eye(T)
 
-    sens_cov = 2.0 * clip_norm ** 2 / m
-    sigma_cov = gaussian_sigma(sens_cov, eps_half, delta_half)
-
-    # Symmetrised Gaussian noise, as a covariance must be symmetric.
+    # Symmetrised Gaussian noise, as a covariance must be symmetric. The
+    # /sqrt(2) keeps each entry's marginal sd at sigma_cov: off-diagonal
+    # entries are (n_ij + n_ji)/sqrt(2), a sum of two independent N(0, sigma^2)
+    # scaled to variance sigma^2. Diagonal entries get 2 n_ii / sqrt(2), i.e.
+    # sd sigma*sqrt(2) -- conservative (more noise than calibrated), so the
+    # guarantee holds.
     noise = rng.normal(0.0, sigma_cov, size=(T, T))
     cov_dp = cov_true + (noise + noise.T) / np.sqrt(2.0)
 
@@ -143,8 +344,22 @@ def dp_fit_class(
         sigma_mu=sigma_mu, sigma_cov=sigma_cov, eig_clipped=n_clipped,
         records_clipped=n_clipped_records, clip_norm=float(clip_norm),
         kl_to_true=gaussian_kl(mu_dp, cov_dp, mu_true, cov_true),
+        calibration=calibration, delta_achieved=delta_achieved,
     )
     return mu_dp, cov_dp, report
+
+
+def _eps_from_rho(rho: float, delta: float) -> float:
+    """Convert a rho-zCDP allocation to an (eps, delta)-DP epsilon.
+
+    Bun & Steinke Prop. 1.3, forward direction:
+        eps = rho + 2 sqrt(rho log(1/delta))
+    The inverse of zcdp_rho_from_eps_delta, used to turn each release's share
+    of rho back into the epsilon its own calibration needs.
+    """
+    if rho <= 0 or not (0 < delta < 1):
+        raise ValueError("need rho > 0 and 0 < delta < 1")
+    return float(rho + 2.0 * np.sqrt(rho * np.log(1.0 / delta)))
 
 
 def bnp_fit_class(
@@ -225,6 +440,10 @@ def bnp_fit_class(
         eig_clipped=n_clipped, records_clipped=n_clipped_records,
         clip_norm=float(clip_norm),
         kl_to_true=gaussian_kl(mu_dp, cov_dp, mu_true, cov_true),
+        # Uniform BNP is exactly (0, delta)-private by Corollary 1, so its
+        # delta needs no audit -- the bound IS the guarantee. delta_achieved is
+        # left None to mark "not a Gaussian calibration" rather than "unchecked".
+        calibration="bnp-uniform", delta_achieved=None,
     )
     return mu_dp, cov_dp, report
 
