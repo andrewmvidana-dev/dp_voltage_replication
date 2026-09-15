@@ -81,42 +81,62 @@ for the tighter calibration:
 covariance (which carries the temporal structure) cuts KL from 53.4 to 37.5 at
 eps=50, at identical delta.
 
-### Bounded-Noise Privacy is not a viable substitute — at either stage
+### What Bounded-Noise Privacy purchases, and what it costs
 
 BNP (Severtson & Khajenejad) replaces unbounded noise with uniform noise on
 `[-B, B]`, so a released value can never be more than B from the truth. `B = S/2δ`
-by their Corollary 1. Tested as a drop-in replacement at both injection points,
-against the **corrected** Gaussian baseline:
+by their Corollary 1.
 
-**Output stage (on released voltages) — fails outright.** Two constraints bracket
-B from opposite sides: Corollary 1 needs `B ≥ S/2`, and usefulness needs B under
-the ANSI C84.1 half-band of 0.05 pu. On this feeder those intervals do not
-intersect. The smallest admissible bound buys `delta = 1.0` — no privacy — while
-putting ~60% of released voltages outside the regulation band and taking lag-1
-autocorrelation to 0.00. Figure 4 shows the empty region.
+**What it purchases: a bounded corridor.** Every released value is within `B` of
+the truth — always, not with high probability. No Gaussian mechanism provides
+this at any sigma, because the Gaussian tail is unbounded: there is always some
+probability of an arbitrarily wrong release. Where the binding requirement is
+"no released value may *ever* leave the band," BNP satisfies it by construction
+and the Gaussian mechanism is inadmissible regardless of its epsilon. The
+mechanism delivers this exactly as specified — Corollary 1 round-trips to
+machine precision across five orders of magnitude of `S`, the bound is never
+violated (deviation/B = 0.999998 at every bound tested), and the released model
+is positive definite at every operating point. See `results/bnp_correctness.md`.
 
-**Input stage (on the load model) — dominated.** This is the promising place:
-the per-record sensitivity of a mean over m≈2700 records carries a 1/m factor, so
-B lands small relative to the log-load range. It still loses. Its best temporal
-structure (lag-1 0.59) arrives at `delta = 0.5`, which is **50,000x weaker
-privacy** than the Gaussian path's 1e-5 — and still below that path's lag-1 0.78.
-Every swept operating point lands in the region of strictly worse privacy *and*
-strictly worse structure.
+What that corridor costs, at each injection point, is the rest of this section.
+Both mechanisms are measured against the **corrected** Gaussian baseline.
 
-The shape to notice: every utility axis improves monotonically as B falls, but
+**Input stage (on the load model) — feasibility holds.** This is where the
+corridor is cheap: the per-record sensitivity of a mean over m≈2700 records
+carries a 1/m factor, so `B` lands small relative to the log-load range. The
+mechanism is feasible here in a way it is not downstream — power flow re-imposes
+physics on the released loads, so ANSI violations stay near the proposed
+method's own baseline rather than exploding, and the sampled loads remain inside
+the truncation box.
+
+What the corridor costs here is temporal structure and delta. BNP's best
+measured structure is lag-1 0.59, reached at `delta = 0.5`; the Gaussian path
+reaches lag-1 0.78 at `delta = 1e-5`. The two are **not at matched delta** —
+uniform BNP buys delta as `1/B` while the Gaussian buys it exponentially, so no
+sample size closes the gap — and at BNP's own operating point of `delta = 0.02`
+the measured structure is lag-1 0.08 against the truth's 0.97. Every swept
+point sits at both weaker privacy and less retained structure than the Gaussian
+reference.
+
+**Output stage (on released voltages) — the corridor and the band do not
+overlap.** Two constraints bracket `B` from opposite sides: Corollary 1 requires
+`B ≥ S/2`, and staying inside ANSI C84.1 requires `B` under the 0.05 pu
+half-band. On this feeder those intervals are disjoint. At `B = S/2` — the
+smallest bound Corollary 1 admits — `delta = S/(2B) = 1` exactly, which is no
+privacy rather than weak privacy, and the bound still exceeds the ANSI half-band
+by 79x at the honest sensitivity. Measured there: 99.0% of released voltages
+outside the regulation band, lag-1 −0.01. Figure 4 shows the empty region.
+
+The shape to notice: every utility axis improves monotonically as `B` falls, but
 delta rises exactly as fast, because `delta = S/2B` ties them together. There is
-no knee. Buying utility costs privacy one-for-one.
+no knee — the corridor is purchased at a one-for-one rate in privacy.
 
-**This conclusion survives the calibration fix**, which is what makes it worth
-stating. The obvious objection — that BNP was losing to a baseline flattered by
-five orders of magnitude of privacy it never had — is now closed.
+**These figures survive the calibration fix**, which is what makes them worth
+stating. The obvious objection — that BNP was being measured against a baseline
+flattered by five orders of magnitude of privacy it never had — is now closed.
+The analytic (Balle & Wang) calibration is the default throughout.
 
-**What BNP does buy, honestly:** a hard worst-case bound on any single released
-value, which no Gaussian sigma can provide. If a deployment's binding requirement
-is "no released voltage may ever leave the band", that guarantee has real value.
-It is simply not what this method is measured on, and the price is steep.
-
-#### Why it fails: noise magnitude, not the eigenvalue floor
+#### Where the cost comes from: noise magnitude, not the eigenvalue floor
 
 A reviewer proposed moving the noise into eigenvalue space — eigendecompose
 `Sigma = V Λ Vᵀ`, perturb only the eigenvalues, reconstruct — on the theory that
@@ -138,13 +158,14 @@ The numbers say the floor was never the binding constraint:
 | typical \|true covariance entry\| | 0.0154 |
 | ratio, BNP sd / covariance entry | **48x** |
 
-The noise sd is 48x the signal it is added to. Over 12 seeds, disabling the
-floor entirely changes KL by 2.7% (8.64e3 → 8.87e3) — it is not the binding
-constraint. Granting the oracle the true eigenvectors for free does help: KL
-improves 6.7x, from 5.76e4 to 8.64e3, and ANSI violations nearly halve (24.9% →
-13.6%). But it remains **14x worse than the Gaussian path** (6.23e2), and lag-1
-autocorrelation stays flat at 0.17 against the Gaussian's 0.79 and the truth's
-0.97. Giving away the entire correlation structure is not enough to rescue it.
+The noise sd is 48x the signal it is added to, which is where the cost
+originates. Over 12 seeds, disabling the floor entirely changes KL by 2.7%
+(8.64e3 → 8.87e3) — it is not the binding constraint. Granting the oracle the
+true eigenvectors for free does help: KL improves 6.7x, from 5.76e4 to 8.64e3,
+and ANSI violations nearly halve (24.9% → 13.6%). It remains 14x the Gaussian
+path's KL (6.23e2), with lag-1 at 0.17 against the Gaussian's 0.79 and the
+truth's 0.97 — so the correlation structure is worth a great deal, and releasing
+it in the clear still does not close the gap.
 
 Also note `B_lambda` from Weyl's inequality is the *same* `2C²/m` sensitivity as
 entrywise noise — moving noise into eigenvalue space does not reduce how much one
@@ -229,6 +250,8 @@ dp-voltage-replication/
 ├── run_bnp_viability.py     figure 7 — the viability verdict (~2 min)
 ├── run_bnp_peer_review.py   results/bnp_peer_review.md — the peer-review
 │                            comparison table, 12 seeds (~15 min)
+├── run_bnp_correctness.py   results/bnp_correctness.md — does BNP deliver the
+│                            guarantee it states? (~5s, no power flow)
 ├── verify.py                80 correctness checks
 ├── requirements.txt
 └── RUN_GUIDE.md             step-by-step setup, no terminal required
