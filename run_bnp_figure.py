@@ -15,7 +15,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from dpvolt.powerflow import bnp_delta, bnp_bound
+from dpvolt.powerflow import bnp_bound
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))

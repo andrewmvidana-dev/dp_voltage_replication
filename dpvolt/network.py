@@ -358,7 +358,6 @@ def _prune_dangling_stubs(Y, node_names, bus_of_node, V, Vbase,
     changes, since removing one stub can expose another behind it.
     """
     keep = list(range(len(node_names)))
-    removed_buses = []
 
     while True:
         A = np.abs(Y[np.ix_(keep, keep)]) > tol
@@ -387,7 +386,6 @@ def _prune_dangling_stubs(Y, node_names, bus_of_node, V, Vbase,
         if not drop:
             break
 
-        removed_buses += drop
         drop_set = set(drop)
 
         # IMPORTANT: ELIMINATE the stub, do not merely delete its rows.

@@ -25,7 +25,7 @@ import os
 
 import numpy as np
 
-from dpvolt.privacy import bnp_fit_class, bnp_bound_scalar
+from dpvolt.privacy import bnp_fit_class
 from dpvolt.powerflow import bnp_delta, bnp_bound, add_bounded_voltage_noise
 
 

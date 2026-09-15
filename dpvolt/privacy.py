@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -631,8 +632,16 @@ def bnp_bound_scalar(sensitivity: float, delta: float) -> float:
     return sensitivity / (2.0 * delta)
 
 
-def gaussian_kl(mu0, cov0, mu1, cov1) -> float:
+def gaussian_kl(
+    mu0: np.ndarray,
+    cov0: np.ndarray,
+    mu1: np.ndarray,
+    cov1: np.ndarray,
+) -> float:
     """KL from Normal(mu0, cov0) to Normal(mu1, cov1). Lower is better.
+
+    Means have shape (T,) and positive-definite covariances shape (T, T).
+    Returns the scalar divergence in nats.
 
     The paper's DP-GMM is built to minimise exactly this, so it is the fair
     yardstick for what our simpler substitute costs.
@@ -675,15 +684,15 @@ class PrivacyBound:
     tail_term: float         # psi_bar * tau(delta)
     bias_term: float         # everything deterministic, eq. (33)
     tau: float               # chi-squared tail factor, eq. (35)
-    d_ell: dict              # per-class sensitivity constant, eq. (23)
-    gamma_ell: dict          # per-class precision sum, eq. (24)
+    d_ell: dict[int, float]              # per-class sensitivity constant, eq. (23)
+    gamma_ell: dict[int, float]          # per-class precision sum, eq. (24)
 
 
 def theorem1(
     *,
-    Sigma_by_class: dict,        # class -> (T, T) covariance of the DP model
-    size_by_class: dict,         # class -> number of buses in it
-    p_min_by_class: dict,        # class -> lower load margin, per-unit
+    Sigma_by_class: dict[int, np.ndarray],        # class -> (T, T) covariance of the DP model
+    size_by_class: dict[int, int],         # class -> number of buses in it
+    p_min_by_class: dict[int, float],        # class -> lower load margin, per-unit
     n: int,                      # number of retained buses
     T: int,                      # time steps per release
     d_max: int,                  # maximum node degree in the network
@@ -771,8 +780,16 @@ def theorem1(
     )
 
 
-def solve_for_r(target_epsilon: float, *, bracket=(1e-14, 1e-2), **kwargs) -> float:
+def solve_for_r(
+    target_epsilon: float,
+    *,
+    bracket: tuple[float, float] = (1e-14, 1e-2),
+    **kwargs: Any,
+) -> float:
     """Largest adjacency radius r still meeting a target epsilon.
+
+    bracket gives the lower and upper radii; kwargs forwards the remaining
+    keyword arguments to theorem1. Returns zero if the lower radius fails.
 
     epsilon is monotone in r, so we bisect. Usually the more useful direction:
     a utility knows what epsilon it will spend and wants to know how broad a
@@ -828,7 +845,7 @@ def calibrate_M_inv(
     b: np.ndarray,
     quantile: float = 0.99,
     confidence: float = 0.95,
-) -> dict:
+) -> dict[str, float | int]:
     """Estimate ||M~^-1|| empirically, following the paper's Remark 2.
 
     Appendix E gives a closed form, but it is a worst case over every voltage
