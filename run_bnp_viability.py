@@ -30,10 +30,11 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import opendssdirect as dss
 
-from dpvolt.loads import (assign_classes, make_historical, fit_load_model,
-                          sample_loads, reactive_from_active, LoadModel)
+from dpvolt.loads import sample_loads, reactive_from_active, LoadModel
+from dpvolt.bnp_setup import (
+    build_history, feeder_load_ratings as _load_ratings,
+)
 from dpvolt.powerflow import (PowerFlowRunner, add_bounded_voltage_noise,
                               bnp_delta)
 from dpvolt.privacy import dp_fit_class, bnp_fit_class
@@ -77,16 +78,7 @@ GRID = "#e1e0d9"
 
 
 def feeder_load_ratings():
-    dss.Text.Command("Clear")
-    dss.Text.Command(f"Redirect {MASTER}")
-    dss.Text.Command("Solve")
-    kw, pf = [], []
-    i = dss.Loads.First()
-    while i > 0:
-        kw.append(dss.Loads.kW())
-        pf.append(dss.Loads.PF())
-        i = dss.Loads.Next()
-    return np.array(kw), np.arccos(np.clip(np.array(pf), -1.0, 1.0))
+    return _load_ratings(MASTER)
 
 
 def main():
@@ -99,9 +91,7 @@ def main():
     rng = np.random.default_rng(0)
 
     kw, theta = feeder_load_ratings()
-    classes = assign_classes(kw, L=3)
-    archive = make_historical(kw, classes, n_days=N_HIST, rng=rng)
-    model = fit_load_model(archive, classes, theta)
+    classes, archive, model = build_history(kw, theta, N_HIST, rng)
 
     runner = PowerFlowRunner(MASTER)
     sel = runner.retained_indices()

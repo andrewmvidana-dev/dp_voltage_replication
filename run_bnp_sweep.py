@@ -29,10 +29,11 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import opendssdirect as dss
 
-from dpvolt.loads import (assign_classes, make_historical, fit_load_model,
-                          sample_loads, reactive_from_active, LoadModel)
+from dpvolt.loads import sample_loads, reactive_from_active, LoadModel
+from dpvolt.bnp_setup import (
+    build_history, feeder_load_ratings as _load_ratings, print_banner,
+)
 from dpvolt.powerflow import PowerFlowRunner
 from dpvolt.privacy import dp_fit_class, bnp_fit_class
 from dpvolt.experiments import (voltage_wasserstein, build_masked_dataset,
@@ -60,23 +61,11 @@ SEED = 0
 
 
 def banner(text):
-    print()
-    print("=" * 74)
-    print(text)
-    print("=" * 74)
+    print_banner(text, width=74)
 
 
 def feeder_load_ratings():
-    dss.Text.Command("Clear")
-    dss.Text.Command(f"Redirect {MASTER}")
-    dss.Text.Command("Solve")
-    kw, pf = [], []
-    i = dss.Loads.First()
-    while i > 0:
-        kw.append(dss.Loads.kW())
-        pf.append(dss.Loads.PF())
-        i = dss.Loads.Next()
-    return np.array(kw), np.arccos(np.clip(np.array(pf), -1.0, 1.0))
+    return _load_ratings(MASTER)
 
 
 def evaluate(V, V_true_flat, sel, X_test, Y_test, var_test):
@@ -103,9 +92,7 @@ def main():
     rng = np.random.default_rng(SEED)
 
     kw, theta = feeder_load_ratings()
-    classes = assign_classes(kw, L=3)
-    archive = make_historical(kw, classes, n_days=N_HIST_DAYS, rng=rng)
-    model = fit_load_model(archive, classes, theta)
+    classes, archive, model = build_history(kw, theta, N_HIST_DAYS, rng)
 
     runner = PowerFlowRunner(MASTER)
     sel = runner.retained_indices()
