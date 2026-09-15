@@ -25,7 +25,9 @@ from dpvolt.privacy import (gaussian_sigma, dp_fit_class, theorem1,
                             calibrate_M_inv, normalised_jacobian, solve_for_r,
                             bnp_fit_class, bnp_bound_scalar,
                             analytic_gaussian_sigma, analytic_gaussian_delta,
-                            zcdp_rho_from_eps_delta)
+                            zcdp_rho_from_eps_delta,
+                            bnp_fit_class_eigen_oracle, OracleFitReport,
+                            DPFitReport)
 from dpvolt.experiments import (voltage_wasserstein, build_masked_dataset,
                                 Standardizer, train_and_curve,
                                 ansi_violation_rate, mean_autocorrelation)
@@ -626,6 +628,86 @@ def main():
               add_bounded_voltage_noise(V_small, 0.5, np.random.default_rng(10)))
           > ansi_violation_rate(
               add_bounded_voltage_noise(V_small, 0.001, np.random.default_rng(10))))
+
+    # =====================================================================
+    section("9. The eigenvalue-space oracle -- NOT a mechanism")
+    # =====================================================================
+
+    # bnp_fit_class_eigen_oracle exists to be MEASURED, never reported. It
+    # releases the true eigenvectors in the clear, so it has no guarantee at
+    # any parameter. The protection is structural -- its report type has no
+    # guarantee fields at all -- and these checks pin that down, because a
+    # future edit re-adding them would otherwise be silent.
+
+    mu_o, cov_o, rep_o = bnp_fit_class_eigen_oracle(
+        data, lo_b, hi_b, 0.02, np.random.default_rng(12),
+        clip_norm=6.0, eig_floor_ratio=0.1, verbose=False)
+
+    check("the eigen-oracle labels itself NOT PRIVATE",
+          rep_o.calibration == "bnp-eigen-oracle-NOTPRIVATE",
+          f"calibration = {rep_o.calibration!r}")
+
+    check("the eigen-oracle report has NO guarantee fields",
+          isinstance(rep_o, OracleFitReport)
+          and not isinstance(rep_o, DPFitReport)
+          and not any(hasattr(rep_o, f)
+                      for f in ("epsilon", "delta", "delta_achieved")),
+          "epsilon/delta/delta_achieved must not exist on an oracle report -- "
+          "reading one is an AttributeError, not a number")
+
+    check("reading a delta off the oracle raises",
+          _raises(lambda: rep_o.delta, AttributeError),
+          "the invalid state is unrepresentable, not merely detected")
+
+    check("real mechanisms still carry their guarantee fields",
+          isinstance(r_default, DPFitReport)
+          and r_default.delta_achieved is not None
+          and rep_b.epsilon == 0.0,
+          "the report split must not strip dp_fit_class or bnp_fit_class")
+
+    # The defining property, stated as a test: the released eigenvectors ARE
+    # the true ones. If this ever passes on a real mechanism, that mechanism
+    # is broken.
+    centred_chk = data - mu_o
+    nrm = np.linalg.norm(centred_chk, axis=1, keepdims=True)
+    centred_chk = centred_chk * np.minimum(1.0, 6.0 / np.maximum(nrm, 1e-12))
+    cov_chk = (centred_chk.T @ centred_chk) / len(data) + 1e-12 * np.eye(96)
+    ev_true = np.linalg.eigh(cov_chk)[1]
+    ev_rel = np.linalg.eigh(cov_o)[1]
+
+    # NOT a projector comparison of the leading columns. B_lambda (1.38) is
+    # larger than the gaps between the true eigenvalues, so the noise REORDERS
+    # the spectrum -- and eigh sorts its output by eigenvalue, so the released
+    # matrix's "leading k" columns are a different SUBSET of the same true
+    # eigenbasis, not a rotation of it. Comparing leading blocks therefore
+    # fails (measured: 1.3e-1 at k=8) even though nothing was rotated.
+    #
+    # The right statement of the leak: EVERY released eigenvector is one of the
+    # true ones up to sign. So match each released column to its best true
+    # partner by |inner product| and require that to be 1.
+    overlap = np.abs(ev_rel.T @ ev_true)        # (released, true)
+    best = overlap.max(axis=1)
+    # The floor pins 54 of 96 eigenvalues to one degenerate value, and any
+    # orthonormal basis of a degenerate eigenspace is valid, so only the
+    # non-degenerate modes carry a well-defined individual eigenvector.
+    floor_val = 0.1 * float(np.trace(cov_chk)) / 96
+    nondegenerate = ~np.isclose(np.linalg.eigvalsh(cov_o), floor_val, rtol=1e-9)
+    check("the eigen-oracle leaks the true eigenvectors exactly",
+          bool(np.all(best[nondegenerate] > 1.0 - 1e-6)),
+          f"all {int(nondegenerate.sum())} non-degenerate released "
+          f"eigenvectors match a TRUE eigenvector to "
+          f"|<u,v>| >= {best[nondegenerate].min():.9f} -- no rotation, no "
+          f"noise on V: this is the leak, measured")
+
+    # Disabling the floor must be a real change, or the 'floor disabled' row of
+    # the peer-review table is measuring nothing.
+    _, cov_nofloor, rep_nofloor = bnp_fit_class_eigen_oracle(
+        data, lo_b, hi_b, 0.02, np.random.default_rng(12),
+        clip_norm=6.0, eig_floor_ratio=None, verbose=False)
+    check("disabling the eigenvalue floor changes the result",
+          not np.allclose(cov_o, cov_nofloor),
+          f"eig_clipped {rep_o.eig_clipped} with floor vs "
+          f"{rep_nofloor.eig_clipped} without")
 
     # =====================================================================
     print()

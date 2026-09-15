@@ -116,6 +116,43 @@ value, which no Gaussian sigma can provide. If a deployment's binding requiremen
 is "no released voltage may ever leave the band", that guarantee has real value.
 It is simply not what this method is measured on, and the price is steep.
 
+#### Why it fails: noise magnitude, not the eigenvalue floor
+
+A reviewer proposed moving the noise into eigenvalue space — eigendecompose
+`Sigma = V Λ Vᵀ`, perturb only the eigenvalues, reconstruct — on the theory that
+the eigenvalue floor was what destroyed utility. That is **not differentially
+private**: `V` comes from the raw data and is released unperturbed, so the whole
+correlation structure leaks, and post-processing does not apply. It is
+implemented anyway as `bnp_fit_class_eigen_oracle`, explicitly labelled, purely
+to separate two causes that entrywise noise confounds.
+
+The numbers say the floor was never the binding constraint:
+
+| quantity | value |
+|---|---|
+| `sens_cov = 2C²/m` (C=6, m=2790) | 0.0258 |
+| `B_cov` at δ=0.02 | 1.290 |
+| implied uniform sd `B/√3` | **0.745** |
+| analytic Gaussian `sigma_cov` at (ε=50, δ=1e-5) | **0.00392** |
+| ratio, BNP sd / Gaussian sd | **190x** |
+| typical \|true covariance entry\| | 0.0154 |
+| ratio, BNP sd / covariance entry | **48x** |
+
+The noise sd is 48x the signal it is added to. Over 12 seeds, disabling the
+floor entirely changes KL by 2.7% (8.64e3 → 8.87e3) — it is not the binding
+constraint. Granting the oracle the true eigenvectors for free does help: KL
+improves 6.7x, from 5.76e4 to 8.64e3, and ANSI violations nearly halve (24.9% →
+13.6%). But it remains **14x worse than the Gaussian path** (6.23e2), and lag-1
+autocorrelation stays flat at 0.17 against the Gaussian's 0.79 and the truth's
+0.97. Giving away the entire correlation structure is not enough to rescue it.
+
+Also note `B_lambda` from Weyl's inequality is the *same* `2C²/m` sensitivity as
+entrywise noise — moving noise into eigenvalue space does not reduce how much one
+record can move the estimate — and the per-eigenvalue δ composes: releasing all
+T=96 eigenvalues costs δ=0.96 under naive composition.
+
+Full table: `results/bnp_peer_review.md`, via `run_bnp_peer_review.py`.
+
 ### Two open questions the paper does not address
 
 Both are questions rather than claimed errors:
@@ -190,7 +227,9 @@ dp-voltage-replication/
 ├── run_bnp_grid.py          figure 5 — the 2x2 mechanism grid (~3 min)
 ├── run_bnp_sweep.py         figure 6 — sweeping the BNP bound (~4 min)
 ├── run_bnp_viability.py     figure 7 — the viability verdict (~2 min)
-├── verify.py                74 correctness checks
+├── run_bnp_peer_review.py   results/bnp_peer_review.md — the peer-review
+│                            comparison table, 12 seeds (~15 min)
+├── verify.py                80 correctness checks
 ├── requirements.txt
 └── RUN_GUIDE.md             step-by-step setup, no terminal required
 ```
@@ -204,7 +243,12 @@ dp-voltage-replication/
 | `zcdp_rho_from_eps_delta` | zCDP composition, for splitting budget across releases |
 | `dp_fit_class` | The DP load-model fit (`calibration=`, `rho_split=`) |
 | `bnp_fit_class` | Bounded-noise counterpart, identical except the distribution |
+| `bnp_fit_class_eigen_oracle` | **NOT PRIVATE** ablation — releases the true eigenvectors; isolates noise magnitude from the eigenvalue floor |
 | `gaussian_sigma` | The paper's classical formula — **do not use above eps=1** |
+
+`DPFitReport` carries `epsilon`/`delta`/`delta_achieved`; `OracleFitReport` has
+none of them, so an ablation's output cannot be reported as a guarantee — the
+invalid state is unrepresentable rather than merely checked.
 
 ## Running it
 
@@ -230,10 +274,19 @@ Dependencies: `numpy`, `scipy`, `opendssdirect.py`, `matplotlib`.
 - Jacobian norm calibration is done by Monte Carlo sampling; the bound is empirical
   rather than analytic.
 - **The voltage sensitivity S is empirical**, taken as the largest observed
-  `||V1 - V0||` over sampled trajectories, and it is seed-dependent — runs here
-  produced values from 0.26 to 0.67 pu. A true worst case would be larger, which
-  only widens figure 4's empty region, so the direction is safe; but the BNP
-  output-stage numbers rest on a measured rather than proven quantity.
+  `||V1 - V0||` over sampled trajectories, and the sampled estimator is badly
+  seed-dependent: measured over seeds 0–5 it spans **0.18 to 1.56 pu** (sd 0.47,
+  an 8.6x spread), and it plateaus by `n_trials=50` at whatever corner its own
+  draws happened to reach — so more trials do not fix it. Random replacements
+  systematically never visit the box corner.
+  `empirical_voltage_sensitivity(adversarial=True)` constructs that corner
+  instead (one bus pinned at its class `p_min` all day against the same bus at
+  `p_max`, maximised over load buses); it gives **7.93 pu** and is seed-stable
+  to ~1%. Since the output bound is `B = S/2`, an under-estimated `S` means less
+  noise for the same claimed delta, so the sampled figure flatters the
+  output-stage baselines — quote the adversarial value for any claim about them.
+  `run_bnp_figure.py` keeps `S = 0.6699` for continuity with the published
+  figure and plots the adversarial point alongside it.
 - The BNP conclusions are for uniform bounded noise specifically. A different
   bounded mechanism with better tail behaviour might land differently.
 - The two open questions above remain unresolved and are the subject of questions

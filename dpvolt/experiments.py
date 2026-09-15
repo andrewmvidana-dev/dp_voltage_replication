@@ -89,18 +89,43 @@ def empirical_voltage_sensitivity(
     theta: np.ndarray,
     rng: np.random.Generator,
     n_trials: int = 12,
+    adversarial: bool = False,
 ) -> float:
     """Largest observed ||V1 - V0|| when one bus's whole daily trajectory is
     replaced -- the L2 sensitivity calibrating the output-perturbation
     baseline, under the same bounded-record adjacency used for the loads.
 
-    Empirical, so a lower bound on the true sensitivity; a closed form would
-    require worst-casing the power flow. It is the same figure the baseline
-    would be given in practice, so the comparison stays fair.
+    TWO MODES, AND THE DIFFERENCE MATTERS.
+
+    adversarial=False (default) SAMPLES n_trials random replacements and takes
+    the max. That is a LOWER BOUND on the true sensitivity, and a weak one: it
+    asks what a typical replacement does, when the definition asks what the
+    WORST one does. Because the output-perturbation bound is B = S / (2 delta),
+    an S that is too small makes the mechanism look better than it is -- less
+    noise for the same claimed delta. Both the Gaussian and BNP output
+    baselines are flattered by exactly this.
+
+    adversarial=True constructs the box-corner replacement instead of sampling:
+    for each load bus in turn, one dataset pins that bus at its class p_min for
+    the entire day and the neighbour pins the SAME bus at p_max for the entire
+    day, every other bus held fixed. That is the true extremal pair under
+    bounded-record adjacency with the class truncation box as the record
+    domain, so the max over buses is a far tighter (and still conservative in
+    the right direction) estimate. It costs 2 * n_loads trajectory solves
+    rather than 2 * n_trials, so it is slower -- but it is the honest number.
+
+    Still not a proof of the supremum: power flow is nonlinear, so the extremal
+    LOAD pair need not give the extremal VOLTAGE difference at every bus. It is
+    a lower bound computed at the corner the definition points to, rather than
+    at a random interior point.
     """
     from dpvolt.loads import sample_loads, reactive_from_active
 
     n_loads = len(runner.load_names)
+
+    if adversarial:
+        return _adversarial_voltage_sensitivity(runner, model, theta, rng)
+
     worst = 0.0
 
     for _ in range(n_trials):
@@ -126,6 +151,86 @@ def empirical_voltage_sensitivity(
     if worst == 0.0:
         raise RuntimeError("every sensitivity trial failed to converge")
     return worst
+
+
+def _adversarial_voltage_sensitivity(runner, model, theta, rng) -> float:
+    """Box-corner sensitivity: the max over load buses of ||V(p_max) - V(p_min)||
+    when that one bus is pinned to a class margin for the whole day.
+
+    The background dataset is a single ordinary sample, held FIXED across every
+    bus, so the only thing varying between the two solves of a pair is the one
+    record being replaced -- which is what bounded-record adjacency means. A
+    fresh background per bus would conflate the replacement's effect with the
+    background's.
+    """
+    from dpvolt.loads import sample_loads, reactive_from_active
+
+    base = sample_loads(model, 1, rng=rng, sweeps=10)[:, 0, :]     # (n_loads, T)
+
+    # Which class each bus belongs to, so the corner is the right one per bus.
+    class_of = {}
+    for label, members in model.members.items():
+        for b in members:
+            class_of[int(b)] = label
+
+    worst = 0.0
+    n_ok = 0
+
+    for bus in range(len(runner.load_names)):
+        label = class_of[bus]
+
+        lo_day = base.copy()
+        hi_day = base.copy()
+        lo_day[bus, :] = model.p_min[label]
+        hi_day[bus, :] = model.p_max[label]
+
+        V0, ok0 = runner.solve_trajectory(lo_day,
+                                          reactive_from_active(lo_day, theta))
+        V1, ok1 = runner.solve_trajectory(hi_day,
+                                          reactive_from_active(hi_day, theta))
+        if not (ok0.all() and ok1.all()):
+            continue
+
+        n_ok += 1
+        worst = max(worst, float(np.linalg.norm(V1 - V0)))
+
+    if n_ok == 0:
+        raise RuntimeError("every adversarial sensitivity pair failed to converge")
+    return worst
+
+
+def sensitivity_convergence_report(
+    runner,
+    model,
+    theta: np.ndarray,
+    seed: int = 0,
+    trial_counts=(10, 25, 50, 100, 200),
+) -> dict:
+    """How the sampled sensitivity estimate behaves as n_trials grows, against
+    the adversarial construction. Returns a dict for tabulating.
+
+    The point of the table is to show whether the default n_trials=10 is
+    merely noisy or systematically low. Those are different problems: a noisy
+    estimate is fixed by more trials, a systematically low one is not fixed by
+    any number of them, because random replacements never visit the corner.
+
+    Each count gets its OWN generator seeded identically, so the sequences are
+    nested -- the n=25 run contains the n=10 run's draws. Without that, the
+    estimate could move because a different random path was taken rather than
+    because more of it was explored, and the trend would mean nothing.
+    """
+    out = {"sampled": {}, "adversarial": None}
+
+    for n in trial_counts:
+        runner.reset()
+        out["sampled"][n] = float(empirical_voltage_sensitivity(
+            runner, model, theta, np.random.default_rng(seed), n_trials=n))
+
+    runner.reset()
+    out["adversarial"] = float(empirical_voltage_sensitivity(
+        runner, model, theta, np.random.default_rng(seed), adversarial=True))
+
+    return out
 
 
 # ---------------------------------------------------------------------------

@@ -24,7 +24,20 @@ FIGDIR = os.path.join(HERE, "figures")
 # Empirical L2 voltage sensitivity, from empirical_voltage_sensitivity() in
 # run_days5_6.py: the largest observed ||V1 - V0|| when one bus's whole daily
 # trajectory is replaced.
+#
+# THIS IS A LOWER BOUND OF UNSTABLE MAGNITUDE. The sampled estimator spans
+# ~8.6x across seeds (measured 0.18 to 1.56 pu over seeds 0-5, sd 0.47) and
+# plateaus by n_trials=50 at whatever corner its own draws happened to reach,
+# so more trials do not fix it. 0.6699 is one draw near the top of that range,
+# kept here because the published figure was built on it.
 S = 0.6699
+
+# The box-corner construction instead of sampling: one bus pinned at its class
+# p_min all day against the same bus at p_max, maximised over load buses. It is
+# seed-stable to ~1% (7.82-8.05 pu over the same seeds) and 13x the sampled
+# mean. Shown as a second marker so the figure states which number is honest.
+# See experiments.empirical_voltage_sensitivity(adversarial=True).
+S_ADVERSARIAL = 7.9341
 
 DELTA_TARGET = 1e-5      # the delta the Gaussian path achieves
 V_NOMINAL = 1.0          # per-unit
@@ -76,11 +89,31 @@ def main():
     ax.plot([B_min], [1.0], "o", ms=10, color="#c0392b", zorder=5,
             markeredgecolor="white", markeredgewidth=1.4)
     ax.annotate(
-        f"best admissible point\nB = S/2 = {B_min:.3f} pu,  " + r"$\delta=1.0$" +
-        "\n(no privacy at all, and\n83% of voltages outside ANSI)",
-        xy=(B_min, 1.0), xytext=(3.0, 1.6),
-        fontsize=8.5, color="#c0392b",
-        arrowprops=dict(arrowstyle="->", color="#c0392b", lw=1.2),
+        f"best admissible point\n$B = S/2$ = {B_min:.3f} pu  "
+        + r"$\Rightarrow\ \delta = S/2B = 1.0$" + "\n"
+        + r"$\delta=1$ is NO PRIVACY, not weak privacy"
+        + f"\nand $B$ is already {B_min / ANSI_HALF_BAND:.0f}x the ANSI half-band",
+        xy=(B_min, 1.0), xytext=(0.47, 1.4e-3),
+        fontsize=8.5, color="#c0392b", ha="left", va="top",
+        arrowprops=dict(arrowstyle="->", color="#c0392b", lw=1.2,
+                        connectionstyle="arc3,rad=0.25"),
+    )
+
+    # The same point at the HONEST sensitivity. Plotted rather than described,
+    # because the gap between the two is the reviewer's objection made visible:
+    # the sampled S is what sets how favourable this baseline looks.
+    B_min_adv = S_ADVERSARIAL / 2.0
+    ax.plot([B_min_adv], [1.0], "^", ms=11, color="#7d3c98", zorder=6,
+            markeredgecolor="white", markeredgewidth=1.4,
+            label=r"same point at the adversarial $S$")
+    ax.annotate(
+        f"at the ADVERSARIAL $S$ = {S_ADVERSARIAL:.2f} pu:\n"
+        f"$B = S/2$ = {B_min_adv:.2f} pu = {B_min_adv / ANSI_HALF_BAND:.0f}x "
+        "the half-band\n(sampled $S$ is seed-unstable, 8.6x spread)",
+        xy=(B_min_adv, 1.0), xytext=(22.0, 0.30),
+        fontsize=8.5, color="#7d3c98", ha="left", va="top",
+        arrowprops=dict(arrowstyle="->", color="#7d3c98", lw=1.2,
+                        connectionstyle="arc3,rad=-0.2"),
     )
 
     ax.plot([B_for_target], [DELTA_TARGET], "s", ms=9, color="#2980b9", zorder=5,
@@ -88,14 +121,16 @@ def main():
     ax.annotate(
         f"to match the Gaussian path:\nB = {B_for_target:,.0f} pu"
         "\n" + r"$3\times10^{4}\!\times$ nominal voltage",
-        xy=(B_for_target, DELTA_TARGET), xytext=(15.0, 3.5e-4),
+        xy=(B_for_target, DELTA_TARGET), xytext=(260.0, 1.1e-3),
         fontsize=8.5, color="#2980b9", ha="left",
         arrowprops=dict(arrowstyle="->", color="#2980b9", lw=1.2),
     )
 
     # ---- region labels -----------------------------------------------------
     # Each label sits over the region it describes.
-    ax.text(np.sqrt(B[0] * ANSI_HALF_BAND), 2.5e-5,
+    # Raised out of the bottom-left corner to clear the legend; the dotted
+    # (inadmissible) branch of the curve leaves this band empty.
+    ax.text(np.sqrt(B[0] * ANSI_HALF_BAND), 1.1e-3,
             "NO GUARANTEE\n" + r"$S > 2B$" + "\nCorollary 1 fails",
             ha="center", va="center", fontsize=9, color="#c0392b", weight="bold")
     ax.text(np.sqrt(B_min * B[-1]), 2.5e-5,
@@ -128,16 +163,26 @@ def main():
                  fontsize=11.5)
 
     ax.grid(True, which="both", alpha=0.25)
-    ax.legend(loc="lower left", fontsize=9, framealpha=0.95)
+    # Bottom-left, BELOW the NO GUARANTEE region label rather than over it:
+    # bbox_to_anchor pins it into the corner the delta curve never reaches.
+    # "lower center" collides with the DATA DESTROYED label instead.
+    ax.legend(loc="lower left", fontsize=9, framealpha=0.95,
+              bbox_to_anchor=(0.0, 0.0))
     fig.tight_layout()
 
     out = os.path.join(FIGDIR, "figure4_bnp_wall.png")
     fig.savefig(out, dpi=150)
     plt.close(fig)
 
-    print(f"  voltage sensitivity S      : {S:.4f} pu")
-    print(f"  smallest admissible B      : {B_min:.4f} pu  (delta = 1.0)")
+    print(f"  voltage sensitivity S      : {S:.4f} pu  (sampled, seed-unstable)")
+    print(f"  voltage sensitivity S      : {S_ADVERSARIAL:.4f} pu  "
+          f"(adversarial box-corner, the honest figure)")
+    print(f"  smallest admissible B      : {B_min:.4f} pu")
+    print(f"    B = S/2  =>  delta = S/(2B) = 1.0 EXACTLY -- NO privacy at all,")
+    print(f"    not merely weak. Every B that buys privacy is larger still.")
     print(f"  ANSI half-band             : {ANSI_HALF_BAND:.4f} pu")
+    print(f"    B exceeds it by {B_min / ANSI_HALF_BAND:.1f}x at the sampled S,")
+    print(f"    and by {S_ADVERSARIAL / 2.0 / ANSI_HALF_BAND:.1f}x at the adversarial S.")
     print(f"  B needed for delta = {DELTA_TARGET:g}  : {B_for_target:,.0f} pu")
     print(f"  admissible-and-useful range: EMPTY "
           f"({B_min:.3f} > {ANSI_HALF_BAND:.3f})")

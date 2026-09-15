@@ -172,12 +172,24 @@ def zcdp_sigma(sensitivity: float, rho: float) -> float:
     return float(sensitivity / np.sqrt(2.0 * rho))
 
 
-@dataclass
-class DPFitReport:
-    """Diagnostics from privately fitting one class's load model."""
+@dataclass(kw_only=True)
+class FitReport:
+    """Diagnostics common to every load-model fit, private or not.
 
-    epsilon: float
-    delta: float
+    Deliberately carries NO epsilon, delta or delta_achieved. Those live on
+    DPFitReport, the subclass returned by mechanisms that actually have a
+    guarantee. The split is structural on purpose: bnp_fit_class_eigen_oracle
+    releases the true eigenvectors in the clear and has no guarantee at any
+    parameter, so the fields that would state one DO NOT EXIST on its report.
+    Reaching for `.delta` on an oracle result is an AttributeError naming the
+    type, not a number that reads like a promise.
+
+    Making the invalid state unrepresentable beats detecting it: a guard only
+    fires where someone remembers to call it, and the failure mode this exists
+    for -- a future edit wiring the oracle into a runner that prints a delta --
+    is exactly the edit that would forget to call it.
+    """
+
     n_records: int
     log_range: float          # width of the log-load box, per coordinate
     sigma_mu: float           # noise sd added to the mean
@@ -186,13 +198,43 @@ class DPFitReport:
     records_clipped: int      # records whose L2 norm exceeded the clip bound
     clip_norm: float
     kl_to_true: float         # KL from the true fit, for reference
+    calibration: str
+
+
+@dataclass(kw_only=True)
+class DPFitReport(FitReport):
+    """A FitReport from a mechanism that HAS a privacy guarantee.
+
+    Adds the three fields that state one. kw_only keeps epsilon and delta
+    MANDATORY despite following defaulted fields in the base -- a report that
+    claims a guarantee must say what it is, not inherit a default.
+    """
+
+    epsilon: float
+    delta: float
 
     # Calibration audit. The classical formula silently under-noises above
     # epsilon = 1, so we record which calibration was used and -- for Gaussian
     # paths -- the delta the returned sigmas ACTUALLY achieve. If
     # delta_achieved > delta, the stated guarantee does not hold.
-    calibration: str = "analytic"
     delta_achieved: float | None = None
+
+
+@dataclass(kw_only=True)
+class OracleFitReport(FitReport):
+    """A FitReport from something that is NOT a mechanism.
+
+    Exists solely so an ablation's diagnostics can be collected and tabulated
+    without ever being mistakable for a privacy claim. It has no epsilon, no
+    delta and no delta_achieved, because there is no value those could honestly
+    take. See bnp_fit_class_eigen_oracle.
+
+    `nominal_delta` records the delta the noise was CALIBRATED with, so the
+    ablation can be swept and labelled. It is not a guarantee, and it is named
+    so that it cannot be read as one.
+    """
+
+    nominal_delta: float = float("nan")
 
 
 def dp_fit_class(
@@ -444,6 +486,136 @@ def bnp_fit_class(
         # delta needs no audit -- the bound IS the guarantee. delta_achieved is
         # left None to mark "not a Gaussian calibration" rather than "unchecked".
         calibration="bnp-uniform", delta_achieved=None,
+    )
+    return mu_dp, cov_dp, report
+
+
+def bnp_fit_class_eigen_oracle(
+    log_data: np.ndarray,
+    lo: float,
+    hi: float,
+    delta: float,
+    rng: np.random.Generator,
+    eig_floor_ratio: float | None = 1e-3,
+    clip_norm: float | None = None,
+    verbose: bool = True,
+) -> tuple[np.ndarray, np.ndarray, OracleFitReport]:
+    """NOT PRIVATE. NOT A MECHANISM. DO NOT REPORT A GUARANTEE FROM THIS.
+
+    This releases the TRUE EIGENVECTORS V of the class covariance in the clear.
+    V is computed from the raw data, so the entire correlation structure -- the
+    one thing this project exists to protect -- leaks exactly, with no noise on
+    it at all. Perturbing only the eigenvalues does not repair that.
+
+    POST-PROCESSING DOES NOT APPLY. The usual argument ("we only touch the
+    already-noised matrix, so it is free") is what makes the eigenvalue repair
+    in bnp_fit_class legitimate. It does NOT transfer here: post-processing is
+    closed under functions of the RELEASED quantity, and V is a function of the
+    RAW data, not of any released quantity. There is no delta, however large,
+    that makes this output (0, delta)-private.
+
+    Enforced structurally: this returns an OracleFitReport, which HAS NO
+    epsilon, delta or delta_achieved field. Code that tries to report a
+    guarantee from it raises AttributeError rather than printing a number.
+
+    WHY IT EXISTS ANYWAY. A reviewer proposed it as a fix for BNP's utility
+    collapse. It is an ablation and nothing more: bnp_fit_class destroys the
+    covariance through two mechanisms at once -- the magnitude of the uniform
+    noise, and the eigenvalue floor that repairs what that noise breaks -- and
+    those two cannot be separated while the noise is applied entrywise. Here
+    the noise lands on the spectrum directly and the floor can be switched off
+    (eig_floor_ratio=None), so the two causes come apart and can be measured
+    against each other. The measurement is the deliverable. The mechanism is
+    not a candidate.
+
+    Argument signature matches bnp_fit_class, with two additions:
+    eig_floor_ratio may be None to disable the floor, and verbose prints the
+    bound accounting. The RETURN TYPE deliberately differs -- see above.
+
+    B_lambda FROM WEYL. Under bounded-record replacement with each centred
+    record clipped to C, replacing one record moves the covariance by at most
+    2 C^2 / m in Frobenius norm, hence by at most that in spectral norm. Weyl's
+    inequality then bounds the movement of EVERY eigenvalue by the same
+    2 C^2 / m, so that is the per-eigenvalue sensitivity and Corollary 1 gives
+
+        B_lambda = sens / (2 * delta)
+
+    THE HIDDEN COMPOSITION COST. That delta is PER EIGENVALUE. The release is
+    all T of them, so naive composition costs T * delta -- at T = 96 and
+    delta = 0.02 that is 1.92, which is not a probability. Even granting the
+    eigenvectors for free, the eigenvalue release alone has no admissible
+    operating point. Printed below so it is visible rather than buried.
+    """
+    m, T = log_data.shape
+    R = float(hi - lo)
+
+    delta_half = delta / 2.0
+
+    # ---- mean: identical to bnp_fit_class, so the rows differ in one thing --
+    sens_mu = np.sqrt(T) * R / m
+    B_mu = bnp_bound_scalar(sens_mu, delta_half)
+    mu_true = log_data.mean(axis=0)
+    mu_dp = mu_true + rng.uniform(-B_mu, B_mu, size=T)
+
+    # ---- covariance ---------------------------------------------------------
+    if clip_norm is None:
+        clip_norm = np.sqrt(T) * R / 2.0
+
+    centred = log_data - mu_dp
+    norms = np.linalg.norm(centred, axis=1, keepdims=True)
+    scale = np.minimum(1.0, clip_norm / np.maximum(norms, 1e-12))
+    centred = centred * scale
+    n_clipped_records = int((scale < 1.0).sum())
+
+    cov_true = (centred.T @ centred) / m + 1e-12 * np.eye(T)
+
+    # Weyl sensitivity -- the SAME 2C^2/m the entrywise path uses. That it is
+    # unchanged is itself the point: moving the noise into eigenvalue space
+    # does not reduce how much one record can move the estimate.
+    sens_lambda = 2.0 * clip_norm ** 2 / m
+    B_lambda = bnp_bound_scalar(sens_lambda, delta_half)
+
+    if verbose:
+        print(f"    [NOT PRIVATE oracle] per-eigenvalue B_lambda = "
+              f"{B_lambda:.4f} at delta = {delta_half:g}")
+        print(f"    [NOT PRIVATE oracle] naive composition over T = {T} "
+              f"eigenvalues costs delta = {T * delta_half:.3f}"
+              + ("  -- ABOVE 1, not a probability"
+                 if T * delta_half > 1.0 else ""))
+
+    # THE NON-PRIVATE STEP. evecs comes from the true (clipped, centred) data
+    # and is released unperturbed.
+    evals_true, evecs_true = np.linalg.eigh(cov_true)
+
+    evals_hat = evals_true + rng.uniform(-B_lambda, B_lambda, size=T)
+
+    # max(0, .) is part of the reviewer's proposal, not the floor: a negative
+    # eigenvalue is not samplable at all. The FLOOR is the separate, optional
+    # lift to eig_floor_ratio * mean(diag) that bnp_fit_class applies.
+    evals_hat = np.maximum(evals_hat, 0.0)
+
+    if eig_floor_ratio is None:
+        # Floor disabled. Zeros are still not invertible and gaussian_kl needs
+        # a nonsingular covariance, so lift only to the numerical minimum --
+        # enough to be well posed, far below any structural floor. The row this
+        # feeds measures "floor at numerical minimum", not "no floor at all".
+        floor = 1e-12
+    else:
+        floor = eig_floor_ratio * max(float(np.trace(cov_true)) / T, 1e-12)
+    n_clipped = int((evals_hat < floor).sum())
+    evals_hat = np.maximum(evals_hat, floor)
+
+    cov_dp = evecs_true @ np.diag(evals_hat) @ evecs_true.T
+    cov_dp = (cov_dp + cov_dp.T) / 2.0        # kill eigh round-off asymmetry
+
+    report = OracleFitReport(
+        n_records=m, log_range=R,
+        sigma_mu=B_mu, sigma_cov=B_lambda,    # BOUNDS, not standard deviations
+        eig_clipped=n_clipped, records_clipped=n_clipped_records,
+        clip_norm=float(clip_norm),
+        kl_to_true=gaussian_kl(mu_dp, cov_dp, mu_true, cov_true),
+        calibration="bnp-eigen-oracle-NOTPRIVATE",
+        nominal_delta=float(delta),
     )
     return mu_dp, cov_dp, report
 

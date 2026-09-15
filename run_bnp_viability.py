@@ -176,12 +176,35 @@ def main():
     S = float(empirical_voltage_sensitivity(runner, model, theta,
                                             np.random.default_rng(9),
                                             n_trials=10))
-    B_out = S / 2.0                      # smallest bound Corollary 1 allows
-    d_out = float(bnp_delta(S, B_out))   # which is exactly 1.0 -- no privacy
+    # The honest sensitivity, for comparison. The sampled estimate above is a
+    # lower bound of UNSTABLE magnitude -- it spans ~8.6x across seeds and
+    # plateaus at whatever corner its own draws happened to reach -- whereas
+    # the box-corner construction is seed-stable to ~1%. Both are reported
+    # because the sampled one is what the existing figures were built on.
+    runner.reset()
+    S_adv = float(empirical_voltage_sensitivity(runner, model, theta,
+                                                np.random.default_rng(9),
+                                                adversarial=True))
+
+    B_out = S / 2.0
+    # B = S/2 is the SMALLEST bound Corollary 1 admits, and by delta = S/(2B)
+    # that is delta = 1 EXACTLY: the uniform mechanism's non-overlap region is
+    # the whole support, so it provides NO privacy whatsoever. This is not a
+    # weak operating point, it is the absence of one.
+    d_out = float(bnp_delta(S, B_out))
     out = evaluate(add_bounded_voltage_noise(V_g, B_out,
                                              np.random.default_rng(11)))
-    print(f"  output-stage BNP: S={S:.4f} pu, B=S/2={B_out:.4f}, "
-          f"delta={d_out:.2f}  lag-1 {out['ac']:.3f}  ANSI {out['viol']:.1%}")
+
+    ANSI_HALF_BAND = 0.05
+    print(f"  output-stage BNP: B = S/2  =>  delta = {d_out:.1f} "
+          f"(NO PRIVACY AT ALL, not merely weak)")
+    print(f"    sampled     S = {S:7.4f} pu -> B = {B_out:7.4f} pu "
+          f"= {B_out / ANSI_HALF_BAND:5.1f}x the ANSI half-band")
+    print(f"    adversarial S = {S_adv:7.4f} pu -> B = {S_adv / 2.0:7.4f} pu "
+          f"= {S_adv / 2.0 / ANSI_HALF_BAND:5.1f}x the ANSI half-band")
+    print(f"    even at delta = 1, the noise bound alone exceeds the entire")
+    print(f"    regulation half-band by more than an order of magnitude.")
+    print(f"    lag-1 {out['ac']:.3f}  ANSI {out['viol']:.1%}")
 
     if not rows:
         print("\n  every BNP point failed -- nothing to plot")
@@ -248,7 +271,9 @@ def main():
             label="BNP on released voltages (output stage)")
     # Label above the marker and hard right, clear of the sweep curve.
     ax.annotate(
-        f"output stage:\n$\\delta$=1.0 (no privacy),\nlag-1 {out['ac']:.2f}",
+        f"output stage: $B=S/2$\n$\\Rightarrow\\delta$=1.0, i.e. NO privacy\n"
+        f"and $B$ is {S_adv / 2.0 / 0.05:.0f}x the ANSI half-band\n"
+        f"lag-1 {out['ac']:.2f}",
         xy=(d_out, out["ac"]), xytext=(0.62, 0.175),
         fontsize=8.5, color=C_OUT, ha="center", va="bottom",
         arrowprops=dict(arrowstyle="->", color=C_OUT, lw=1.3,
@@ -378,10 +403,17 @@ def main():
     print(f"  even ties while matching the privacy. Every swept point lands in")
     print(f"  the strictly-worse region of the left panel.")
     print()
-    print(f"  OUTPUT STAGE. Fails outright. The smallest bound Corollary 1")
-    print(f"  admits (B = S/2 = {B_out:.4f} pu) buys delta = {d_out:.1f}, i.e. no")
-    print(f"  privacy at all, while destroying {out['viol']:.0%} of the ANSI band and")
-    print(f"  taking autocorrelation to {out['ac']:.2f}.")
+    print(f"  OUTPUT STAGE. Fails outright, and fails BEFORE any privacy is")
+    print(f"  bought. Setting B = S/2 -- the smallest bound Corollary 1 admits")
+    print(f"  -- gives delta = S/(2B) = {d_out:.1f} EXACTLY. That is not weak")
+    print(f"  privacy, it is none: the mechanism's non-overlap region covers")
+    print(f"  its whole support, so neighbouring datasets are not confused at")
+    print(f"  all. Every B that WOULD buy privacy is larger still.")
+    print(f"  And even at that zero-privacy setting the bound exceeds the ANSI")
+    print(f"  half-band of 0.05 pu by {B_out / 0.05:.1f}x (sampled S = {S:.4f}) or")
+    print(f"  {S_adv / 2.0 / 0.05:.1f}x (adversarial S = {S_adv:.4f}, the honest figure).")
+    print(f"  Measured: {out['viol']:.0%} of the ANSI band destroyed, autocorrelation")
+    print(f"  down to {out['ac']:.2f}.")
     if failed:
         print()
         print("  Points that could not be evaluated (mechanism too degenerate):")
@@ -402,6 +434,10 @@ def main():
                    "gauss_delta": GAUSS_DELTA, "ac_true": ac_true,
                    "bnp_input": rows, "bnp_output": out,
                    "S_voltage": S, "B_out": B_out, "delta_out": d_out,
+                   "S_voltage_adversarial": S_adv,
+                   "B_out_adversarial": S_adv / 2.0,
+                   "ansi_exceedance_sampled": B_out / 0.05,
+                   "ansi_exceedance_adversarial": S_adv / 2.0 / 0.05,
                    "failed": failed}, f, indent=2)
 
 
