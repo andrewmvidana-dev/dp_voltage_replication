@@ -1,0 +1,531 @@
+{
+  "protocol": {
+    "feeder": "EPRI Ckt5",
+    "master": "feeders\\ckt5\\Master_ckt5.dss",
+    "historical_days": 365,
+    "evaluation_days": 4,
+    "delta": 0.02,
+    "seeds": [
+      2026091701,
+      2026091702
+    ],
+    "regimes": [
+      [
+        96,
+        6.0
+      ],
+      [
+        24,
+        3.0
+      ]
+    ],
+    "adjacency": "one load-object-day record",
+    "gaussian_comparison": "epsilon=1, delta=0.02; BNP epsilon=0, delta=0.02"
+  },
+  "rows": [
+    {
+      "T": 96,
+      "clip_norm": 6.0,
+      "seed": 2026091701,
+      "mechanism": "bnp",
+      "privacy": {
+        "epsilon": 0.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.012379160030271905,
+          "median_abs_true_covariance": 0.43678688909766383,
+          "noise_to_signal": 0.028341418525279896,
+          "clipped_records": 17753,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.012379160030271905,
+          "median_abs_true_covariance": 0.01474870841292759,
+          "noise_to_signal": 0.8393385836702337,
+          "clipped_records": 9,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.012406129877832411,
+          "median_abs_true_covariance": 0.034602002423808925,
+          "noise_to_signal": 0.3585379171378824,
+          "clipped_records": 2037,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.8393385836702337,
+      "mean_true_log_lag1": 0.947016744793355,
+      "mean_private_covariance_lag1": 0.7533730528654647,
+      "lag1_change": -0.19364369192789022,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": false,
+        "passed": false
+      },
+      "voltage": {
+        "wasserstein_1": 0.0023027352433179354,
+        "ansi_violation_rate": 0.048961732535653855,
+        "true_lag1": 0.599613472274488,
+        "released_lag1": 0.60594389764062,
+        "reference_steps": 384
+      }
+    },
+    {
+      "T": 96,
+      "clip_norm": 6.0,
+      "seed": 2026091701,
+      "mechanism": "gaussian",
+      "privacy": {
+        "epsilon": 1.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.0009969291898540567,
+          "median_abs_true_covariance": 0.43678688909766383,
+          "noise_to_signal": 0.0022824155549026727,
+          "clipped_records": 17790,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.0009969291898540567,
+          "median_abs_true_covariance": 0.01474870841292759,
+          "noise_to_signal": 0.0675943385646044,
+          "clipped_records": 9,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.0009991011488733464,
+          "median_abs_true_covariance": 0.034602002423808925,
+          "noise_to_signal": 0.028874084702851924,
+          "clipped_records": 2034,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.0675943385646044,
+      "mean_true_log_lag1": 0.947016744793355,
+      "mean_private_covariance_lag1": 0.9864699543229793,
+      "lag1_change": 0.03945320952962439,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": true,
+        "passed": false
+      },
+      "voltage": {
+        "wasserstein_1": 0.002377827841274089,
+        "ansi_violation_rate": 0.0400067228668117,
+        "true_lag1": 0.599613472274488,
+        "released_lag1": 0.6005958811036187,
+        "reference_steps": 384
+      }
+    },
+    {
+      "T": 96,
+      "clip_norm": 6.0,
+      "seed": 2026091702,
+      "mechanism": "bnp",
+      "privacy": {
+        "epsilon": 0.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.012379160030271905,
+          "median_abs_true_covariance": 0.43720332658634714,
+          "noise_to_signal": 0.028314423238559316,
+          "clipped_records": 17756,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.012379160030271905,
+          "median_abs_true_covariance": 0.014709856874752781,
+          "noise_to_signal": 0.8415554369885705,
+          "clipped_records": 13,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.012406129877832411,
+          "median_abs_true_covariance": 0.03456994166727939,
+          "noise_to_signal": 0.3588704313485976,
+          "clipped_records": 2059,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.8415554369885705,
+      "mean_true_log_lag1": 0.9470035124280972,
+      "mean_private_covariance_lag1": 0.7394263399764243,
+      "lag1_change": -0.20757717245167295,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": false,
+        "passed": false
+      },
+      "voltage": {
+        "wasserstein_1": 0.002245740522261629,
+        "ansi_violation_rate": 0.04624803601643703,
+        "true_lag1": 0.6009633409680876,
+        "released_lag1": 0.5958180279919986,
+        "reference_steps": 384
+      }
+    },
+    {
+      "T": 96,
+      "clip_norm": 6.0,
+      "seed": 2026091702,
+      "mechanism": "gaussian",
+      "privacy": {
+        "epsilon": 1.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.0009969291898540567,
+          "median_abs_true_covariance": 0.43720332658634714,
+          "noise_to_signal": 0.002280241547195008,
+          "clipped_records": 17641,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.0009969291898540567,
+          "median_abs_true_covariance": 0.014709856874752781,
+          "noise_to_signal": 0.06777286810758391,
+          "clipped_records": 13,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.0009991011488733464,
+          "median_abs_true_covariance": 0.03456994166727939,
+          "noise_to_signal": 0.02890086302398943,
+          "clipped_records": 2056,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 6.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.06777286810758391,
+      "mean_true_log_lag1": 0.9470035124280972,
+      "mean_private_covariance_lag1": 0.9864044948388871,
+      "lag1_change": 0.03940098241078993,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": true,
+        "passed": false
+      },
+      "voltage": {
+        "wasserstein_1": 0.0021430043853223686,
+        "ansi_violation_rate": 0.04472972564660382,
+        "true_lag1": 0.6009633409680876,
+        "released_lag1": 0.6023029335013894,
+        "reference_steps": 384
+      }
+    },
+    {
+      "T": 24,
+      "clip_norm": 3.0,
+      "seed": 2026091701,
+      "mechanism": "bnp",
+      "privacy": {
+        "epsilon": 0.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.0030947900075679762,
+          "median_abs_true_covariance": 0.4909881720965673,
+          "noise_to_signal": 0.006303186478714796,
+          "clipped_records": 24729,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.0030947900075679762,
+          "median_abs_true_covariance": 0.04173694566521942,
+          "noise_to_signal": 0.07414989185820928,
+          "clipped_records": 612,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.0031015324694581028,
+          "median_abs_true_covariance": 0.04465662951691633,
+          "noise_to_signal": 0.06945290101401885,
+          "clipped_records": 2157,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.07414989185820928,
+      "mean_true_log_lag1": 0.8820423171776296,
+      "mean_private_covariance_lag1": 0.8809729532219945,
+      "lag1_change": -0.001069363955635061,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": true,
+        "passed": true
+      },
+      "voltage": {
+        "wasserstein_1": 0.0023971784921156024,
+        "ansi_violation_rate": 0.04497522359197486,
+        "true_lag1": 0.5978687593698679,
+        "released_lag1": 0.5989775336225435,
+        "reference_steps": 96
+      }
+    },
+    {
+      "T": 24,
+      "clip_norm": 3.0,
+      "seed": 2026091701,
+      "mechanism": "gaussian",
+      "privacy": {
+        "epsilon": 1.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.00024923229746351416,
+          "median_abs_true_covariance": 0.4909881720965673,
+          "noise_to_signal": 0.0005076136486124869,
+          "clipped_records": 24752,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.00024923229746351416,
+          "median_abs_true_covariance": 0.04173694566521942,
+          "noise_to_signal": 0.005971503029058653,
+          "clipped_records": 613,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.0002497752872183366,
+          "median_abs_true_covariance": 0.04465662951691633,
+          "noise_to_signal": 0.005593240912275287,
+          "clipped_records": 2135,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.005971503029058653,
+      "mean_true_log_lag1": 0.8820423171776296,
+      "mean_private_covariance_lag1": 0.941472701678173,
+      "lag1_change": 0.05943038450054339,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": false,
+        "passed": false
+      },
+      "voltage": {
+        "wasserstein_1": 0.0025665256617620493,
+        "ansi_violation_rate": 0.039649806623156876,
+        "true_lag1": 0.5978687593698679,
+        "released_lag1": 0.6029185165142644,
+        "reference_steps": 96
+      }
+    },
+    {
+      "T": 24,
+      "clip_norm": 3.0,
+      "seed": 2026091702,
+      "mechanism": "bnp",
+      "privacy": {
+        "epsilon": 0.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.0030947900075679762,
+          "median_abs_true_covariance": 0.49249844661156383,
+          "noise_to_signal": 0.006283857398658668,
+          "clipped_records": 25066,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.0030947900075679762,
+          "median_abs_true_covariance": 0.04178784220691252,
+          "noise_to_signal": 0.0740595791532887,
+          "clipped_records": 571,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.0031015324694581028,
+          "median_abs_true_covariance": 0.04433921155371189,
+          "noise_to_signal": 0.06995010422548786,
+          "clipped_records": 2155,
+          "epsilon": 0.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.0740595791532887,
+      "mean_true_log_lag1": 0.8819993992266294,
+      "mean_private_covariance_lag1": 0.87261873997049,
+      "lag1_change": -0.009380659256139401,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": true,
+        "passed": true
+      },
+      "voltage": {
+        "wasserstein_1": 0.0025151849446484547,
+        "ansi_violation_rate": 0.04247492144065748,
+        "true_lag1": 0.5954669486384363,
+        "released_lag1": 0.6089727160800372,
+        "reference_steps": 96
+      }
+    },
+    {
+      "T": 24,
+      "clip_norm": 3.0,
+      "seed": 2026091702,
+      "mechanism": "gaussian",
+      "privacy": {
+        "epsilon": 1.0,
+        "delta": 0.02
+      },
+      "records_per_class": {
+        "0": 167900,
+        "1": 167900,
+        "2": 167535
+      },
+      "class_details": {
+        "0": {
+          "records": 167900,
+          "noise_sd": 0.00024923229746351416,
+          "median_abs_true_covariance": 0.49249844661156383,
+          "noise_to_signal": 0.0005060570224703369,
+          "clipped_records": 25067,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "1": {
+          "records": 167900,
+          "noise_sd": 0.00024923229746351416,
+          "median_abs_true_covariance": 0.04178784220691252,
+          "noise_to_signal": 0.005964229888431193,
+          "clipped_records": 569,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        },
+        "2": {
+          "records": 167535,
+          "noise_sd": 0.0002497752872183366,
+          "median_abs_true_covariance": 0.04433921155371189,
+          "noise_to_signal": 0.005633282110029457,
+          "clipped_records": 2155,
+          "epsilon": 1.0,
+          "delta": 0.02,
+          "clip_norm": 3.0
+        }
+      },
+      "max_noise_to_median_covariance": 0.005964229888431193,
+      "mean_true_log_lag1": 0.8819993992266294,
+      "mean_private_covariance_lag1": 0.9413717509860575,
+      "lag1_change": 0.05937235175942812,
+      "acceptance": {
+        "noise_below_signal": true,
+        "lag1_within_0_05": false,
+        "passed": false
+      },
+      "voltage": {
+        "wasserstein_1": 0.002468191064715885,
+        "ansi_violation_rate": 0.03901528885665941,
+        "true_lag1": 0.5954669486384363,
+        "released_lag1": 0.6013858600454778,
+        "reference_steps": 96
+      }
+    }
+  ]
+}
