@@ -32,6 +32,7 @@ const COLORS = {
 const FONTS = { heading: "Cambria", body: "Calibri" };
 const metricsPath = path.join(workspaceDir, "results/bnp_circuit_regime_20260917_v4/metrics.json");
 const figurePath = path.join(workspaceDir, "figures/bnp_ckt5_gaussian_comparison.png");
+const inputOutputFigurePath = path.join(workspaceDir, "figures/bnp_ckt5_input_output_baseline.png");
 const outputPath = path.join(workspaceDir, ".deck-build/bnp_viability_explainer_candidate.pptx");
 const previewDir = path.join(workspaceDir, ".deck-build/previews");
 
@@ -174,6 +175,18 @@ async function makeFigureSlide(presentation) {
   addSlideNumber(slide, 4);
 }
 
+async function makeInputOutputFigureSlide(presentation) {
+  const slide = presentation.slides.add();
+  slide.background.fill = COLORS.light;
+  kicker(slide, "Input and output fidelity");
+  title(slide, "Temporal structure is measured at both sides of the power-flow map");
+  body(slide, "The gray bars are the original release. Colored bars show the same input-stage perturbations after power flow.", 68, 146, 1120, 28, { fontSize: 16, color: COLORS.muted });
+  const imageBytes = await fs.readFile(inputOutputFigurePath);
+  slide.images.add({ blob: imageBytes, contentType: "image/png", alt: "Input and output fidelity compared with no noise", fit: "contain", position: { left: 180, top: 174, width: 920, height: 548 } });
+  notes(slide, `Figure embedded from ${inputOutputFigurePath}. It reads only ${metricsPath}; no experiment was rerun. Input metrics are covariance noise/signal and covariance lag-1. Output metrics are voltage W1 and voltage lag-1.`);
+  addSlideNumber(slide, 5);
+}
+
 function makeEvidenceSlide(presentation) {
   const slide = presentation.slides.add();
   slide.background.fill = COLORS.light;
@@ -214,7 +227,7 @@ function makeEvidenceSlide(presentation) {
   panel(slide, 68, 540, 1144, 76, COLORS.white, COLORS.border);
   body(slide, "Gaussian remains the lower-noise option in this comparison. BNP's distinct benefit is the hard error bound, when the release is scoped tightly enough.", 100, 562, 1080, 32, { fontSize: 17, color: COLORS.blue, bold: true, alignment: "center" });
   notes(slide, `Table values are means across the two saved seeds in ${metricsPath}. Gaussian rows use ε=1, δ=0.02; BNP rows use ε=0, δ=0.02. This is not a matched-ε comparison.`);
-  addSlideNumber(slide, 5);
+  addSlideNumber(slide, 6);
 }
 
 function makeLimitsSlide(presentation) {
@@ -231,7 +244,7 @@ function makeLimitsSlide(presentation) {
   panel(slide, 68, 548, 1144, 70, COLORS.blue, COLORS.blue);
   textbox(slide, "BNP is a good choice when the application values a hard error tolerance and can release a lower-sensitivity statistic.", 102, 568, 1076, 30, { typeface: FONTS.heading, fontSize: 21, color: COLORS.white, bold: true, alignment: "center" });
   notes(slide, `Scope statement based on the saved Ckt5 v4 measurements in ${metricsPath}. The original IEEE 123-bus measurements remain historical and were not modified.`);
-  addSlideNumber(slide, 6);
+  addSlideNumber(slide, 7);
 }
 
 const presentation = Presentation.create({ slideSize: { width: WIDTH, height: HEIGHT } });
@@ -239,6 +252,7 @@ makeCover(presentation);
 makeMechanismSlide(presentation);
 makeChangesSlide(presentation);
 await makeFigureSlide(presentation);
+await makeInputOutputFigureSlide(presentation);
 makeEvidenceSlide(presentation);
 makeLimitsSlide(presentation);
 
