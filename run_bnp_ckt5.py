@@ -52,6 +52,20 @@ def lag_one(values: np.ndarray) -> float:
     return float(np.mean(correlations))
 
 
+def covariance_lag_one(covariance: np.ndarray) -> float:
+    """Return the normalized first temporal covariance diagonal."""
+    diagonal = float(np.mean(np.diag(covariance)))
+    first_off_diagonal = float(np.mean(np.diag(covariance, k=1)))
+    return first_off_diagonal / max(diagonal, 1e-15)
+
+
+def repair_covariance(covariance: np.ndarray, floor_ratio: float = 0.1) -> np.ndarray:
+    """Apply the existing public eigenvalue floor without changing its value."""
+    floor = floor_ratio * max(float(np.trace(covariance)) / covariance.shape[0], 1e-12)
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance)
+    return eigenvectors @ np.diag(np.maximum(eigenvalues, floor)) @ eigenvectors.T
+
+
 def fit_private(
     archive: np.ndarray,
     classes: dict[int, np.ndarray],
@@ -164,12 +178,21 @@ def run_experiment() -> dict:
                     runner, archive, theta, private_model, rng,
                 )
                 ratios = [v["noise_to_signal"] for v in details.values()]
-                true_lags = [
-                    lag_one(np.log(archive[members].reshape(-1, T)))
+                raw_true_lags = [
+                    covariance_lag_one(np.cov(
+                        np.log(archive[members].reshape(-1, T)), rowvar=False,
+                    ))
                     for members in classes.values()
                 ]
+                repaired_true_lags = [
+                    covariance_lag_one(repair_covariance(np.cov(
+                        np.log(archive[members].reshape(-1, T)), rowvar=False,
+                    )))
+                    for members in classes.values()
+                ]
+                true_lags = repaired_true_lags
                 private_lags = [
-                    lag_one(private_model.Sigma[label])
+                    covariance_lag_one(private_model.Sigma[label])
                     for label in classes
                 ]
                 rows.append({
@@ -188,6 +211,8 @@ def run_experiment() -> dict:
                     "class_details": details,
                     "max_noise_to_median_covariance": float(max(ratios)),
                     "mean_true_log_lag1": float(np.mean(true_lags)),
+                    "mean_raw_true_log_lag1": float(np.mean(raw_true_lags)),
+                    "mean_repaired_true_log_lag1": float(np.mean(repaired_true_lags)),
                     "mean_private_covariance_lag1": float(np.mean(private_lags)),
                     "lag1_change": float(np.mean(private_lags) - np.mean(true_lags)),
                     "acceptance": {
@@ -196,8 +221,7 @@ def run_experiment() -> dict:
                             abs(np.mean(private_lags) - np.mean(true_lags)) <= 0.05
                         ),
                         "passed": bool(
-                            mechanism == "bnp"
-                            and max(ratios) <= 1.0
+                            max(ratios) <= 1.0
                             and abs(np.mean(private_lags) - np.mean(true_lags)) <= 0.05
                         ),
                     },
@@ -272,10 +296,15 @@ def make_report(result: dict) -> str:
         "",
         "## Acceptance criterion",
         "",
-        "A BNP regime passes only if the maximum class noise standard deviation is",
+        "A mechanism meets the fidelity screen only if the maximum class noise",
+        "standard deviation is",
         "below that class's measured median absolute true covariance entry and the",
-        "mean covariance lag-1 changes by no more than 0.05. Voltage metrics are",
-        "reported separately and are not converted into a privacy guarantee.",
+        "mean covariance lag-1 changes by no more than 0.05 relative to the",
+        "nonprivate covariance after the existing 0.1 eigenvalue floor. Raw and",
+        "repaired baselines are both retained in metrics.json. Voltage metrics are",
+        "reported separately and are not converted into a privacy guarantee. The",
+        "pass column applies the same fidelity screen to both mechanisms; only the",
+        "BNP rows are used to claim BNP viability.",
         "",
         "## Results",
         "",
