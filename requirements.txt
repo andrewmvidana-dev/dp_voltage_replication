@@ -2,3 +2,5 @@ numpy
 scipy
 opendssdirect.py
 matplotlib
+phe==1.5.0
+# Optional acceleration for Paillier: pip install gmpy2

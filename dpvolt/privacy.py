@@ -238,6 +238,50 @@ class OracleFitReport(FitReport):
     nominal_delta: float = float("nan")
 
 
+def gaussian_fit_scales(m, T, R, epsilon, delta, clip_norm=None,
+                        calibration="analytic", rho_split=0.5):
+    """Shared original calibration for trusted and encrypted model fitting.
+
+    This factors out the existing arithmetic without changing its accounting.
+    It exposes both scales because means and covariances have different units.
+    """
+    if calibration not in ("analytic", "zcdp", "classical"):
+        raise ValueError(f"unknown calibration {calibration!r}")
+    if not 0 < rho_split < 1:
+        raise ValueError("need 0 < rho_split < 1")
+    sens_mu = np.sqrt(T) * R / m
+
+    if clip_norm is None:
+        clip_norm = np.sqrt(T) * R / 2.0          # worst case, very loose
+    sens_cov = 2.0 * clip_norm ** 2 / m
+
+    # Preserve the original calibration arithmetic for both fitting paths.
+    if calibration == "classical":
+        # The paper's stated calibration: split epsilon and delta evenly, then
+        # apply the classical formula to each half. Under-noises above
+        # epsilon = 1; kept only to quantify that gap.
+        eps_mu = eps_cov = epsilon / 2.0
+        sigma_mu = gaussian_sigma(sens_mu, eps_mu, delta / 2.0)
+        sigma_cov = gaussian_sigma(sens_cov, eps_cov, delta / 2.0)
+    else:
+        # The existing policy allocates rho, converts each share to epsilon,
+        # then calibrates two analytic Gaussian scales. Factoring these steps
+        # out does not provide an independent proof of their composition.
+        rho_total = zcdp_rho_from_eps_delta(epsilon, delta)
+        eps_mu = _eps_from_rho(rho_total * rho_split, delta / 2.0)
+        eps_cov = _eps_from_rho(rho_total * (1.0 - rho_split), delta / 2.0)
+        sigma_mu = analytic_gaussian_sigma(sens_mu, eps_mu, delta / 2.0)
+        sigma_cov = analytic_gaussian_sigma(sens_cov, eps_cov, delta / 2.0)
+
+    # Keep the original diagnostic: sum the deltas evaluated at each release's
+    # allocated epsilon. This diagnostic alone is not a composition proof.
+    d_mu = analytic_gaussian_delta(sens_mu, sigma_mu, eps_mu)
+    d_cov = analytic_gaussian_delta(sens_cov, sigma_cov, eps_cov)
+    delta_achieved = float(d_mu + d_cov)
+
+    return sigma_mu, sigma_cov, delta_achieved
+
+
 def dp_fit_class(
     log_data: np.ndarray,
     lo: float,
@@ -311,43 +355,10 @@ def dp_fit_class(
     if not (0.0 < rho_split < 1.0):
         raise ValueError("need 0 < rho_split < 1")
 
-    sens_mu = np.sqrt(T) * R / m
-
     if clip_norm is None:
-        clip_norm = np.sqrt(T) * R / 2.0          # worst case, very loose
-    sens_cov = 2.0 * clip_norm ** 2 / m
-
-    # ---- calibrate both releases together ---------------------------------
-    # Done up front so the two paths are visibly the same decision, and so the
-    # audit below can re-check whichever one was taken.
-    if calibration == "classical":
-        # The paper's stated calibration: split epsilon and delta evenly, then
-        # apply the classical formula to each half. Under-noises above
-        # epsilon = 1; kept only to quantify that gap.
-        eps_mu = eps_cov = epsilon / 2.0
-        sigma_mu = gaussian_sigma(sens_mu, eps_mu, delta / 2.0)
-        sigma_cov = gaussian_sigma(sens_cov, eps_cov, delta / 2.0)
-    else:
-        # Split the budget in rho (additive under zCDP), then convert each
-        # share back to an epsilon and calibrate that release exactly. The two
-        # epsilons do NOT sum to `epsilon` -- that is the point of composing in
-        # rho -- but the pair of releases together still satisfies
-        # (epsilon, delta), because rho_mu + rho_cov = rho_total and
-        # rho_total converts to exactly epsilon at delta.
-        rho_total = zcdp_rho_from_eps_delta(epsilon, delta)
-        eps_mu = _eps_from_rho(rho_total * rho_split, delta / 2.0)
-        eps_cov = _eps_from_rho(rho_total * (1.0 - rho_split), delta / 2.0)
-        sigma_mu = analytic_gaussian_sigma(sens_mu, eps_mu, delta / 2.0)
-        sigma_cov = analytic_gaussian_sigma(sens_cov, eps_cov, delta / 2.0)
-
-    # Audit each release at the epsilon it was actually calibrated FOR -- not
-    # at epsilon/2, which is only the right question on the classical path.
-    # Summing the two deltas is the basic-composition accounting: the pair is
-    # (eps_mu + eps_cov, d_mu + d_cov)-DP, and for the analytic path the
-    # tighter zCDP accounting above certifies the stronger (epsilon, delta).
-    d_mu = analytic_gaussian_delta(sens_mu, sigma_mu, eps_mu)
-    d_cov = analytic_gaussian_delta(sens_cov, sigma_cov, eps_cov)
-    delta_achieved = float(d_mu + d_cov)
+        clip_norm = np.sqrt(T) * R / 2.0
+    sigma_mu, sigma_cov, delta_achieved = gaussian_fit_scales(
+        m, T, R, epsilon, delta, clip_norm, calibration, rho_split)
 
     # ---- private mean -----------------------------------------------------
     mu_true = log_data.mean(axis=0)

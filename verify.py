@@ -9,6 +9,7 @@
 # exception. Each was caught by an invariant with a known answer.
 
 import os
+import sys
 import warnings
 
 import numpy as np
@@ -62,6 +63,248 @@ def section(title):
     print("-" * 74)
     print(title)
     print("-" * 74)
+
+
+def secure_dropout_fit_checks():
+    """Check dropout at the actual two-round model-fitting boundary."""
+    from dpvolt.secure_agg import SecureAggConfig, PaillierSimulation
+    from dpvolt.experiments import ModelFitConfig, fit_private_load_model
+
+    archive = np.array([[[0.02, 0.04], [0.03, 0.06]],
+                        [[0.08, 0.05], [0.07, 0.04]]])
+    classes = {0: np.arange(2)}
+    theta = np.full(2, 0.2)
+    model = fit_load_model(archive, classes, theta)
+    model.p_min, model.p_max = {0: 0.001}, {0: 1.0}
+    session = PaillierSimulation()
+    _, _, reference = dp_fit_class(np.log(archive.reshape(-1, 2)), np.log(0.001),
+                                    0, 50, 1e-5, np.random.default_rng(42), clip_norm=1)
+    for compensate in (False, True):
+        config = ModelFitConfig(mode="secure_aggregation", secure=SecureAggConfig(
+            n_meters=4, dropout=0.25, compensate_dropout=compensate))
+        fitted = fit_private_load_model(
+            archive, classes, model, theta, 50, 1e-5, np.random.default_rng(42),
+            config=config, session=session, clip_norm=1)
+        report = config.reports[0]
+        ratio = 1 if compensate else 0.75
+        check(f"encrypted fitting reports actual dropout variance, compensate={compensate}",
+              report["enrolled"] == 8 and report["reporters"] == 6
+              and report["nominal_noise_preserved"] == compensate
+              and report["sigma_mu"] == reference.sigma_mu
+              and report["sigma_cov"] == reference.sigma_cov
+              and np.isclose(report["effective_mean_variance"], ratio * reference.sigma_mu**2)
+              and np.isclose(report["effective_covariance_offdiag_variance"], ratio * reference.sigma_cov**2)
+              and np.isclose(report["effective_covariance_diagonal_variance"], 2 * ratio * reference.sigma_cov**2)
+              and np.linalg.eigvalsh(fitted.Sigma[0]).min() > 0)
+    check("secure fit reports do not disclose clean-data diagnostics",
+          not any(key in report for key in ("kl_to_true", "records_clipped", "mu_true", "cov_true")))
+    check("secure model fitting rejects data outside public bounds",
+          _raises(lambda: fit_private_load_model(
+              archive * 100, classes, model, theta, 50, 1e-5, np.random.default_rng(42),
+              config=config, session=session, clip_norm=1)))
+    check("unknown aggregation mode is rejected",
+          _raises(lambda: fit_private_load_model(
+              archive, classes, model, theta, 50, 1e-5, np.random.default_rng(42),
+              config=ModelFitConfig(mode="typo"))))
+
+
+def secure_aggregation_checks():
+    """Opt-in checks using real 2048-bit encryption, not mocked ciphertexts.
+
+    Run python verify.py --secure-agg to include these slower checks, or use
+    --secure-agg-only while developing this layer. No secrets enter reports.
+    """
+    from dataclasses import asdict
+    import json
+    from scipy.stats import chi2, t as student_t
+    from dpvolt.secure_agg import (SecureAggConfig, PaillierSimulation,
+                                  split_loads, noise_share, participation,
+                                  aggregate_bus_loads, SimulatedMeter)
+    from dpvolt.experiments import (ModelFitConfig, fit_private_load_model,
+                                    voltage_utility_metrics)
+    from dpvolt.loads import LoadModel
+
+    section("10. Secure aggregation: arithmetic, noise, and utility")
+    secure_dropout_fit_checks()
+    settings = SecureAggConfig()
+    session = PaillierSimulation()
+    check("Paillier key is 2048 bits and collector holds no private key",
+          session.collector.public_key.n.bit_length() == 2048
+          and not hasattr(session.collector, "_private_key"))
+    p = np.array([[0.04, 0.07], [0.12, 0.09]])
+    pieces, weights = split_loads(p)
+    check("Dirichlet customer loads sum to bus loads and reproduce",
+          np.allclose(pieces.sum(axis=1), p, atol=1e-15, rtol=0)
+          and np.array_equal(pieces, split_loads(p)[0]))
+    check("explicit customer weights are respected",
+          np.allclose(split_loads(p, weights=np.full((2, 10), 0.1))[0],
+                      p[:, None, :] / 10))
+    result, _, _ = aggregate_bus_loads(p, 0.0, np.random.default_rng(10), session=session)
+    error = float(np.max(np.abs(result - p)))
+    check("noise-free decrypted bus sums agree within 1e-9 pu", error < 1e-9,
+          f"maximum error {error:.3e} pu")
+    signed = np.array([0.0, -0.3, 0.8])
+    result, _, _ = aggregate_bus_loads(signed, 0.0, np.random.default_rng(11), session=session)
+    check("fixed-point sums handle zero and negative readings",
+          np.allclose(result, signed, atol=1e-9, rtol=0))
+    check("invalid settings, weights and nonfinite loads are rejected",
+          all(_raises(fn) for fn in (
+              lambda: SecureAggConfig(n_meters=1),
+              lambda: SecureAggConfig(n_meters=2.5),
+              lambda: SecureAggConfig(dropout=1),
+              lambda: SecureAggConfig(dropout=-0.1),
+              lambda: SecureAggConfig(dirichlet_alpha=0),
+              lambda: split_loads(p, weights=np.zeros((2, 10))),
+              lambda: split_loads(np.array([np.nan])),
+              lambda: noise_share(-1, 10, 10),
+              lambda: noise_share(1, 10, 0),
+              lambda: participation(2, SecureAggConfig(dropout=0.9), np.random.default_rng(0)),
+          )))
+    check("committed roster mismatch is rejected before decryption",
+          _raises(lambda: session.sum([np.zeros(1)], 0, 2, 2, np.random.default_rng(0))))
+
+    # Verify the statistics that the two model-fitting rounds will sum.
+    history = np.array([[[0.02, 0.04], [0.03, 0.06]],
+                        [[0.08, 0.05], [0.07, 0.04]]])
+    readings, shares = split_loads(history)
+    meters = [SimulatedMeter(readings[b, i], shares[b, i])
+              for b in range(2) for i in range(10)]
+    logs = np.log(history.reshape(-1, 2))
+    mean = logs.mean(axis=0)
+    local_mean = sum(m.mean_contribution(4) for m in meters)
+    centred = logs - mean
+    centred *= np.minimum(1, 0.2 / np.maximum(np.linalg.norm(centred, axis=1, keepdims=True), 1e-12))
+    expected = (centred.T @ centred / 4)[np.triu_indices(2)]
+    local_cov = sum(m.covariance_contribution(mean, 0.2, 4) for m in meters)
+    check("meter contributions reproduce mean and clipped covariance",
+          np.allclose(local_mean, mean, atol=1e-14, rtol=0)
+          and np.allclose(local_cov, expected, atol=1e-14, rtol=0))
+    encrypted_mean = session.sum((m.mean_contribution(4) for m in meters),
+                                 0, 20, 20, np.random.default_rng(0))
+    encrypted_cov = session.sum((m.covariance_contribution(mean, 0.2, 4) for m in meters),
+                                0, 20, 20, np.random.default_rng(0))
+    check("encrypted model sufficient statistics match plaintext",
+          np.allclose(encrypted_mean, mean, atol=1e-9, rtol=0)
+          and np.allclose(encrypted_cov, expected, atol=1e-9, rtol=0))
+
+    # A tight many-trial check plus an independent end-to-end ciphertext check.
+    sigma = 0.03
+    noise_results = {}
+    for k, compensate in ((10, False), (7, False), (7, True)):
+        sd, variance = noise_share(sigma, 10, k, compensate)
+        samples = np.random.default_rng(120 + k + compensate).normal(
+            0, sd, size=(50000, k)).sum(axis=1)
+        ratio = float(np.var(samples, ddof=1) / variance)
+        interval = chi2.ppf([0.0005, 0.9995], len(samples) - 1) / (len(samples) - 1)
+        name = f"k={k}, compensated={compensate}"
+        check(f"summed Gaussian variance, {name}", interval[0] < ratio < interval[1],
+              f"empirical/expected {ratio:.5f}; expected variance {variance:.6g}")
+        noise_results[name] = {"empirical_variance": float(np.var(samples, ddof=1)),
+                               "expected_variance": float(variance)}
+    # Zero contributions isolate 256 independent summed noise draws, all
+    # encrypted by ten meters and decrypted only after addition.
+    draws = session.sum((np.zeros(256) for _ in range(10)), sigma / np.sqrt(10),
+                        10, 10, np.random.default_rng(131))
+    variance_ratio = float(np.var(draws, ddof=1) / sigma**2)
+    limits = chi2.ppf([0.0005, 0.9995], 255) / 255
+    check("encrypted Gaussian sums pass a 99.9% variance interval",
+          limits[0] < variance_ratio < limits[1],
+          f"empirical/target {variance_ratio:.4f}, interval {limits}")
+    dropped = SecureAggConfig(dropout=0.3)
+    compensated = SecureAggConfig(dropout=0.3, compensate_dropout=True)
+    v_drop, rep_drop, _ = aggregate_bus_loads(
+        np.array([0.1]), 0, np.random.default_rng(44), dropped, session=session)
+    v_comp, rep_comp, _ = aggregate_bus_loads(
+        np.array([0.1]), 0, np.random.default_rng(44), compensated, session=session)
+    check("dropout removes readings; noise compensation does not impute data",
+          0 < v_drop[0] < 0.1 and np.array_equal(v_drop, v_comp)
+          and rep_drop[0]["reporters"] == rep_comp[0]["reporters"] == 7)
+
+    # Learn a representative class from three simulated bus histories, then
+    # use that model at every feeder load row. Small T makes repeated REAL
+    # encrypted fits feasible. The separate benchmark fits all feeder rows.
+    T = 6
+    classes = {0: np.arange(3)}
+    theta_small = np.full(3, np.arccos(0.95))
+    archive = make_historical(np.full(3, 40.0), classes, 360, T=T,
+                              rng=np.random.default_rng(140))
+    model = fit_load_model(archive, classes, theta_small)
+    model.p_min, model.p_max = {0: 1e-5}, {0: 1.0}
+    options = dict(clip_norm=6.0, eig_floor_ratio=0.1)
+    trusted = fit_private_load_model(archive, classes, model, theta_small, 50, 1e-5,
+                                    np.random.default_rng(141),
+                                    config=ModelFitConfig(), **options)
+    old_mu, old_cov, _ = dp_fit_class(np.log(archive.reshape(-1, T)),
+                                     np.log(1e-5), 0, 50, 1e-5,
+                                     np.random.default_rng(141), **options)
+    check("flag off preserves original fitter outputs exactly",
+          np.array_equal(trusted.mu[0], old_mu)
+          and np.array_equal(trusted.Sigma[0], old_cov))
+
+    runner = PowerFlowRunner(MASTER)
+    n_loads = len(runner.load_names)
+    theta = np.full(n_loads, np.arccos(0.95))
+
+    def whole_feeder(fitted):
+        return LoadModel(fitted.mu, fitted.Sigma, {0: np.arange(n_loads)},
+                         fitted.p_min, fitted.p_max, theta, T=T)
+
+    truth_p = sample_loads(whole_feeder(model), 12, rng=np.random.default_rng(142))
+    truth_v, ok = runner.solve_many(truth_p, reactive_from_active(truth_p, theta))
+    if not ok.all():
+        raise RuntimeError("utility reference did not converge")
+    values = {mode: [] for mode in ("trusted_curator", "secure_aggregation")}
+    secure_settings = SecureAggConfig(n_meters=2)
+    trials = 32
+    for trial in range(trials):
+        for mode in values:
+            config = ModelFitConfig(mode=mode, secure=secure_settings)
+            # Separate fit seeds, paired downstream sampling to reduce variance.
+            seed = 2000 + 2 * trial + (mode == "secure_aggregation")
+            fitted = fit_private_load_model(
+                archive, classes, model, theta_small, 50, 1e-5,
+                np.random.default_rng(seed), config=config,
+                session=session, **options)
+            p_synth = sample_loads(whole_feeder(fitted), 12,
+                                   rng=np.random.default_rng(3000 + trial))
+            runner.reset()
+            volts, ok = runner.solve_many(p_synth, reactive_from_active(p_synth, theta))
+            if not ok.all():
+                raise RuntimeError(f"{mode}, trial {trial}: power flow did not converge")
+            values[mode].append(voltage_utility_metrics(truth_v, volts))
+        if (trial + 1) % 4 == 0:
+            print(f"  Encrypted utility fits: {trial + 1}/{trials}", flush=True)
+
+    # Equivalence requires the entire 90% CI inside predeclared margins.
+    # Merely obtaining p > .05 in a difference test would not establish this.
+    margins = {"r2": 0.02, "ansi_exceedance": 0.005, "lag1": 0.05}
+    comparisons = {}
+    for metric, margin in margins.items():
+        a = np.array([v[metric] for v in values["trusted_curator"]])
+        b = np.array([v[metric] for v in values["secure_aggregation"]])
+        differences = b - a
+        half_width = float(student_t.ppf(0.95, trials - 1)
+                           * differences.std(ddof=1) / np.sqrt(trials))
+        interval = [float(differences.mean() - half_width),
+                    float(differences.mean() + half_width)]
+        equivalent = interval[0] > -margin and interval[1] < margin
+        check(f"voltage {metric} is statistically equivalent within {margin}", equivalent,
+              f"90% CI for secure minus trusted: {interval}")
+        comparisons[metric] = {"trusted_mean": float(a.mean()),
+                               "secure_mean": float(b.mean()),
+                               "difference_ci90": interval, "margin": margin,
+                               "equivalent": equivalent}
+    output = {"noise": noise_results, "encrypted_variance_ratio": variance_ratio,
+              "noise_free_max_error_pu": error,
+              "utility_trials": trials, "utility_training_buses": 3,
+              "utility_training_days": 360, "utility_T": T,
+              "utility_meters_per_bus": 2, "voltage_load_rows": n_loads,
+              "utility": comparisons, "crypto_timing": asdict(session.timing)}
+    path = os.path.join(HERE, "results", "secure_agg_verification.json")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(output, f, indent=2, allow_nan=False)
+        f.write("\n")
 
 
 def main():
@@ -726,4 +969,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--secure-agg-only" not in sys.argv:
+        main()
+    if "--secure-agg" in sys.argv or "--secure-agg-only" in sys.argv:
+        secure_aggregation_checks()
+        print(f"RESULT INCLUDING SECURE AGGREGATION: {sum(ok for _, ok in RESULTS)} of {len(RESULTS)} checks passed")
+    sys.exit(1 if any(not ok for _, ok in RESULTS) else 0)

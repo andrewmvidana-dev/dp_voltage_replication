@@ -1,0 +1,232 @@
+==========================================================================
+VERIFICATION SUITE
+==========================================================================
+
+--------------------------------------------------------------------------
+1. Network model and Kron reduction
+--------------------------------------------------------------------------
+  [PASS]  feeder solves and node bookkeeping adds up
+           96 load + 139 zero-inj + 3 slack = 238
+  [PASS]  zero-injection buses inject no power
+           largest is 1.981 kVA against 3615 kW throughput; was 238225 kVA when pruning was wrong
+  [PASS]  total substation power matches IEEE 123's documented load
+           3615.2 kW, documented 3490 kW; read -216 MW before the regulator freeze was added
+  [PASS]  Kron reduction reproduces the true eliminated voltages
+           relative residual 1.28e-07; was 1.06 with naive pruning
+  [PASS]  Y_ZZ is well conditioned after cleanup
+           cond = 2.451e+04, was 9.2e12 before merge and prune
+  [PASS]  network cleanup actually reduced kappa_Kron
+           kappa_Kron = 1.001e+07, was 2.1e25 uncleaned
+  [PASS]  Y_red equals the Schur complement exactly
+           max difference 0.00e+00
+
+--------------------------------------------------------------------------
+2. Per-unit conversion and the slack offset
+--------------------------------------------------------------------------
+  [PASS]  the slack offset b is non-zero
+           max |b_pu| = 85.0181; evaluated to exactly 0 before the elimination path was included
+  [PASS]  Y_pu is well conditioned
+           cond = 4.177e+03
+  [PASS]  load reconstructed from the reduced model matches the feeder
+           3519 kW against the feeder's 3490 kW (0.8% error)
+  [PASS]  per-unit conversion is invertible
+           max relative difference 1.98e-16
+
+--------------------------------------------------------------------------
+3. Load model
+--------------------------------------------------------------------------
+  [PASS]  every bus lands in exactly one class
+           91 buses across 3 classes
+  [PASS]  diurnal shape 'residential' averages to 1.0
+           mean = 1.000000000000
+  [PASS]  diurnal shape 'commercial' averages to 1.0
+           mean = 1.000000000000
+  [PASS]  diurnal shape 'industrial' averages to 1.0
+           mean = 1.000000000000
+  [PASS]  AR(1) covariance is symmetric positive definite
+           smallest eigenvalue 3.265e-03
+  [PASS]  synthetic history reproduces the feeder's total demand
+           3489 kW against 3490 kW (0.03%)
+  [PASS]  all generated loads are strictly positive
+           minimum 3.230e-03 per-unit
+  [PASS]  fitted covariances are positive definite
+  [PASS]  load margins bracket the observed data
+  [PASS]  synthetic loads respect the truncation box
+           repair rates 0:0.0%, 1:0.0%, 2:0.0%
+  [PASS]  temporal correlation survives sampling
+           max lag-1..5 difference 0.0515
+  [PASS]  reactive power follows the fixed power factor
+           q = 0.034854, expected 0.034854
+
+--------------------------------------------------------------------------
+4. Differential privacy
+--------------------------------------------------------------------------
+  [PASS]  smaller epsilon gives larger noise
+           sigma(eps=1) = 4.845 > sigma(eps=100) = 0.048
+  [PASS]  noise scales inversely with epsilon
+           ratio 100.0000, expected exactly 100
+  [PASS]  DP covariance is symmetric
+           max asymmetry 2.78e-17
+  [PASS]  DP covariance is positive definite after repair
+           smallest eigenvalue 1.154e-04, 40 of 96 needed lifting
+  [PASS]  the mechanism is actually random
+           two draws differ by 2.106e-02
+  [PASS]  tighter privacy degrades the fit
+           KL 1564.6 at eps=5 vs 130.0 at eps=200
+  [PASS]  analytic Gaussian achieves its target delta at every epsilon
+           18 (epsilon, delta) pairs checked against Balle-Wang Thm 8
+  [PASS]  delta decreases as sigma grows
+           delta 1.564e-296 at sigma=0.02 vs 0.000e+00 at sigma=0.2
+  [PASS]  classical formula is confirmed to under-noise at eps=50
+           claims delta=1e-5, actually achieves 5.862e-01 (58618x worse) -- why 'analytic' is the default
+  [PASS]  dp_fit_class defaults to the analytic calibration
+           calibration = 'analytic'
+  [PASS]  the default fit's audited delta meets its claim
+           claimed 1e-5, audited 1.000e-05
+  [PASS]  the classical path is measurably worse than it claims
+           claimed 1e-5, audited 8.336e-03
+  [PASS]  zCDP conversion round-trips
+           rho 19.8020 converts back to eps 50.000000
+  [PASS]  shifting budget to the covariance lowers its noise
+           sigma_cov 1.078e-02 -> 8.144e-03, sigma_mu 6.483e-03 -> 1.389e-02
+  [PASS]  the budget split does not change the delta achieved
+           audited 1.000e-05 at rho_split=0.1
+  [PASS]  dp_fit_class rejects an unknown calibration
+           unknown calibration must raise, not silently pick a default
+
+--------------------------------------------------------------------------
+5. Theorem 1
+--------------------------------------------------------------------------
+  [PASS]  epsilon increases with the adjacency radius
+           18.41 at r=1e-14 vs 1871.82 at r=1e-12
+  [PASS]  alpha scales linearly with r
+           ratio 100.0000, expected 100
+  [PASS]  the admissibility condition is alpha < 1/4
+  [PASS]  an inadmissible radius returns infinity, not a plausible number
+  [PASS]  a noisier load model gives a smaller epsilon
+           121.66 with 25x covariance vs 184.41 baseline
+  [PASS]  epsilon decomposes into its three reported terms
+           bias 106.340 + tail 78.068 = 184.408
+  [PASS]  solve_for_r inverts theorem1 correctly
+           r = 1.084e-13 gives epsilon = 200.00, targeted 200
+
+--------------------------------------------------------------------------
+6. Jacobian and Monte Carlo calibration
+--------------------------------------------------------------------------
+  [PASS]  the normalised Jacobian has the right shape
+           (192, 192) for n = 96
+  [PASS]  the normalised Jacobian is invertible
+           cond = 4.457e+03
+  [PASS]  power flow converges on synthetic loads
+           100.0% of timesteps converged
+  [PASS]  ||M~^-1|| calibrates to a sane magnitude
+           mu_0 = 5.501; read 1.26e16 when b was zero
+  [PASS]  Clopper-Pearson upper bound exceeds the point estimate
+           delta_M 0.0167, upper 0.0766
+  [PASS]  the calibration quantile behaves monotonically
+
+--------------------------------------------------------------------------
+7. Experiments
+--------------------------------------------------------------------------
+  [PASS]  Wasserstein distance of a set with itself is zero
+  [PASS]  Wasserstein distance grows with added noise
+  [PASS]  masked dataset has consistent shapes
+           X(1728, 96) Y(1728, 24)
+  [PASS]  the mask flags exactly the hidden entries
+           first 24 of the window visible, last 24 hidden
+  [PASS]  standardiser gives varying columns zero mean and unit variance
+           24 varying columns: mean 1.84e-14, std 1.000000
+  [PASS]  standardiser leaves constant columns at zero
+           72 constant columns (the mask flags)
+  [PASS]  training reduces the error
+           MSE 9.932e-04 -> 8.380e-05
+  [PASS]  the error curve is finite throughout
+
+--------------------------------------------------------------------------
+8. Bounded-Noise Privacy baseline
+--------------------------------------------------------------------------
+  [PASS]  BNP noise never exceeds the bound B
+           max deviation 0.019994 against B = 0.02
+  [PASS]  bnp_bound inverts bnp_delta
+           delta 1.000e-05, targeted 1e-5
+  [PASS]  larger B gives a smaller delta
+           3.350e-03 at B=100 vs 3.350e-02 at B=10
+  [PASS]  bnp_delta rejects S > 2B (Corollary 1 precondition)
+           S = 10 with 2B = 2 raises rather than returning delta = 5
+  [PASS]  bounded noise still destroys temporal correlation
+           lag-1: true 0.964, bnp 0.311, gaussian 0.144
+  [PASS]  violation rate is zero on in-band voltages
+  [PASS]  violation rate is one on out-of-band voltages
+  [PASS]  the two bnp_bound implementations agree
+           privacy 335.0000 vs powerflow 335.0000
+  [PASS]  bounded load fit returns a positive-definite covariance
+           smallest eigenvalue 3.750e-02
+  [PASS]  bounded load fit reports epsilon = 0
+           uniform BNP is (0, delta)-private by Corollary 1
+  [PASS]  bounded mean noise never exceeds its bound
+           max deviation 1.5404 against B = 1.5515
+  [PASS]  BNP/Gaussian noise ratio is independent of sample size
+           501421.7 at m=270 vs 501421.7 at m=27000 -- averaging cannot close the gap
+  [PASS]  reset() recovers the runner after a degenerate solve
+           100% converged, all finite True
+  [PASS]  bigger bound gives more ANSI violations
+
+--------------------------------------------------------------------------
+9. The eigenvalue-space oracle -- NOT a mechanism
+--------------------------------------------------------------------------
+  [PASS]  the eigen-oracle labels itself NOT PRIVATE
+           calibration = 'bnp-eigen-oracle-NOTPRIVATE'
+  [PASS]  the eigen-oracle report has NO guarantee fields
+           epsilon/delta/delta_achieved must not exist on an oracle report -- reading one is an AttributeError, not a number
+  [PASS]  reading a delta off the oracle raises
+           the invalid state is unrepresentable, not merely detected
+  [PASS]  real mechanisms still carry their guarantee fields
+           the report split must not strip dp_fit_class or bnp_fit_class
+  [PASS]  the eigen-oracle leaks the true eigenvectors exactly
+           all 38 non-degenerate released eigenvectors match a TRUE eigenvector to |<u,v>| >= 1.000000000 -- no rotation, no noise on V: this is the leak, measured
+  [PASS]  disabling the eigenvalue floor changes the result
+           eig_clipped 58 with floor vs 56 without
+
+==========================================================================
+RESULT: 80 of 80 checks passed
+==========================================================================
+
+
+--------------------------------------------------------------------------
+10. Secure aggregation: arithmetic, noise, and utility
+--------------------------------------------------------------------------
+  [PASS]  Paillier key is 2048 bits and collector holds no private key
+  [PASS]  Dirichlet customer loads sum to bus loads and reproduce
+  [PASS]  explicit customer weights are respected
+  [PASS]  noise-free decrypted bus sums agree within 1e-9 pu
+           maximum error 1.201e-12 pu
+  [PASS]  fixed-point sums handle zero and negative readings
+  [PASS]  invalid settings, weights and nonfinite loads are rejected
+  [PASS]  committed roster mismatch is rejected before decryption
+  [PASS]  meter contributions reproduce mean and clipped covariance
+  [PASS]  encrypted model sufficient statistics match plaintext
+  [PASS]  summed Gaussian variance, k=10, compensated=False
+           empirical/expected 1.00092; expected variance 0.0009
+  [PASS]  summed Gaussian variance, k=7, compensated=False
+           empirical/expected 0.99852; expected variance 0.00063
+  [PASS]  summed Gaussian variance, k=7, compensated=True
+           empirical/expected 0.99471; expected variance 0.0009
+  [PASS]  encrypted Gaussian sums pass a 99.9% variance interval
+           empirical/target 1.0002, interval [0.73400316 1.3173202 ]
+  [PASS]  dropout removes readings; noise compensation does not impute data
+  [PASS]  flag off preserves original fitter outputs exactly
+  Encrypted utility fits: 4/32
+  Encrypted utility fits: 8/32
+  Encrypted utility fits: 12/32
+  Encrypted utility fits: 16/32
+  Encrypted utility fits: 20/32
+  Encrypted utility fits: 24/32
+  Encrypted utility fits: 28/32
+  Encrypted utility fits: 32/32
+  [PASS]  voltage r2 is statistically equivalent within 0.02
+           90% CI for secure minus trusted: [-0.0008887148595293228, 0.004902017255727345]
+  [PASS]  voltage ansi_exceedance is statistically equivalent within 0.005
+           90% CI for secure minus trusted: [0.0001451222084074169, 0.002927419758019445]
+  [PASS]  voltage lag1 is statistically equivalent within 0.05
+           90% CI for secure minus trusted: [-0.006498330814367527, 0.010598741111722232]
+RESULT INCLUDING SECURE AGGREGATION: 98 of 98 checks passed
