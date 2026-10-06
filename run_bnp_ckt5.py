@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 
 import matplotlib
@@ -29,7 +28,7 @@ from dpvolt.loads import (
     sample_loads,
 )
 from dpvolt.powerflow import PowerFlowRunner
-from dpvolt.privacy import analytic_gaussian_sigma, bnp_fit_class, dp_fit_class
+from dpvolt.privacy import bnp_fit_class, dp_fit_class
 
 
 ROOT = Path(__file__).resolve().parent

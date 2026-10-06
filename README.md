@@ -13,6 +13,12 @@ from encrypted meter contributions. See [SECURE_AGGREGATION.md](SECURE_AGGREGATI
 for the mode flag, dropout controls, verification, benchmarks, and the limits
 of the simulated trust boundary. The existing trusted mode remains the default.
 
+The optional threshold BGV backend, its build instructions, and verification
+commands are documented in [THRESHOLD_ENCRYPTION.md](THRESHOLD_ENCRYPTION.md).
+The repository keeps experiment code, measured results, and scientific figures.
+PDFs, PowerPoint decks, and presentation build intermediates are local artifacts
+excluded from version control.
+
 Beyond reproducing the paper, this repo does two things the paper does not: it
 tests whether **Bounded-Noise Privacy** can be substituted for the Gaussian
 mechanism at either noise-injection point (figures 4–7), and it audits the
@@ -258,8 +264,7 @@ dp-voltage-replication/
 ├── run_bnp_correctness.py   results/bnp_correctness.md — does BNP deliver the
 │                            guarantee it states? (~5s, no power flow)
 ├── verify.py                80 correctness checks
-├── requirements.txt
-└── RUN_GUIDE.md             step-by-step setup, no terminal required
+└── requirements.txt
 ```
 
 ### Key entry points in `privacy.py`
@@ -282,7 +287,7 @@ invalid state is unrepresentable rather than merely checked.
 
 1. Create the environment from `requirements.txt`.
 2. Run `get_feeder.py` once to download the feeder model.
-3. Run `verify.py` — should report **74 of 74** checks passing.
+3. Run `verify.py` — should report **80 of 80** checks passing.
 4. Run `run_day1.py`, `run_days2_4.py`, `run_days5_6.py` in that order.
 5. For the BNP analysis, run the four `run_bnp_*.py` scripts in any order.
 

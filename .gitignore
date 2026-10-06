@@ -12,3 +12,14 @@ feeders/
 figures/
 .tools/
 threshold_mhe/threshold_mhe.exe
+
+# Local documents, presentations, and their build intermediates
+*.[pP][dD][fF]
+*.[pP][pP][tT]
+*.[pP][pP][tT][xX]
+/.chart-data-*/
+/.deck-build/
+/.privacy-deck-build/
+/.threshold-deck-build/
+/.threshold-graphs-build/
+/.threshold-results-build/

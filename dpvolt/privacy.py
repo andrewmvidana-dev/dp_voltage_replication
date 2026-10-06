@@ -154,25 +154,6 @@ def zcdp_rho_from_eps_delta(epsilon: float, delta: float) -> float:
     return float(u * u)
 
 
-def zcdp_sigma(sensitivity: float, rho: float) -> float:
-    """Noise scale for one Gaussian release under a rho-zCDP allocation.
-
-    Bun & Steinke: the Gaussian mechanism with sigma = Delta / sqrt(2 rho)
-    satisfies rho-zCDP. Composition is then just addition of rho across
-    releases, which is what makes the budget split tunable -- see the
-    `rho_split` argument of dp_fit_class.
-
-    NOTE. Measured against a CORRECT analytic-Gaussian baseline this is not a
-    win at epsilon 25-200; it saves noise only where the naive epsilon/2 split
-    is compared against the invalid classical formula. Provided because the
-    tunable split is independently useful (the covariance carries the temporal
-    structure and can be given more than half the budget), not as a free lunch.
-    """
-    if rho <= 0:
-        raise ValueError("need rho > 0")
-    return float(sensitivity / np.sqrt(2.0 * rho))
-
-
 @dataclass(kw_only=True)
 class FitReport:
     """Diagnostics common to every load-model fit, private or not.

@@ -315,40 +315,6 @@ def _adversarial_voltage_sensitivity(runner, model, theta, rng) -> float:
     return worst
 
 
-def sensitivity_convergence_report(
-    runner,
-    model,
-    theta: np.ndarray,
-    seed: int = 0,
-    trial_counts=(10, 25, 50, 100, 200),
-) -> dict:
-    """How the sampled sensitivity estimate behaves as n_trials grows, against
-    the adversarial construction. Returns a dict for tabulating.
-
-    The point of the table is to show whether the default n_trials=10 is
-    merely noisy or systematically low. Those are different problems: a noisy
-    estimate is fixed by more trials, a systematically low one is not fixed by
-    any number of them, because random replacements never visit the corner.
-
-    Each count gets its OWN generator seeded identically, so the sequences are
-    nested -- the n=25 run contains the n=10 run's draws. Without that, the
-    estimate could move because a different random path was taken rather than
-    because more of it was explored, and the trend would mean nothing.
-    """
-    out = {"sampled": {}, "adversarial": None}
-
-    for n in trial_counts:
-        runner.reset()
-        out["sampled"][n] = float(empirical_voltage_sensitivity(
-            runner, model, theta, np.random.default_rng(seed), n_trials=n))
-
-    runner.reset()
-    out["adversarial"] = float(empirical_voltage_sensitivity(
-        runner, model, theta, np.random.default_rng(seed), adversarial=True))
-
-    return out
-
-
 # ---------------------------------------------------------------------------
 # 2. Figure 3: does the released data train a useful model?
 # ---------------------------------------------------------------------------

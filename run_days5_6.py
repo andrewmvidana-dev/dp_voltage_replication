@@ -19,10 +19,10 @@ import matplotlib.pyplot as plt
 import opendssdirect as dss
 
 from dpvolt.loads import (assign_classes, make_historical, fit_load_model,
-                          sample_loads, reactive_from_active, LoadModel)
+                          sample_loads, reactive_from_active)
 from dpvolt.powerflow import (PowerFlowRunner, add_voltage_noise,
                               add_bounded_voltage_noise, bnp_bound, bnp_delta)
-from dpvolt.privacy import dp_fit_class, gaussian_sigma
+from dpvolt.privacy import gaussian_sigma
 from dpvolt.experiments import (voltage_wasserstein, empirical_voltage_sensitivity,
                                 build_masked_dataset, run_seeds,
                                 ansi_violation_rate, mean_autocorrelation)
