@@ -33,6 +33,7 @@ class ModelFitConfig:
 
     mode: str = "trusted_curator"
     secure: SecureAggConfig | None = None
+    encryption_backend: str = "paillier"
     reports: dict = field(default_factory=dict, init=False)
     timing: CryptoTiming | None = field(default=None, init=False)
 
@@ -74,7 +75,14 @@ def fit_private_load_model(archive, classes, model, theta, epsilon, delta, rng,
             raise ValueError("classes must partition the load rows exactly once")
         settings = config.secure or SecureAggConfig()
         readings, shares = split_loads(archive, settings, weights)
-        session = session or PaillierSimulation(settings.precision)
+        if session is None:
+            if config.encryption_backend == "paillier":
+                session = PaillierSimulation(settings.precision)
+            elif config.encryption_backend == "threshold_bgv":
+                from dpvolt.threshold_agg import ThresholdBGVSimulation
+                session = ThresholdBGVSimulation()
+            else:
+                raise ValueError("encryption_backend must be paillier or threshold_bgv")
         for label, indices in classes.items():
             if len(indices) == 0:
                 raise ValueError("classes must not be empty")

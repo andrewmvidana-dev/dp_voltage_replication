@@ -1,0 +1,298 @@
+{
+  "scope": "Direct bus active-power sums; not model-fitting or topology privacy",
+  "adjacency": "Replace one bounded meter reading at one time. Changing a whole trajectory needs composition.",
+  "python": "3.14.3",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "settings": {
+    "trials": 30,
+    "steps": 6,
+    "meters_per_load": 10,
+    "load_rows": 91,
+    "retained_nodes": 96,
+    "sensitivity_kw": 20.0,
+    "epsilon_gaussian": 1.0,
+    "epsilon_bnp": 0.0,
+    "delta": 0.01,
+    "key_bits": 2048,
+    "gaussian_sd_kw": 37.55751121819028,
+    "bnp_half_width_kw": 1000.0,
+    "input_clipped_fraction": 0.015384615384615385,
+    "input_clipping_load_rmse_kw": 11.530493126642915,
+    "data_seed": 20260924,
+    "split_seed": 17,
+    "noise_seed_start": 5000
+  },
+  "limitations": [
+    "Synthetic proportional meters, six time samples, fixed feeder controls, no dropouts.",
+    "BNP has the stricter epsilon=0 at the same delta; this is not an equal-epsilon comparison.",
+    "For the full vector, one-event adjacency changes only one sum. Whole-customer trajectories are outside this guarantee.",
+    "Ideal continuous-noise DP accounting; floating-point sampling/encoding is not a certified finite-precision DP implementation.",
+    "Cryptographic roles share one process and assume an honest, separate non-colluding decryptor. Plain Paillier cannot enforce aggregate-only decryption.",
+    "Raw noisy outputs are clipped to public [0,200] kW bounds before power flow. This changes utility, while preserving ideal DP by post-processing.",
+    "Repeated trials are independent offline evaluations, not a composition-free repeated publishing policy.",
+    "Paired Gaussian/hybrid trials use identical noise shares to isolate encryption error. They are not independent estimates."
+  ],
+  "cryptography": {
+    "Encryption": {
+      "wall_s": 83.58690710004885,
+      "max_plaintext_difference_kw": 3.0718899646231534e-09,
+      "timing": {
+        "encryption_s": 80.99284460092895,
+        "addition_s": 0.12669370020739734,
+        "decryption_s": 2.3276806991780177,
+        "encrypted_values": 5460,
+        "decrypted_values": 546
+      },
+      "coverage": "Every feeder load row and time sample, first trial only"
+    },
+    "Encryption + Gaussian": {
+      "wall_s": 83.9024360999465,
+      "max_plaintext_difference_kw": 2.913055213715765e-09,
+      "timing": {
+        "encryption_s": 81.28512180154212,
+        "addition_s": 0.12402910110540688,
+        "decryption_s": 2.3541160991881043,
+        "encrypted_values": 5460,
+        "decrypted_values": 546
+      },
+      "coverage": "Every feeder load row and time sample, first trial only"
+    }
+  },
+  "key_generation_s": 0.018845100072212517,
+  "utility": {
+    "BNP": {
+      "raw_load_rmse_kw": {
+        "mean": 574.1687269208855,
+        "ci95": [
+          570.488364297175,
+          577.849089544596
+        ]
+      },
+      "clipped_load_rmse_kw": {
+        "mean": 113.17422971255723,
+        "ci95": [
+          112.33621660102158,
+          114.0122428240929
+        ]
+      },
+      "output_clipped_fraction": {
+        "mean": 0.8984126984126984,
+        "ci95": [
+          0.8943538586256738,
+          0.902471538199723
+        ]
+      },
+      "convergence_fraction": {
+        "mean": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ]
+      },
+      "voltage_magnitude_rmse_pu": {
+        "mean": 0.09419153852168093,
+        "ci95": [
+          0.09171330255410651,
+          0.09666977448925534
+        ]
+      }
+    },
+    "Gaussian": {
+      "raw_load_rmse_kw": {
+        "mean": 37.64443398911085,
+        "ci95": [
+          37.2545287557645,
+          38.034339222457206
+        ]
+      },
+      "clipped_load_rmse_kw": {
+        "mean": 31.92028764875136,
+        "ci95": [
+          31.533118249903932,
+          32.30745704759878
+        ]
+      },
+      "output_clipped_fraction": {
+        "mean": 0.20818070818070822,
+        "ci95": [
+          0.20256601326735638,
+          0.21379540309406006
+        ]
+      },
+      "convergence_fraction": {
+        "mean": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ]
+      },
+      "voltage_magnitude_rmse_pu": {
+        "mean": 0.01616710153893128,
+        "ci95": [
+          0.015224617636643215,
+          0.01710958544121935
+        ]
+      }
+    },
+    "Encryption": {
+      "raw_load_rmse_kw": {
+        "mean": 8.594826774862782e-10,
+        "ci95": [
+          8.594826774862782e-10,
+          8.594826774862782e-10
+        ]
+      },
+      "clipped_load_rmse_kw": {
+        "mean": 8.594826774862782e-10,
+        "ci95": [
+          8.594826774862782e-10,
+          8.594826774862782e-10
+        ]
+      },
+      "output_clipped_fraction": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "convergence_fraction": {
+        "mean": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ]
+      },
+      "voltage_magnitude_rmse_pu": {
+        "mean": 4.2172735242621883e-13,
+        "ci95": [
+          4.217273524262188e-13,
+          4.217273524262189e-13
+        ]
+      }
+    },
+    "Encryption + Gaussian": {
+      "raw_load_rmse_kw": {
+        "mean": 37.64443398911024,
+        "ci95": [
+          37.254528755764206,
+          38.034339222456275
+        ]
+      },
+      "clipped_load_rmse_kw": {
+        "mean": 31.92028764875083,
+        "ci95": [
+          31.53311824990367,
+          32.30745704759799
+        ]
+      },
+      "output_clipped_fraction": {
+        "mean": 0.20818070818070822,
+        "ci95": [
+          0.20256601326735638,
+          0.21379540309406006
+        ]
+      },
+      "convergence_fraction": {
+        "mean": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ]
+      },
+      "voltage_magnitude_rmse_pu": {
+        "mean": 0.016167101538935434,
+        "ci95": [
+          0.015224617636647479,
+          0.01710958544122339
+        ]
+      }
+    }
+  },
+  "privacy": {
+    "BNP": {
+      "epsilon": 0.0,
+      "delta": 0.01,
+      "attack_theory": 0.505,
+      "attack_empirical": 0.505035,
+      "collector_sees_raw": true
+    },
+    "Gaussian": {
+      "epsilon": 1.0,
+      "delta": 0.009999999999934284,
+      "attack_theory": 0.6049798663432258,
+      "attack_empirical": 0.60553,
+      "collector_sees_raw": true
+    },
+    "Encryption": {
+      "epsilon": null,
+      "delta": null,
+      "attack_theory": 1.0,
+      "attack_empirical": 1.0,
+      "collector_sees_raw": false
+    },
+    "Encryption + Gaussian": {
+      "epsilon": 1.0,
+      "delta": 0.009999999999934284,
+      "attack_theory": 0.6049798663432258,
+      "attack_empirical": 0.60553,
+      "collector_sees_raw": false
+    }
+  },
+  "attack_samples": 200000,
+  "delta_sweep": [
+    {
+      "delta": 1e-05,
+      "gaussian_theoretical_rmse_kw": 74.61263269689519,
+      "bnp_theoretical_rmse_kw": 577350.2691896257,
+      "gaussian_delta_audit": 9.999999998717605e-06
+    },
+    {
+      "delta": 0.0001,
+      "gaussian_theoretical_rmse_kw": 63.714059799801134,
+      "bnp_theoretical_rmse_kw": 57735.02691896258,
+      "gaussian_delta_audit": 9.999999998823016e-05
+    },
+    {
+      "delta": 0.001,
+      "gaussian_theoretical_rmse_kw": 51.493140372789945,
+      "bnp_theoretical_rmse_kw": 5773.5026918962585,
+      "gaussian_delta_audit": 0.0009999999999918867
+    },
+    {
+      "delta": 0.01,
+      "gaussian_theoretical_rmse_kw": 37.55751121819028,
+      "bnp_theoretical_rmse_kw": 577.3502691896258,
+      "gaussian_delta_audit": 0.009999999999934284
+    },
+    {
+      "delta": 0.05,
+      "gaussian_theoretical_rmse_kw": 26.65556619537547,
+      "bnp_theoretical_rmse_kw": 115.47005383792515,
+      "gaussian_delta_audit": 0.04999999999617864
+    },
+    {
+      "delta": 0.1,
+      "gaussian_theoretical_rmse_kw": 21.71755530432745,
+      "bnp_theoretical_rmse_kw": 57.735026918962575,
+      "gaussian_delta_audit": 0.0999999999931788
+    }
+  ],
+  "checks": {
+    "gaussian_calibration": true,
+    "bnp_calibration": true,
+    "meter_bounds": true,
+    "Encryption_quantization": true,
+    "Encryption + Gaussian_quantization": true,
+    "bnp_support": true,
+    "all_powerflows_converged": true,
+    "BNP_attack_agrees": true,
+    "Gaussian_attack_agrees": true,
+    "sweep_1e-05": true,
+    "sweep_0.0001": true,
+    "sweep_0.001": true,
+    "sweep_0.01": true,
+    "sweep_0.05": true,
+    "sweep_0.1": true
+  }
+}

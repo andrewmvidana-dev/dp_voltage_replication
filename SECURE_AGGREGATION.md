@@ -202,3 +202,13 @@ unbatched implementation on the measured machine, not yet benchmarked.
 The API follows the [phe documentation](https://python-paillier.readthedocs.io/en/stable/).
 The original model-fitting context is described by
 [Campbell et al.](https://arxiv.org/abs/2605.02390).
+# Optional 2023 threshold BGV extension
+
+An additional backend now implements Lattigo's Thresholdize/Combine operations
+with a 3-of-5 authority quorum and packed BGV vectors. Select
+`ModelFitConfig(mode="secure_aggregation", encryption_backend="threshold_bgv")`
+to use it in the existing Gaussian mean/covariance fitter. Paillier remains the
+default. See [THRESHOLD_ENCRYPTION.md](THRESHOLD_ENCRYPTION.md) for build steps,
+matched comparisons, and the research security limits. The BNP encrypted
+direct-sum experiment uses an independent trusted noise service; dealer-free
+BNP model fitting remains unimplemented.

@@ -1,0 +1,60 @@
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"Encryption + privacy","textShapes":3}
+{"kind":"textbox","id":"sh/547294r6","slide":1,"text":"Encryption + privacy\nfor synthetic grids","textPreview":"Encryption + privacy | for synthetic grids","textChars":40,"textLines":2,"bbox":[64,120,640,175]}
+{"kind":"textbox","id":"sh/k3yl0zql","slide":1,"text":"How threshold encryption works\nwith BNP and differential privacy","textPreview":"How threshold encryption works | with BNP and differential privacy","textChars":64,"textLines":2,"bbox":[64,332,590,110]}
+{"kind":"textbox","id":"sh/7qp4be9c","slide":1,"text":"Proposed research architecture\nEvidence and next measurements","textPreview":"Proposed research architecture | Evidence and next measurements","textChars":61,"textLines":2,"bbox":[64,550,570,78]}
+{"kind":"slide","id":"sl/hwbqtkby","slide":2,"title":"How the protections work together","textShapes":19}
+{"kind":"textbox","id":"sh/t8byxkn2","slide":2,"text":"How the protections work together","textPreview":"How the protections work together","textChars":33,"textLines":1,"bbox":[64,45,1152,82]}
+{"kind":"textbox","id":"sh/9072xkry","slide":2,"text":"Encryption protects computation. Calibrated noise protects the released statistics.","textPreview":"Encryption protects computation. Calibrated noise protects the released statistics.","textChars":83,"textLines":1,"bbox":[64,135,1145,70]}
+{"kind":"textbox","id":"sh/ozy1ofad","slide":2,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[1160,666,50,28]}
+{"kind":"textbox","id":"sh/b29kza94","slide":2,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[68,220,55,52]}
+{"kind":"textbox","id":"sh/a10jqpsj","slide":2,"text":"Meters compute statistics","textPreview":"Meters compute statistics","textChars":25,"textLines":1,"bbox":[145,220,1010,37]}
+{"kind":"textbox","id":"sh/x4r21kru","slide":2,"text":"Each meter keeps its raw records locally.","textPreview":"Each meter keeps its raw records locally.","textChars":41,"textLines":1,"bbox":[145,257,1010,34]}
+{"kind":"textbox","id":"sh/w3i1sfa9","slide":2,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[68,295,55,52]}
+{"kind":"textbox","id":"sh/r65knqtk","slide":2,"text":"Noise enters before decryption","textPreview":"Noise enters before decryption","textChars":30,"textLines":1,"bbox":[145,295,1010,37]}
+{"kind":"textbox","id":"sh/q5wjelsz","slide":2,"text":"A calibrated protocol protects the aggregate.","textPreview":"A calibrated protocol protects the aggregate.","textChars":45,"textLines":1,"bbox":[145,332,1010,34]}
+{"kind":"textbox","id":"sh/ove9o7yd","slide":2,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[68,370,55,52]}
+{"kind":"textbox","id":"sh/9wnqhczy","slide":2,"text":"The server adds encrypted values","textPreview":"The server adds encrypted values","textChars":32,"textLines":1,"bbox":[145,370,1010,37]}
+{"kind":"textbox","id":"sh/mtwrmxg7","slide":2,"text":"It cannot read the individual contributions.","textPreview":"It cannot read the individual contributions.","textChars":44,"textLines":1,"bbox":[145,407,1010,34]}
+{"kind":"textbox","id":"sh/nu58f2hs","slide":2,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[68,445,55,52]}
+{"kind":"textbox","id":"sh/wjy9sry9","slide":2,"text":"Authorities authorize a release","textPreview":"Authorities authorize a release","textChars":31,"textLines":1,"bbox":[145,445,1010,37]}
+{"kind":"textbox","id":"sh/xk7qlczu","slide":2,"text":"A quorum combines partial decryptions.","textPreview":"A quorum combines partial decryptions.","textChars":38,"textLines":1,"bbox":[145,482,1010,34]}
+{"kind":"textbox","id":"sh/ahwrqhgj","slide":2,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[68,520,55,52]}
+{"kind":"textbox","id":"sh/bip8jmho","slide":2,"text":"The model generates voltages","textPreview":"The model generates voltages","textChars":28,"textLines":1,"bbox":[145,520,1010,37]}
+{"kind":"textbox","id":"sh/cnupgny5","slide":2,"text":"Synthetic loads pass through AC power flow.","textPreview":"Synthetic loads pass through AC power flow.","textChars":43,"textLines":1,"bbox":[145,557,1010,34]}
+{"kind":"textbox","id":"sh/do3q9szq","slide":2,"text":"The fitter repeats this process for the mean and then the covariance.","textPreview":"The fitter repeats this process for the mean and then the covariance.","textChars":69,"textLines":1,"bbox":[64,625,1120,36]}
+{"kind":"slide","id":"sl/ofy9wn61","slide":3,"title":"A simple example of bounded noise","textShapes":11}
+{"kind":"textbox","id":"sh/943mhgre","slide":3,"text":"A simple example of bounded noise","textPreview":"A simple example of bounded noise","textChars":33,"textLines":1,"bbox":[64,45,1152,82]}
+{"kind":"textbox","id":"sh/cza94vmx","slide":3,"text":"Illustrative aggregate statistic, in arbitrary units. These values are not a privacy calibration.","textPreview":"Illustrative aggregate statistic, in arbitrary units. These values are not a privacy calibration.","textChars":97,"textLines":1,"bbox":[64,135,1145,70]}
+{"kind":"textbox","id":"sh/d0jax03i","slide":3,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[1160,666,50,28]}
+{"kind":"textbox","id":"sh/298ryl4v","slide":3,"text":"100","textPreview":"100","textChars":3,"textLines":1,"bbox":[70,243,320,105]}
+{"kind":"textbox","id":"sh/3ah8rqlg","slide":3,"text":"Exact aggregate\nkept hidden","textPreview":"Exact aggregate | kept hidden","textChars":27,"textLines":2,"bbox":[70,365,330,90]}
+{"kind":"textbox","id":"sh/obq90bml","slide":3,"text":"+1.2","textPreview":"+1.2","textChars":4,"textLines":1,"bbox":[474,243,320,105]}
+{"kind":"textbox","id":"sh/pcjqtg36","slide":3,"text":"Hidden noise draw\ninside [−2, +2]","textPreview":"Hidden noise draw | inside [−2, +2]","textChars":33,"textLines":2,"bbox":[474,365,350,90]}
+{"kind":"textbox","id":"sh/m5cra54z","slide":3,"text":"101.2","textPreview":"101.2","textChars":5,"textLines":1,"bbox":[875,243,340,105]}
+{"kind":"textbox","id":"sh/n6ls3alk","slide":3,"text":"Authorized\nreleased statistic","textPreview":"Authorized | released statistic","textChars":29,"textLines":2,"bbox":[875,365,335,90]}
+{"kind":"textbox","id":"sh/n2l4fq98","slide":3,"text":"BNP bounds the perturbation. DP quantifies the privacy guarantee.","textPreview":"BNP bounds the perturbation. DP quantifies the privacy guarantee.","textChars":65,"textLines":1,"bbox":[64,500,1152,62]}
+{"kind":"textbox","id":"sh/m1c3mlsn","slide":3,"text":"A suitable bounded mechanism can satisfy DP itself. Gaussian noise added on top removes the hard bound on total noise.","textPreview":"A suitable bounded mechanism can satisfy DP itself. Gaussian noise added on top removes the hard bound on total noise.","textChars":118,"textLines":1,"bbox":[64,588,1110,82]}
+{"kind":"slide","id":"sl/jyx0ra1s","slide":4,"title":"Shared authority with small measured overhead","textShapes":5}
+{"kind":"textbox","id":"sh/sna103ap","slide":4,"text":"Shared authority with small measured overhead","textPreview":"Shared authority with small measured overhead","textChars":45,"textLines":1,"bbox":[64,45,1152,82]}
+{"kind":"textbox","id":"sh/1cj2d8b6","slide":4,"text":"Proposed configuration and published benchmark use different numbers of authorities.","textPreview":"Proposed configuration and published benchmark use different numbers of authorities.","textChars":84,"textLines":1,"bbox":[64,135,1145,70]}
+{"kind":"textbox","id":"sh/0ba143al","slide":4,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[1160,666,50,28]}
+{"kind":"textbox","id":"sh/ql8jytsj","slide":4,"text":"Benchmark: 7 of 20 authorities, parameter set III, Ryzen 9 5900X.","textPreview":"Benchmark: 7 of 20 authorities, parameter set III, Ryzen 9 5900X.","textChars":65,"textLines":1,"bbox":[64,566,1130,40]}
+{"kind":"textbox","id":"sh/doj29oba","slide":4,"text":"This measures local computation, not total grid or network latency.","textPreview":"This measures local computation, not total grid or network latency.","textChars":67,"textLines":1,"bbox":[64,620,1130,40]}
+{"kind":"table","id":"tb/uxcbq1c3","slide":4,"name":"","rows":4,"cols":3,"preview":"Number | Meaning | Evidence","bbox":[64,220,1152,320]}
+{"kind":"slide","id":"sl/i107q5of","slide":5,"title":"Batching targets the current bottleneck","textShapes":9}
+{"kind":"textbox","id":"sh/w32dkbuh","slide":5,"text":"Batching targets the current bottleneck","textPreview":"Batching targets the current bottleneck","textChars":39,"textLines":1,"bbox":[64,45,1152,82]}
+{"kind":"textbox","id":"sh/dgbulwnm","slide":5,"text":"Recorded Paillier baseline: 91 load rows, 10 simulated meters per row, 4 time samples.","textPreview":"Recorded Paillier baseline: 91 load rows, 10 simulated meters per row, 4 time samples.","textChars":86,"textLines":1,"bbox":[64,135,1145,70]}
+{"kind":"textbox","id":"sh/cf2tcr61","slide":5,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[1160,666,50,28]}
+{"kind":"textbox","id":"sh/z2tcnm5s","slide":5,"text":"99.4%","textPreview":"99.4%","textChars":5,"textLines":1,"bbox":[64,239,450,115]}
+{"kind":"textbox","id":"sh/yhkbe1o7","slide":5,"text":"of fitting time spent\non encryption","textPreview":"of fitting time spent | on encryption","textChars":35,"textLines":2,"bbox":[64,375,470,90]}
+{"kind":"textbox","id":"sh/l4bupwny","slide":5,"text":"214.25 s encryption","textPreview":"214.25 s encryption","textChars":19,"textLines":1,"bbox":[620,247,590,65]}
+{"kind":"textbox","id":"sh/032tgr6d","slide":5,"text":"215.54 s total fit","textPreview":"215.54 s total fit","textChars":18,"textLines":1,"bbox":[620,332,590,65]}
+{"kind":"textbox","id":"sh/n6dcr65o","slide":5,"text":"4,752 values per meter\nfor a 96-sample fit","textPreview":"4,752 values per meter | for a 96-sample fit","textChars":42,"textLines":2,"bbox":[620,435,590,95]}
+{"kind":"textbox","id":"sh/m5kbi1oj","slide":5,"text":"Packed BGV could encrypt many values together. The speedup remains unmeasured.","textPreview":"Packed BGV could encrypt many values together. The speedup remains unmeasured.","textChars":78,"textLines":1,"bbox":[64,580,1110,80]}
+{"kind":"slide","id":"sl/x8f69ofe","slide":6,"title":"The measurements that will decide success","textShapes":5}
+{"kind":"textbox","id":"sh/7m98ru9g","slide":6,"text":"The measurements that will decide success","textPreview":"The measurements that will decide success","textChars":41,"textLines":1,"bbox":[64,45,1152,82]}
+{"kind":"textbox","id":"sh/yhg7epsj","slide":6,"text":"The best settings must balance privacy, availability and voltage quality.","textPreview":"The best settings must balance privacy, availability and voltage quality.","textChars":73,"textLines":1,"bbox":[64,135,1145,70]}
+{"kind":"textbox","id":"sh/zi98nu94","slide":6,"text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[1160,666,50,28]}
+{"kind":"textbox","id":"sh/98rqt4r6","slide":6,"text":"Next comparison: current Paillier versus packed threshold BGV.","textPreview":"Next comparison: current Paillier versus packed threshold BGV.","textChars":62,"textLines":1,"bbox":[64,578,1120,40]}
+{"kind":"textbox","id":"sh/ml07i9sv","slide":6,"text":"BNP sampling, collusion protection and safe recovery still need validation.","textPreview":"BNP sampling, collusion protection and safe recovery still need validation.","textChars":75,"textLines":1,"bbox":[64,631,1115,36]}
+{"kind":"table","id":"tb/pc3mlove","slide":6,"name":"","rows":4,"cols":2,"preview":"Measure | What a good result means","bbox":[64,220,1152,330]}

@@ -1,0 +1,32 @@
+{
+  "Paillier / None": {
+    "max_load_error_kw": 3.0718899646231534e-09,
+    "max_voltage_difference_pu": 1.3389289676979388e-12,
+    "all_converged": true
+  },
+  "Threshold BGV / None": {
+    "max_load_error_kw": 0.0025270123851020565,
+    "max_voltage_difference_pu": 1.5271884310497086e-06,
+    "all_converged": true
+  },
+  "Paillier / Gaussian DP": {
+    "max_load_error_kw": 2.3949731087213877e-09,
+    "max_voltage_difference_pu": 3.7403413699621524e-13,
+    "all_converged": true
+  },
+  "Threshold BGV / Gaussian DP": {
+    "max_load_error_kw": 0.0029698240833209155,
+    "max_voltage_difference_pu": 8.568618961035668e-07,
+    "all_converged": true
+  },
+  "Paillier / BNP": {
+    "max_load_error_kw": 3.257727421157597e-09,
+    "max_voltage_difference_pu": 5.030420524576584e-13,
+    "all_converged": true
+  },
+  "Threshold BGV / BNP": {
+    "max_load_error_kw": 0.0024000201429563717,
+    "max_voltage_difference_pu": 3.687411673780616e-07,
+    "all_converged": true
+  }
+}
