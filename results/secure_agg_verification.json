@@ -1,0 +1,64 @@
+{
+  "noise": {
+    "k=10, compensated=False": {
+      "empirical_variance": 0.0009008297816221137,
+      "expected_variance": 0.0009
+    },
+    "k=7, compensated=False": {
+      "empirical_variance": 0.0006290664745685006,
+      "expected_variance": 0.0006299999999999999
+    },
+    "k=7, compensated=True": {
+      "empirical_variance": 0.0008952359383726775,
+      "expected_variance": 0.0008999999999999999
+    }
+  },
+  "encrypted_variance_ratio": 1.0002007528613521,
+  "noise_free_max_error_pu": 1.200539667678413e-12,
+  "utility_trials": 32,
+  "utility_training_buses": 3,
+  "utility_training_days": 360,
+  "utility_T": 6,
+  "utility_meters_per_bus": 2,
+  "voltage_load_rows": 91,
+  "utility": {
+    "r2": {
+      "trusted_mean": 0.907135421616831,
+      "secure_mean": 0.90914207281493,
+      "difference_ci90": [
+        -0.0008887148595293228,
+        0.004902017255727345
+      ],
+      "margin": 0.02,
+      "equivalent": true
+    },
+    "ansi_exceedance": {
+      "trusted_mean": 0.26236354666266987,
+      "secure_mean": 0.26389981764588333,
+      "difference_ci90": [
+        0.0001451222084074169,
+        0.002927419758019445
+      ],
+      "margin": 0.005,
+      "equivalent": true
+    },
+    "lag1": {
+      "trusted_mean": 0.08375092377455517,
+      "secure_mean": 0.08580112892323254,
+      "difference_ci90": [
+        -0.006498330814367527,
+        0.010598741111722232
+      ],
+      "margin": 0.05,
+      "equivalent": true
+    }
+  },
+  "crypto_timing": {
+    "key_generation_s": 0.2118274999083951,
+    "encryption_s": 127.61733630031813,
+    "addition_s": 0.13925760111305863,
+    "decryption_s": 5.267675800481811,
+    "encrypted_values": 7929,
+    "decrypted_values": 1134
+  }
+}

@@ -13,8 +13,102 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
 import numpy as np
 from scipy.stats import wasserstein_distance
+
+if TYPE_CHECKING:
+    from dpvolt.secure_agg import SecureAggConfig, CryptoTiming
+
+
+@dataclass
+class ModelFitConfig:
+    """Opt into encrypted fitting; existing experiment defaults stay trusted.
+
+    Secure settings are constructed lazily so trusted experiments do not need
+    phe installed. Public load bounds must be supplied by the caller.
+    """
+
+    mode: str = "trusted_curator"
+    secure: SecureAggConfig | None = None
+    encryption_backend: str = "paillier"
+    reports: dict = field(default_factory=dict, init=False)
+    timing: CryptoTiming | None = field(default=None, init=False)
+
+
+# Used by run_days5_6.dp_model. Change mode to "secure_aggregation" to opt in.
+MODEL_FIT_CONFIG = ModelFitConfig()
+
+
+def fit_private_load_model(archive, classes, model, theta, epsilon, delta, rng,
+                           config=None, session=None, weights=None, **fit_options):
+    """Fit privately, then return the same LoadModel used by sample_loads.
+
+    The secure branch is a simulation harness: it distributes the synthetic
+    archive to meter objects before calling the encrypted two-round fitter.
+    A real utility must never receive that archive or the harness key holder.
+    Class membership, bounds, weights and power factors are treated as public.
+    Do not estimate these on sensitive customer records without accounting.
+    """
+    from dpvolt.loads import LoadModel
+    from dpvolt.privacy import dp_fit_class
+
+    config = MODEL_FIT_CONFIG if config is None else config
+    if config.mode not in ("trusted_curator", "secure_aggregation"):
+        raise ValueError("mode must be trusted_curator or secure_aggregation")
+    config.reports.clear()
+    config.timing = None
+    mu, covariances = {}, {}
+
+    if config.mode == "secure_aggregation":
+        from dpvolt.secure_agg import (SecureAggConfig, PaillierSimulation,
+                                       SimulatedMeter, split_loads, fit_class)
+
+        archive = np.asarray(archive, dtype=float)
+        if (archive.ndim != 3 or archive.shape[-1] != model.T
+                or not np.isfinite(archive).all() or np.any(archive <= 0)):
+            raise ValueError("secure fitting needs positive (buses, days, T) loads")
+        members = np.concatenate(list(classes.values()))
+        if not np.array_equal(np.sort(members), np.arange(len(archive))):
+            raise ValueError("classes must partition the load rows exactly once")
+        settings = config.secure or SecureAggConfig()
+        readings, shares = split_loads(archive, settings, weights)
+        if session is None:
+            if config.encryption_backend == "paillier":
+                session = PaillierSimulation(settings.precision)
+            elif config.encryption_backend == "threshold_bgv":
+                from dpvolt.threshold_agg import ThresholdBGVSimulation
+                session = ThresholdBGVSimulation()
+            else:
+                raise ValueError("encryption_backend must be paillier or threshold_bgv")
+        for label, indices in classes.items():
+            if len(indices) == 0:
+                raise ValueError("classes must not be empty")
+            lo, hi = model.p_min[label], model.p_max[label]
+            if lo <= 0 or hi <= lo or not np.isfinite([lo, hi]).all():
+                raise ValueError("need positive finite public load bounds")
+            if np.any(archive[indices] < lo) or np.any(archive[indices] > hi):
+                raise ValueError("records exceed declared public load bounds")
+            meters = [SimulatedMeter(readings[b, i], shares[b, i])
+                      for b in indices for i in range(settings.n_meters)]
+            mu[label], covariances[label], config.reports[label] = fit_class(
+                meters, len(indices) * archive.shape[1], model.T,
+                np.log(lo), np.log(hi), epsilon, delta, rng,
+                config=settings, session=session, **fit_options)
+        config.timing = session.timing
+    else:
+        # Keep the original calls and RNG consumption exactly as before.
+        for label, indices in classes.items():
+            data = np.log(archive[indices].reshape(-1, model.T))
+            mu[label], covariances[label], config.reports[label] = dp_fit_class(
+                data, np.log(model.p_min[label]), np.log(model.p_max[label]),
+                epsilon, delta, rng, **fit_options)
+
+    return LoadModel(mu=mu, Sigma=covariances, members=classes,
+                     p_min=model.p_min, p_max=model.p_max,
+                     power_factor=theta, T=model.T)
 
 
 # ---------------------------------------------------------------------------
@@ -50,6 +144,28 @@ def ansi_violation_rate(V: np.ndarray,
     """
     mag = np.abs(V)
     return float(np.mean((mag < v_min) | (mag > v_max)))
+
+
+def voltage_utility_metrics(V_true, V_released):
+    """Magnitude R^2, ANSI exceedance fraction, and mean lag-1 correlation.
+
+    R^2 treats aligned voltage magnitudes as predictions, using the global
+    true-magnitude mean. It is not the masked-recovery training score.
+    Both arrays must be finite (days, time, nodes) with at least two steps.
+    """
+    truth, released = np.abs(V_true), np.abs(V_released)
+    if (truth.shape != released.shape or truth.ndim != 3
+            or truth.shape[1] < 2 or truth.size == 0
+            or not np.isfinite(truth).all() or not np.isfinite(released).all()):
+        raise ValueError("need matching finite (days, time >= 2, nodes) voltages")
+    denominator = float(np.sum((truth - truth.mean()) ** 2))
+    if denominator == 0:
+        raise ValueError("R^2 is undefined for constant reference voltages")
+    return {
+        "r2": float(1 - np.sum((released - truth) ** 2) / denominator),
+        "ansi_exceedance": ansi_violation_rate(released),
+        "lag1": float(mean_autocorrelation(released, max_lag=1)[0]),
+    }
 
 
 def mean_autocorrelation(V: np.ndarray, max_lag: int = 5) -> np.ndarray:

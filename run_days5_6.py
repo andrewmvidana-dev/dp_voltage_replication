@@ -26,6 +26,7 @@ from dpvolt.privacy import dp_fit_class, gaussian_sigma
 from dpvolt.experiments import (voltage_wasserstein, empirical_voltage_sensitivity,
                                 build_masked_dataset, run_seeds,
                                 ansi_violation_rate, mean_autocorrelation)
+from dpvolt.experiments import fit_private_load_model
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -64,27 +65,15 @@ def feeder_load_ratings():
     return np.array(kw), np.arccos(np.clip(np.array(pf), -1.0, 1.0))
 
 
-def dp_model(archive, classes, model, theta, epsilon, rng):
+def dp_model(archive, classes, model, theta, epsilon, rng, config=None):
     """Refit the load model under DP at a given epsilon.
 
     Returns a LoadModel carrying the PRIVATE mean and covariance, so that
     sampling from it produces private synthetic loads.
     """
-    mu, Sigma = {}, {}
-    for label, members in classes.items():
-        data = np.log(archive[members].reshape(-1, model.T))
-        m, cov, _ = dp_fit_class(
-            data, np.log(model.p_min[label]), np.log(model.p_max[label]),
-            epsilon, DELTA, rng, clip_norm=CLIP_NORM,
-            eig_floor_ratio=COV_FLOOR,
-        )
-        mu[label], Sigma[label] = m, cov
-
-    return LoadModel(
-        mu=mu, Sigma=Sigma, members=classes,
-        p_min=model.p_min, p_max=model.p_max,
-        power_factor=theta, T=model.T,
-    )
+    return fit_private_load_model(
+        archive, classes, model, theta, epsilon, DELTA, rng, config=config,
+        clip_norm=CLIP_NORM, eig_floor_ratio=COV_FLOOR)
 
 
 def main():

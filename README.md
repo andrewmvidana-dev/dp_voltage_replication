@@ -5,8 +5,13 @@ An independent replication of Campbell, Zhang, Scaglione, Kerr, Chesler & Peiser
 ([arXiv:2605.02390](https://arxiv.org/abs/2605.02390)), on the IEEE 123-bus test feeder.
 
 The pipeline runs end to end: feeder model → admittance matrix → Kron reduction →
-load model fitting → DP mechanism → AC power flow → evaluation figures. A 74-check
+load model fitting → DP mechanism → AC power flow → evaluation figures. An 80-check
 verification suite passes cleanly.
+
+An optional Paillier aggregation simulation now fits the private load model
+from encrypted meter contributions. See [SECURE_AGGREGATION.md](SECURE_AGGREGATION.md)
+for the mode flag, dropout controls, verification, benchmarks, and the limits
+of the simulated trust boundary. The existing trusted mode remains the default.
 
 Beyond reproducing the paper, this repo does two things the paper does not: it
 tests whether **Bounded-Noise Privacy** can be substituted for the Gaussian

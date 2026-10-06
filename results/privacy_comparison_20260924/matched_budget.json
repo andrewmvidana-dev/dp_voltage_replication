@@ -1,0 +1,42 @@
+{
+  "epsilon": 0,
+  "delta": 0.01,
+  "gaussian_sd_kw": 797.8636716323297,
+  "gaussian_delta_audit": 0.010000000000000009,
+  "noise_seed_start": 25000,
+  "gaussian_theoretical_raw_rmse_kw": 797.8636716323297,
+  "bnp_theoretical_raw_rmse_kw": 577.3502691896258,
+  "theoretical_attack_accuracy": 0.505,
+  "utility": {
+    "raw_load_rmse_kw": {
+      "mean": 797.0932082475632,
+      "ci95": [
+        788.5872925002298,
+        805.5991239948967
+      ]
+    },
+    "clipped_load_rmse_kw": {
+      "mean": 113.8453656314709,
+      "ci95": [
+        113.18186428960121,
+        114.50886697334059
+      ]
+    },
+    "output_clipped_fraction": {
+      "mean": 0.9023199023199024,
+      "ci95": [
+        0.8970458747676507,
+        0.9075939298721541
+      ]
+    },
+    "voltage_magnitude_rmse_pu": {
+      "mean": 0.09539299268169894,
+      "ci95": [
+        0.09302352620880533,
+        0.09776245915459256
+      ]
+    }
+  },
+  "all_powerflows_converged": true,
+  "calibration": "At epsilon=0, total variation is 2*Phi(S/(2*sigma))-1. Invert this to match delta exactly."
+}
