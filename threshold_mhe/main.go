@@ -3,6 +3,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -24,16 +25,22 @@ type Request struct {
 	Active        []int       `json:"active"`
 	Scale         float64     `json:"scale"`
 	Workers       int         `json:"workers"`
+	// Only the synthetic attack harness enables individual decryption.
+	CompromiseIndividuals bool `json:"compromise_individuals,omitempty"`
 }
 type Result struct {
-	Values               []float64          `json:"values"`
-	Timing               map[string]float64 `json:"timing"`
-	Ciphertexts          int                `json:"ciphertexts"`
-	CiphertextBytes      int                `json:"ciphertext_bytes"`
-	DecryptionShareBytes int                `json:"decryption_share_bytes"`
-	Slots                int                `json:"slots"`
-	PlaintextModulus     uint64             `json:"plaintext_modulus"`
-	MaxQuantizationError float64            `json:"max_quantization_error"`
+	Values                         []float64          `json:"values"`
+	Timing                         map[string]float64 `json:"timing"`
+	Ciphertexts                    int                `json:"ciphertexts"`
+	CiphertextBytes                int                `json:"ciphertext_bytes"`
+	DecryptionShareBytes           int                `json:"decryption_share_bytes"`
+	Slots                          int                `json:"slots"`
+	PlaintextModulus               uint64             `json:"plaintext_modulus"`
+	MaxQuantizationError           float64            `json:"max_quantization_error"`
+	RecoveredContributions         [][]float64        `json:"recovered_contributions,omitempty"`
+	CompromiseCiphertextDigests    []string           `json:"compromise_ciphertext_digests,omitempty"`
+	CompromiseDecryptionShareBytes int                `json:"compromise_decryption_share_bytes,omitempty"`
+	CompromiseWallS                float64            `json:"compromise_wall_s,omitempty"`
 }
 
 func check(err error) {
@@ -146,6 +153,9 @@ func run(r Request) Result {
 	cks, err := multiparty.NewKeySwitchProtocol(params, ring.DiscreteGaussian{Sigma: math.Exp2(40), Bound: 6 * math.Exp2(40)})
 	check(err)
 	out.Values = make([]float64, 0, width)
+	if r.CompromiseIndividuals {
+		out.RecoveredContributions = make([][]float64, len(r.Contributions))
+	}
 	for offset := 0; offset < width; offset += params.MaxSlots() {
 		size := min(params.MaxSlots(), width-offset)
 		cts := make([]*rlwe.Ciphertext, len(r.Contributions))
@@ -181,6 +191,34 @@ func run(r Request) Result {
 			check(e)
 		}
 		out.Timing["encryption_s"] += seconds(start)
+		if r.CompromiseIndividuals {
+			// This intentionally compromised quorum decrypts every original message.
+			// Copies are essential: ordinary aggregation below overwrites cts[0].
+			// These extra disclosures and their costs never enter the default path.
+			attackStart := time.Now()
+			for i, original := range cts {
+				serialized, err := original.MarshalBinary()
+				check(err)
+				digest := sha256.Sum256(serialized)
+				out.CompromiseCiphertextDigests = append(out.CompromiseCiphertextDigests, fmt.Sprintf("%x", digest))
+				copy := original.CopyNew()
+				combinedShare := cks.AllocateShare(copy.Level())
+				for _, sk := range additive {
+					part := cks.AllocateShare(copy.Level())
+					cks.GenShare(sk, zero, copy, &part)
+					out.CompromiseDecryptionShareBytes += part.BinarySize()
+					check(cks.AggregateShares(combinedShare, part, &combinedShare))
+				}
+				cks.KeySwitch(copy, combinedShare, copy)
+				plaintext := rlwe.NewDecryptor(params, zero).DecryptNew(copy)
+				decoded := make([]int64, params.MaxSlots())
+				check(encoder.Decode(plaintext, decoded))
+				for _, value := range decoded[:size] {
+					out.RecoveredContributions[i] = append(out.RecoveredContributions[i], float64(value)/r.Scale)
+				}
+			}
+			out.CompromiseWallS += seconds(attackStart)
+		}
 		start = time.Now()
 		total := cts[0]
 		for i, ct := range cts {

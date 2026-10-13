@@ -1,0 +1,143 @@
+{
+  "label": "RECORDED",
+  "interpretation": "Recomputed from saved trials and ciphertext outputs; no fresh encryption.",
+  "utility": {
+    "None": {
+      "raw_rmse_kw": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "Gaussian DP": {
+      "raw_rmse_kw": {
+        "mean": 794.2752888604371,
+        "ci95": [
+          786.5666399079257,
+          801.9839378129484
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 113.46817026654908,
+        "ci95": [
+          112.49796303127395,
+          114.4383775018242
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.8989010989010988,
+        "ci95": [
+          0.8939812561729468,
+          0.9038209416292509
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.09653808372874013,
+        "ci95": [
+          0.09426700194279077,
+          0.0988091655146895
+        ]
+      }
+    },
+    "BNP": {
+      "raw_rmse_kw": {
+        "mean": 580.6717843537755,
+        "ci95": [
+          577.0167470738583,
+          584.3268216336927
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 113.98308745428989,
+        "ci95": [
+          112.97460548140026,
+          114.99156942717951
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.9032967032967032,
+        "ci95": [
+          0.8989550023034186,
+          0.9076384042899878
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.09639563536205209,
+        "ci95": [
+          0.09360639089527283,
+          0.09918487982883135
+        ]
+      }
+    }
+  },
+  "crypto": {
+    "Paillier / None": {
+      "max_error_kw": 3.0718899646231534e-09,
+      "label": "RECORDED"
+    },
+    "Threshold BGV / None": {
+      "max_error_kw": 0.0025270123851020565,
+      "label": "RECORDED"
+    },
+    "Paillier / Gaussian DP": {
+      "max_error_kw": 2.3949731087213877e-09,
+      "label": "RECORDED"
+    },
+    "Threshold BGV / Gaussian DP": {
+      "max_error_kw": 0.0029698240833209155,
+      "label": "RECORDED"
+    },
+    "Paillier / BNP": {
+      "max_error_kw": 3.257727421157597e-09,
+      "label": "RECORDED"
+    },
+    "Threshold BGV / BNP": {
+      "max_error_kw": 0.0024000201429563717,
+      "label": "RECORDED"
+    }
+  },
+  "checks": {
+    "None/raw_rmse_kw": true,
+    "None/clipped_rmse_kw": true,
+    "None/clipped_fraction": true,
+    "None/voltage_rmse_pu": true,
+    "Paillier / None": true,
+    "Threshold BGV / None": true,
+    "Gaussian DP/raw_rmse_kw": true,
+    "Gaussian DP/clipped_rmse_kw": true,
+    "Gaussian DP/clipped_fraction": true,
+    "Gaussian DP/voltage_rmse_pu": true,
+    "Paillier / Gaussian DP": true,
+    "Threshold BGV / Gaussian DP": true,
+    "BNP/raw_rmse_kw": true,
+    "BNP/clipped_rmse_kw": true,
+    "BNP/clipped_fraction": true,
+    "BNP/voltage_rmse_pu": true,
+    "Paillier / BNP": true,
+    "Threshold BGV / BNP": true
+  },
+  "all_passed": true
+}

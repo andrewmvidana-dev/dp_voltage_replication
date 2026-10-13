@@ -1,0 +1,38 @@
+{
+  "label": "MEASURED",
+  "baseline_commit": "2de0e29a473d6acb52d83864f48a725c8347169e",
+  "suites": {
+    "core": {
+      "label": "MEASURED",
+      "passed": 80,
+      "total": 80,
+      "log": "final_core.txt"
+    },
+    "threshold": {
+      "label": "MEASURED",
+      "passed": 5,
+      "total": 5,
+      "log": "final_threshold.txt"
+    },
+    "key_compromise": {
+      "label": "MEASURED",
+      "passed": 6,
+      "total": 6,
+      "log": "crypto_verification.txt"
+    },
+    "voltage": {
+      "label": "MEASURED",
+      "passed": 4,
+      "total": 4,
+      "log": "voltage_verification.txt"
+    },
+    "distributed_bnp": {
+      "label": "MEASURED",
+      "passed": 14,
+      "total": 14,
+      "source": "distributed_verification.json"
+    }
+  },
+  "total_checks": 109,
+  "all_passed": true
+}

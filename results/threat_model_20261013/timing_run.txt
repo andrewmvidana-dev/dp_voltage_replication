@@ -1,0 +1,37 @@
+Failed to find real location of C:\Users\15397\AppData\Local\Python\pythoncore-3.14-64\python.exe
+Timing 0 None None 0.0
+Timing 0 Threshold BGV Gaussian DP 0.278
+Timing 0 Paillier None 16.492
+Timing 0 Threshold BGV None 0.27
+Timing 0 Paillier BNP 16.574
+Timing 0 None BNP 0.0
+Timing 0 Threshold BGV BNP 0.278
+Timing 0 None Gaussian DP 0.001
+Timing 0 Paillier Gaussian DP 16.328
+Timing 0 Threshold BGV Distributed BNP 0.286
+Timing 0 None Distributed BNP 0.01
+Timing 0 Paillier Distributed BNP 16.276
+Timing 1 Threshold BGV Gaussian DP 0.271
+Timing 1 Threshold BGV Distributed BNP 0.294
+Timing 1 Threshold BGV BNP 0.273
+Timing 1 Paillier Distributed BNP 16.29
+Timing 1 Paillier None 16.232
+Timing 1 None None 0.0
+Timing 1 None Gaussian DP 0.001
+Timing 1 Paillier BNP 16.221
+Timing 1 Threshold BGV None 0.283
+Timing 1 None BNP 0.0
+Timing 1 Paillier Gaussian DP 16.273
+Timing 1 None Distributed BNP 0.01
+Timing 2 Paillier None 16.235
+Timing 2 Threshold BGV BNP 0.275
+Timing 2 Paillier Gaussian DP 15.939
+Timing 2 Threshold BGV Gaussian DP 0.277
+Timing 2 Paillier Distributed BNP 16.034
+Timing 2 Paillier BNP 16.089
+Timing 2 Threshold BGV Distributed BNP 0.301
+Timing 2 None None 0.0
+Timing 2 None Gaussian DP 0.001
+Timing 2 Threshold BGV None 0.273
+Timing 2 None BNP 0.0
+Timing 2 None Distributed BNP 0.011

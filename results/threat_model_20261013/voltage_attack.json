@@ -1,0 +1,401 @@
+{
+  "evidence": "MEASURED",
+  "settings": {
+    "attack_trials": 20000,
+    "s_base_kw": 1000.0,
+    "voltage_bases": "Per-node nominal line-to-neutral volts",
+    "voltage_input": "Retained complex per-unit phasors, including angle",
+    "power_formula": "V_volts = V_pu * Vbase; load_I = J_source - Y_network @ V_volts; load_kVA = V_volts * conj(load_I) / 1000",
+    "release_level": "One row is an OpenDSS load element, not necessarily a unique bus",
+    "scope": "Direct load sums only"
+  },
+  "cases": {
+    "None": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4377624386988923,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.011258060232890443,
+        "rms": 0.0013187007012535757
+      },
+      "recovered_vs_true_load_rmse_kw": 0.001318700701253576,
+      "recovered_vs_raw_release_rmse_kw": 0.001318700701253576,
+      "recovered_vs_clipped_release_rmse_kw": 0.001318700701253576
+    },
+    "Gaussian DP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4446985623667137,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.020853649867689228,
+        "rms": 0.004532009354116547
+      },
+      "recovered_vs_true_load_rmse_kw": 113.18836727151077,
+      "recovered_vs_raw_release_rmse_kw": 723.0858171067681,
+      "recovered_vs_clipped_release_rmse_kw": 0.004532009354116547
+    },
+    "BNP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.442052910066515,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.014628160395659506,
+        "rms": 0.0030312503300451536
+      },
+      "recovered_vs_true_load_rmse_kw": 113.54137378618127,
+      "recovered_vs_raw_release_rmse_kw": 503.66940596103336,
+      "recovered_vs_clipped_release_rmse_kw": 0.0030312503300451536
+    },
+    "Paillier_Distributed_BNP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4542459973970077,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.02147502544858071,
+        "rms": 0.005820024361834228
+      },
+      "recovered_vs_true_load_rmse_kw": 112.4646914474362,
+      "recovered_vs_raw_release_rmse_kw": 706.3787846733559,
+      "recovered_vs_clipped_release_rmse_kw": 0.005820024361834228,
+      "release_evidence": "MEASURED",
+      "release_archive": "results\\threat_model_20261013\\Paillier_Distributed_BNP.npz"
+    },
+    "Paillier_BNP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.442052910066543,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.014628160399269063,
+        "rms": 0.0030312503300503942
+      },
+      "recovered_vs_true_load_rmse_kw": 113.54137378616623,
+      "recovered_vs_raw_release_rmse_kw": 503.6694059610103,
+      "recovered_vs_clipped_release_rmse_kw": 0.0030312503300503942,
+      "release_evidence": "RECORDED",
+      "release_archive": "results\\threshold_20261005\\Paillier_BNP.npz"
+    },
+    "Paillier_Gaussian_DP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.444698562366708,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.020853649876301006,
+        "rms": 0.004532009352623523
+      },
+      "recovered_vs_true_load_rmse_kw": 113.1883672714999,
+      "recovered_vs_raw_release_rmse_kw": 723.0858171067478,
+      "recovered_vs_clipped_release_rmse_kw": 0.004532009352623523,
+      "release_evidence": "RECORDED",
+      "release_archive": "results\\threshold_20261005\\Paillier_Gaussian_DP.npz"
+    },
+    "Paillier_None": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4377624386989636,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.011258060236798428,
+        "rms": 0.001318700701596046
+      },
+      "recovered_vs_true_load_rmse_kw": 0.0013187006679796225,
+      "recovered_vs_raw_release_rmse_kw": 0.001318700701596046,
+      "recovered_vs_clipped_release_rmse_kw": 0.001318700701596046,
+      "release_evidence": "RECORDED",
+      "release_archive": "results\\threshold_20261005\\Paillier_None.npz"
+    },
+    "Threshold_BGV_BNP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4420529087749028,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.01462808373793223,
+        "rms": 0.00303124745357623
+      },
+      "recovered_vs_true_load_rmse_kw": 113.54137365341266,
+      "recovered_vs_raw_release_rmse_kw": 503.66943987624717,
+      "recovered_vs_clipped_release_rmse_kw": 0.0030312474535762303,
+      "release_evidence": "RECORDED",
+      "release_archive": "results\\threshold_20261005\\Threshold_BGV_BNP.npz"
+    },
+    "Threshold_BGV_Gaussian_DP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4446986065463399,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.02085350739108094,
+        "rms": 0.004531989139931481
+      },
+      "recovered_vs_true_load_rmse_kw": 113.18834773094629,
+      "recovered_vs_raw_release_rmse_kw": 723.0858043132125,
+      "recovered_vs_clipped_release_rmse_kw": 0.004531989139931481,
+      "release_evidence": "RECORDED",
+      "release_archive": "results\\threshold_20261005\\Threshold_BGV_Gaussian_DP.npz"
+    },
+    "Threshold_BGV_None": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4377624522934678,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.011257998487849363,
+        "rms": 0.001318762997934177
+      },
+      "recovered_vs_true_load_rmse_kw": 0.0016302569856726592,
+      "recovered_vs_raw_release_rmse_kw": 0.001318762997934177,
+      "recovered_vs_clipped_release_rmse_kw": 0.001318762997934177,
+      "release_evidence": "RECORDED",
+      "release_archive": "results\\threshold_20261005\\Threshold_BGV_None.npz"
+    },
+    "Distributed BNP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.4542459973968824,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.021475025439087858,
+        "rms": 0.00582002436172388
+      },
+      "recovered_vs_true_load_rmse_kw": 112.46469144744059,
+      "recovered_vs_raw_release_rmse_kw": 706.3787846733693,
+      "recovered_vs_clipped_release_rmse_kw": 0.00582002436172388
+    },
+    "Threshold_BGV_Distributed_BNP": {
+      "evidence": "MEASURED",
+      "all_converged": true,
+      "snapshots": 6,
+      "minimum_rank": 91,
+      "max_bus_condition": 1.45424601979674,
+      "setpoint_reconstruction_error_kw": {
+        "max_abs": 0.021474698037195594,
+        "rms": 0.005820008732651567
+      },
+      "recovered_vs_true_load_rmse_kw": 112.46470293268122,
+      "recovered_vs_raw_release_rmse_kw": 706.3787946652268,
+      "recovered_vs_clipped_release_rmse_kw": 0.005820008732651567,
+      "release_evidence": "MEASURED",
+      "release_archive": "results\\threat_model_20261013\\Threshold_BGV_Distributed_BNP.npz"
+    }
+  },
+  "voltage_only_attacks": {
+    "None": {
+      "evidence": "MEASURED",
+      "requested_trials": 20000,
+      "completed_trials": 20000,
+      "failed_powerflows": 0,
+      "accuracy": 1.0,
+      "ci95_wilson": [
+        0.9998079639438954,
+        0.9999999999999999
+      ],
+      "analytic_accuracy": 1.0,
+      "analytic_evidence": "ANALYTIC",
+      "analytic_formula": "(1 + TV)/2; TV=1 without noise or delta=0.01 for matched additive noise. Clipping at 0 and 200 kW preserves this chosen midpoint decision.",
+      "predicted_accuracy": 1.0,
+      "prediction_evidence": "PREDICTED",
+      "wall_s": 17.73183629999403,
+      "max_target_reconstruction_error_kw": 0.00045831636535353937,
+      "classifier": "Threshold the nominal target-element kW recovered from retained phasors at 100 kW",
+      "target_load": "s1a",
+      "privacy_unit": "One bounded meter reading at one time",
+      "scope": "Voltage-only public observation, common to all adversaries. Plaintext mechanism without encrypted quantization.",
+      "status": "complete",
+      "accuracy_conditioning": "All generated trials"
+    },
+    "Gaussian DP": {
+      "evidence": "MEASURED",
+      "requested_trials": 20000,
+      "completed_trials": 20000,
+      "failed_powerflows": 0,
+      "accuracy": 0.50345,
+      "ci95_wilson": [
+        0.4965206486562166,
+        0.5103780262949962
+      ],
+      "analytic_accuracy": 0.505,
+      "analytic_evidence": "ANALYTIC",
+      "analytic_formula": "(1 + TV)/2; TV=1 without noise or delta=0.01 for matched additive noise. Clipping at 0 and 200 kW preserves this chosen midpoint decision.",
+      "predicted_accuracy": 0.505,
+      "prediction_evidence": "PREDICTED",
+      "wall_s": 20.537771000002977,
+      "max_target_reconstruction_error_kw": 0.0039672159896326775,
+      "classifier": "Threshold the nominal target-element kW recovered from retained phasors at 100 kW",
+      "target_load": "s1a",
+      "privacy_unit": "One bounded meter reading at one time",
+      "scope": "Voltage-only public observation, common to all adversaries. Plaintext mechanism without encrypted quantization.",
+      "status": "complete",
+      "accuracy_conditioning": "All generated trials"
+    },
+    "BNP": {
+      "evidence": "MEASURED",
+      "requested_trials": 20000,
+      "completed_trials": 20000,
+      "failed_powerflows": 0,
+      "accuracy": 0.50705,
+      "ci95_wilson": [
+        0.5001204810794251,
+        0.5139768112121839
+      ],
+      "analytic_accuracy": 0.505,
+      "analytic_evidence": "ANALYTIC",
+      "analytic_formula": "(1 + TV)/2; TV=1 without noise or delta=0.01 for matched additive noise. Clipping at 0 and 200 kW preserves this chosen midpoint decision.",
+      "predicted_accuracy": 0.505,
+      "prediction_evidence": "PREDICTED",
+      "wall_s": 19.679784800013294,
+      "max_target_reconstruction_error_kw": 0.004393857734925177,
+      "classifier": "Threshold the nominal target-element kW recovered from retained phasors at 100 kW",
+      "target_load": "s1a",
+      "privacy_unit": "One bounded meter reading at one time",
+      "scope": "Voltage-only public observation, common to all adversaries. Plaintext mechanism without encrypted quantization.",
+      "status": "complete",
+      "accuracy_conditioning": "All generated trials"
+    },
+    "Distributed BNP": {
+      "evidence": "MEASURED",
+      "requested_trials": 20000,
+      "completed_trials": 20000,
+      "failed_powerflows": 0,
+      "accuracy": 0.5068,
+      "ci95_wilson": [
+        0.49987048111073895,
+        0.513726907198898
+      ],
+      "analytic_accuracy": 0.505,
+      "analytic_evidence": "ANALYTIC",
+      "analytic_formula": "(1 + TV)/2; TV=1 without noise or delta=0.01 for matched additive noise. Clipping at 0 and 200 kW preserves this chosen midpoint decision.",
+      "predicted_accuracy": 0.505,
+      "prediction_evidence": "PREDICTED",
+      "wall_s": 20.115898199990625,
+      "max_target_reconstruction_error_kw": 0.004006355127074812,
+      "classifier": "Threshold the nominal target-element kW recovered from retained phasors at 100 kW",
+      "target_load": "s1a",
+      "privacy_unit": "One bounded meter reading at one time",
+      "scope": "Voltage-only public observation, common to all adversaries. Plaintext mechanism without encrypted quantization.",
+      "status": "complete",
+      "accuracy_conditioning": "All generated trials"
+    }
+  },
+  "limitations": [
+    "Complete noiseless complex phasors and exact public topology, controls, source and load laws are assumed.",
+    "Only load models 1, 2 and 5 with the captured connections are implemented.",
+    "Recovering a load-element total does not uniquely identify individual meter readings.",
+    "Published raw noisy sums already dominate voltage information by post-processing; the voltage attack reconstructs clipped setpoints.",
+    "The tolerance gate is an explicit engineering criterion, not a power-error bound implied by the OpenDSS voltage iteration tolerance."
+  ],
+  "public_model": {
+    "node_count": 278,
+    "retained_count": 96,
+    "load_elements": 91,
+    "source_nodes": [
+      "150.1",
+      "150.2",
+      "150.3"
+    ],
+    "frozen_transformer_taps": {
+      "reg1a:1": 1.0,
+      "reg1a:2": 1.0375,
+      "xfm1:1": 1.0,
+      "xfm1:2": 1.0,
+      "reg2a:1": 1.0,
+      "reg2a:2": 0.9999999999999999,
+      "reg3a:1": 1.0,
+      "reg3a:2": 1.0124999999999997,
+      "reg4a:1": 1.0,
+      "reg4a:2": 1.0625,
+      "reg3c:1": 1.0,
+      "reg3c:2": 0.9999999999999997,
+      "reg4b:1": 1.0,
+      "reg4b:2": 1.0249999999999997,
+      "reg4c:1": 1.0,
+      "reg4c:2": 1.0374999999999999
+    },
+    "fixed_capacitor_states": {
+      "c83": [
+        1
+      ],
+      "c88a": [
+        1
+      ],
+      "c90b": [
+        1
+      ],
+      "c92c": [
+        1
+      ]
+    },
+    "elimination_residual_siemens": 1.5238897315605822e-10,
+    "source_offset": "Public Norton source currents, not solved private slack phasors",
+    "load_models": {
+      "1": 59,
+      "2": 17,
+      "5": 15
+    },
+    "delta_elements": 7,
+    "load_law_reference": "https://github.com/dss-extensions/dss_capi/blob/master/src/PCElements/Load.pas"
+  },
+  "validation": {
+    "evidence": "MEASURED",
+    "all_converged": true,
+    "snapshots": 6,
+    "minimum_rank": 91,
+    "max_bus_condition": 1.4377624386988923,
+    "setpoint_reconstruction_error_kw": {
+      "max_abs": 0.011258060232890443,
+      "rms": 0.0013187007012535757
+    },
+    "recovered_vs_true_load_rmse_kw": 0.001318700701253576,
+    "recovered_vs_raw_release_rmse_kw": 0.001318700701253576,
+    "recovered_vs_clipped_release_rmse_kw": 0.001318700701253576,
+    "nodal_current_residual_a": {
+      "max_abs": 0.0030609790775642004,
+      "rms": 0.0004329405732559662
+    },
+    "nodal_power_residual_kva": {
+      "max_abs": 0.007227821908379659,
+      "rms": 0.0010585320250581932
+    },
+    "load_law_current_residual_a": {
+      "max_abs": 0.003052885455254855,
+      "rms": 0.0004319423373394808
+    },
+    "omitted_voltage_diagnostic_pu": {
+      "max_abs": 5.8907952588163214e-09,
+      "rms": 7.443159336891021e-10
+    },
+    "actual_terminal_power_minus_nominal_kw": {
+      "max_abs": 5.09149310273898,
+      "rms": 1.1104116155597554
+    },
+    "solver_voltage_iteration_tolerance_pu": 0.0001,
+    "predeclared_power_residual_limit_kw_or_kva": 0.1,
+    "predeclared_load_law_current_limit_a": 0.0416358367204057,
+    "gate_definition": "Rank complete; maximum nominal and nodal power mismatch no greater than 1 MVA times solver tolerance; unit load law matches independent terminal currents",
+    "naive_identity_hypothesis": "YV recovers actual nodal injections, not nominal element kW for voltage-dependent loads",
+    "gate_passed": true
+  },
+  "status": "complete",
+  "focused_verification": {
+    "evidence": "MEASURED",
+    "checks_passed": 4,
+    "checks_run": 4,
+    "log": "results/threat_model_20261013/voltage_verification.txt"
+  }
+}

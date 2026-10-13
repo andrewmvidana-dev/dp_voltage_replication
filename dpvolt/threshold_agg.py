@@ -93,3 +93,32 @@ class ThresholdBGVSimulation:
         result['scalar_values'] = len(inputs) * inputs[0].size
         self.releases.append(result)
         return values
+
+    def demonstrate_key_compromise(self, contributions):
+        """Decrypt individual messages with a compromised quorum, by opt-in.
+
+        This separate synthetic experiment gives the quorum access to every
+        meter ciphertext, including a caller-supplied noise-service message.
+        It neither exports keys nor adds an arbitrary ciphertext endpoint.
+        Its additional disclosures and costs do not enter normal sum counters.
+        """
+        inputs = [np.asarray(x, dtype=float) for x in contributions]
+        if len(inputs) < 2 or not inputs[0].size or any(
+                x.shape != inputs[0].shape or not np.isfinite(x).all() for x in inputs):
+            raise ValueError('need finite contributions with identical shape')
+        cfg = self.config
+        payload = dict(contributions=[x.ravel().tolist() for x in inputs],
+                       authorities=cfg.authorities, threshold=cfg.threshold,
+                       active=cfg.active, scale=cfg.scale, workers=cfg.workers,
+                       compromise_individuals=True)
+        start = perf_counter()
+        process = subprocess.run([str(self.executable)], input=json.dumps(payload),
+                                 text=True, capture_output=True, timeout=600, check=False)
+        if process.returncode:
+            raise RuntimeError('Threshold compromise demo refused: ' + process.stderr.strip())
+        result = json.loads(process.stdout)
+        result['wall_s'] = perf_counter() - start
+        result['values'] = np.asarray(result['values']).reshape(inputs[0].shape)
+        result['recovered_contributions'] = np.asarray(
+            result['recovered_contributions']).reshape((len(inputs),) + inputs[0].shape)
+        return result

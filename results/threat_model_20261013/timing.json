@@ -1,0 +1,927 @@
+{
+  "settings": {
+    "label": "PROPOSED predeclared",
+    "repeats": 3,
+    "meter_shape": [
+      10,
+      96
+    ],
+    "service_slots": 1,
+    "time_equivalence_margin_relative": 0.1,
+    "criterion": "PASS if paired relative-difference 95% CI lies inside +/-10%; FAIL if wholly outside; otherwise INCONCLUSIVE.",
+    "scope": "Noise preparation + fresh key setup + serialization + aggregation/decryption; local, no network.",
+    "message_scope": "BGV serialized ciphertext and decryption shares exclude key-setup traffic; Paillier fixed-width ciphertext integers exclude exponent metadata."
+  },
+  "samples": [
+    {
+      "backend": "None",
+      "mechanism": "None",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 8.080000407062471e-05,
+      "noise_preparation_s": 5.900001269765198e-05,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "Gaussian DP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 0.27751630000420846,
+      "noise_preparation_s": 0.000651800015475601,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0443365,
+        "encryption_s": 0.1041707,
+        "addition_s": 0.0,
+        "decryption_s": 0.0064966,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "None",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 16.492425600008573,
+      "noise_preparation_s": 0.00018140001338906586,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.15694439999060705,
+        "encryption_s": 15.818822399975033,
+        "addition_s": 0.01806509998277761,
+        "decryption_s": 0.40720379998674616,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "None",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 0.2703149000008125,
+      "noise_preparation_s": 0.0003423999878577888,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0525008,
+        "encryption_s": 0.0846123,
+        "addition_s": 0.0,
+        "decryption_s": 0.0103521,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "BNP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 16.57389920001151,
+      "noise_preparation_s": 0.0002948000037577003,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.150842900009593,
+        "encryption_s": 15.94450839998899,
+        "addition_s": 0.017243300040718168,
+        "decryption_s": 0.45914510000147857,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "BNP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 0.00025829998776316643,
+      "noise_preparation_s": 0.00023609999334439635,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "BNP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 0.27783330000238493,
+      "noise_preparation_s": 0.00012280000373721123,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0553827,
+        "encryption_s": 0.0881784,
+        "addition_s": 0.0,
+        "decryption_s": 0.0085064,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "Gaussian DP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 0.0008027000003494322,
+      "noise_preparation_s": 0.0007842000050004572,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "Gaussian DP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 16.327823600004194,
+      "noise_preparation_s": 0.00048489999608136714,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.06248389999382198,
+        "encryption_s": 15.839590200019302,
+        "addition_s": 0.014626700023654848,
+        "decryption_s": 0.4088486999971792,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "Distributed BNP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 0.2858438999974169,
+      "noise_preparation_s": 0.011769100005039945,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0512564,
+        "encryption_s": 0.0854219,
+        "addition_s": 0.0,
+        "decryption_s": 0.0076295,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "Distributed BNP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 0.009788299998035654,
+      "noise_preparation_s": 0.009773300000233576,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "Distributed BNP",
+      "repetition": 0,
+      "label": "MEASURED",
+      "wall_s": 16.27631859999383,
+      "noise_preparation_s": 0.013971000007586554,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.02327320000040345,
+        "encryption_s": 15.816652699955739,
+        "addition_s": 0.015173300023889169,
+        "decryption_s": 0.4055409000138752,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "Gaussian DP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.2712383000180125,
+      "noise_preparation_s": 0.0005913000204600394,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0517097,
+        "encryption_s": 0.0838462,
+        "addition_s": 0.0,
+        "decryption_s": 0.0077181,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "Distributed BNP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.2938741999969352,
+      "noise_preparation_s": 0.010063399997306988,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0504841,
+        "encryption_s": 0.0950345,
+        "addition_s": 0.0027747,
+        "decryption_s": 0.007184,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "BNP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.27277460001641884,
+      "noise_preparation_s": 0.00026130001060664654,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0498154,
+        "encryption_s": 0.0891775,
+        "addition_s": 0.0007022,
+        "decryption_s": 0.0065583,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "Distributed BNP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 16.29010670000571,
+      "noise_preparation_s": 0.012804500001948327,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.1524822000064887,
+        "encryption_s": 15.6967165999813,
+        "addition_s": 0.016793299990240484,
+        "decryption_s": 0.4094263000006322,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "None",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 16.232188500027405,
+      "noise_preparation_s": 0.00029120000544935465,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.13594819998252206,
+        "encryption_s": 15.646581500011962,
+        "addition_s": 0.016770600021118298,
+        "decryption_s": 0.4305199999944307,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "None",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.0002846999850589782,
+      "noise_preparation_s": 0.0002497999812476337,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "None",
+      "mechanism": "Gaussian DP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.0006822000141255558,
+      "noise_preparation_s": 0.0006729000015184283,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "BNP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 16.221218699996825,
+      "noise_preparation_s": 0.00020299997413530946,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.07826249999925494,
+        "encryption_s": 15.711499999975786,
+        "addition_s": 0.015248000039719045,
+        "decryption_s": 0.4141589000064414,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "None",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.2834017999994103,
+      "noise_preparation_s": 0.00025189999723806977,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0536799,
+        "encryption_s": 0.0856297,
+        "addition_s": 0.0,
+        "decryption_s": 0.0125775,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "BNP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.000294700002996251,
+      "noise_preparation_s": 0.0002741000207606703,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "Gaussian DP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 16.273049500014167,
+      "noise_preparation_s": 0.0006347000016830862,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.16340109999873675,
+        "encryption_s": 15.67031250000582,
+        "addition_s": 0.014835499954642728,
+        "decryption_s": 0.42203190000145696,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "Distributed BNP",
+      "repetition": 1,
+      "label": "MEASURED",
+      "wall_s": 0.010488100000657141,
+      "noise_preparation_s": 0.01046739998855628,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "None",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 16.234564399986994,
+      "noise_preparation_s": 7.459998596459627e-05,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.05437050000182353,
+        "encryption_s": 15.749605199933285,
+        "addition_s": 0.014145199966151267,
+        "decryption_s": 0.4145501999882981,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "BNP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.2751801999984309,
+      "noise_preparation_s": 0.00025409998488612473,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0525479,
+        "encryption_s": 0.0914822,
+        "addition_s": 0.0,
+        "decryption_s": 0.0025734,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "Gaussian DP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 15.938935499987565,
+      "noise_preparation_s": 0.0017561999848112464,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.0615817999932915,
+        "encryption_s": 15.443916299962439,
+        "addition_s": 0.01655240001855418,
+        "decryption_s": 0.4133078999875579,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "Gaussian DP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.2771142999990843,
+      "noise_preparation_s": 0.0007648000027984381,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0494162,
+        "encryption_s": 0.0927656,
+        "addition_s": 0.0,
+        "decryption_s": 0.0055104,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "Distributed BNP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 16.033893300016643,
+      "noise_preparation_s": 0.011732100014341995,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.060177600011229515,
+        "encryption_s": 15.498218000022462,
+        "addition_s": 0.01802379998844117,
+        "decryption_s": 0.44392559997504577,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Paillier",
+      "mechanism": "BNP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 16.08904949997668,
+      "noise_preparation_s": 0.0002663999912329018,
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": {
+        "key_generation_s": 0.09339940000791103,
+        "encryption_s": 15.57050090006669,
+        "addition_s": 0.016504599974723533,
+        "decryption_s": 0.4065575000131503,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "Distributed BNP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.3014084000024013,
+      "noise_preparation_s": 0.011153300001751631,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.0546349,
+        "encryption_s": 0.0918259,
+        "addition_s": 0.0,
+        "decryption_s": 0.0073484,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "None",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.00027710001450031996,
+      "noise_preparation_s": 0.00024789999588392675,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "None",
+      "mechanism": "Gaussian DP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.0006855000101495534,
+      "noise_preparation_s": 0.0006665000109933317,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "Threshold BGV",
+      "mechanism": "None",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.27257649999228306,
+      "noise_preparation_s": 0.0001574999769218266,
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "crypto_timing": {
+        "key_generation_s": 0.051606,
+        "encryption_s": 0.0894805,
+        "addition_s": 0.0,
+        "decryption_s": 0.0,
+        "encrypted_values": 1056,
+        "decrypted_values": 96
+      }
+    },
+    {
+      "backend": "None",
+      "mechanism": "BNP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.0002474000211805105,
+      "noise_preparation_s": 0.00022590000298805535,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    },
+    {
+      "backend": "None",
+      "mechanism": "Distributed BNP",
+      "repetition": 2,
+      "label": "MEASURED",
+      "wall_s": 0.010685699991881847,
+      "noise_preparation_s": 0.010669899987988174,
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "crypto_timing": null
+    }
+  ],
+  "summary": {
+    "None / None": {
+      "mean": 0.0002142000012099743,
+      "ci95": [
+        -7.294213468202442e-05,
+        0.000501342137101973
+      ],
+      "std_s": 0.00011559026479642209,
+      "min_s": 8.080000407062471e-05,
+      "max_s": 0.0002846999850589782,
+      "values_s": [
+        8.080000407062471e-05,
+        0.0002846999850589782,
+        0.00027710001450031996
+      ],
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "None / Gaussian DP": {
+      "mean": 0.0007234666748748472,
+      "ci95": [
+        0.0005529606595518976,
+        0.0008939726901977967
+      ],
+      "std_s": 6.863790784078978e-05,
+      "min_s": 0.0006822000141255558,
+      "max_s": 0.0008027000003494322,
+      "values_s": [
+        0.0008027000003494322,
+        0.0006822000141255558,
+        0.0006855000101495534
+      ],
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "None / BNP": {
+      "mean": 0.000266800003979976,
+      "ci95": [
+        0.000205270075275768,
+        0.000328329932684184
+      ],
+      "std_s": 2.4769129510478638e-05,
+      "min_s": 0.0002474000211805105,
+      "max_s": 0.000294700002996251,
+      "values_s": [
+        0.00025829998776316643,
+        0.000294700002996251,
+        0.0002474000211805105
+      ],
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "None / Distributed BNP": {
+      "mean": 0.010320699996858215,
+      "ci95": [
+        0.00914933289646228,
+        0.011492067097254149
+      ],
+      "std_s": 0.00047153871335522106,
+      "min_s": 0.009788299998035654,
+      "max_s": 0.010685699991881847,
+      "values_s": [
+        0.009788299998035654,
+        0.010488100000657141,
+        0.010685699991881847
+      ],
+      "message_mib": 0.008056640625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "Paillier / None": {
+      "mean": 16.319726166674325,
+      "ci95": [
+        15.948181602921888,
+        16.691270730426762
+      ],
+      "std_s": 0.14956681426918414,
+      "min_s": 16.232188500027405,
+      "max_s": 16.492425600008573,
+      "values_s": [
+        16.492425600008573,
+        16.232188500027405,
+        16.234564399986994
+      ],
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "Paillier / Gaussian DP": {
+      "mean": 16.179936200001976,
+      "ci95": [
+        15.65702047022457,
+        16.70285192977938
+      ],
+      "std_s": 0.21050190869207408,
+      "min_s": 15.938935499987565,
+      "max_s": 16.327823600004194,
+      "values_s": [
+        16.327823600004194,
+        16.273049500014167,
+        15.938935499987565
+      ],
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "Paillier / BNP": {
+      "mean": 16.29472246666167,
+      "ci95": [
+        15.672090751840772,
+        16.91735418148257
+      ],
+      "std_s": 0.2506429944989608,
+      "min_s": 16.08904949997668,
+      "max_s": 16.57389920001151,
+      "values_s": [
+        16.57389920001151,
+        16.221218699996825,
+        16.08904949997668
+      ],
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "Paillier / Distributed BNP": {
+      "mean": 16.200106200005393,
+      "ci95": [
+        15.842118132107197,
+        16.55809426790359
+      ],
+      "std_s": 0.14410959030365417,
+      "min_s": 16.033893300016643,
+      "max_s": 16.29010670000571,
+      "values_s": [
+        16.27631859999383,
+        16.29010670000571,
+        16.033893300016643
+      ],
+      "message_mib": 0.515625,
+      "message_label": "ANALYTIC fixed-width message estimate",
+      "label": "MEASURED"
+    },
+    "Threshold BGV / None": {
+      "mean": 0.2754310666641686,
+      "ci95": [
+        0.2580548561208881,
+        0.29280727720744915
+      ],
+      "std_s": 0.00699486604993295,
+      "min_s": 0.2703149000008125,
+      "max_s": 0.2834017999994103,
+      "values_s": [
+        0.2703149000008125,
+        0.2834017999994103,
+        0.27257649999228306
+      ],
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "label": "MEASURED"
+    },
+    "Threshold BGV / Gaussian DP": {
+      "mean": 0.2752896333404351,
+      "ci95": [
+        0.26655960245791643,
+        0.28401966422295377
+      ],
+      "std_s": 0.0035143103545444915,
+      "min_s": 0.2712383000180125,
+      "max_s": 0.27751630000420846,
+      "values_s": [
+        0.27751630000420846,
+        0.2712383000180125,
+        0.2771142999990843
+      ],
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "label": "MEASURED"
+    },
+    "Threshold BGV / BNP": {
+      "mean": 0.2752627000057449,
+      "ci95": [
+        0.2689769400808939,
+        0.28154845993059585
+      ],
+      "std_s": 0.0025303588827295677,
+      "min_s": 0.27277460001641884,
+      "max_s": 0.27783330000238493,
+      "values_s": [
+        0.27783330000238493,
+        0.27277460001641884,
+        0.2751801999984309
+      ],
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "label": "MEASURED"
+    },
+    "Threshold BGV / Distributed BNP": {
+      "mean": 0.2937088333322511,
+      "ci95": [
+        0.2743733795063252,
+        0.31304428715817706
+      ],
+      "std_s": 0.0077835676075712025,
+      "min_s": 0.2858438999974169,
+      "max_s": 0.3014084000024013,
+      "values_s": [
+        0.2858438999974169,
+        0.2938741999969352,
+        0.3014084000024013
+      ],
+      "message_mib": 6.253572463989258,
+      "message_label": "MEASURED serialized payload bytes, setup excluded",
+      "label": "MEASURED"
+    }
+  },
+  "comparisons": {
+    "None / Gaussian DP": {
+      "status": "INCONCLUSIVE",
+      "relative_difference": {
+        "mean": 3.934816073466648,
+        "ci95": [
+          -6.821364533165635,
+          14.69099668009893
+        ]
+      },
+      "mean_difference_s": 0.0005092666736648729,
+      "combined_run_std_s": 0.0001344331495891833,
+      "within_run_spread": false,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "None / BNP": {
+      "status": "INCONCLUSIVE",
+      "relative_difference": {
+        "mean": 0.7082417100092687,
+        "ci95": [
+          -2.4989682698648177,
+          3.9154516898833553
+        ]
+      },
+      "mean_difference_s": 5.260000277000171e-05,
+      "combined_run_std_s": 0.00011821429309695948,
+      "within_run_spread": true,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "None / Distributed BNP": {
+      "status": "INCONCLUSIVE",
+      "relative_difference": {
+        "mean": 64.51468739217079,
+        "ci95": [
+          -55.177650972901574,
+          184.20702575724314
+        ]
+      },
+      "mean_difference_s": 0.01010649999564824,
+      "combined_run_std_s": 0.0004854996060847056,
+      "within_run_spread": false,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "Paillier / Gaussian DP": {
+      "status": "PASS",
+      "relative_difference": {
+        "mean": -0.008557674343275404,
+        "ci95": [
+          -0.03448351537919058,
+          0.01736816669263977
+        ]
+      },
+      "mean_difference_s": -0.13978996667234966,
+      "combined_run_std_s": 0.2582271974321042,
+      "within_run_spread": true,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "Paillier / BNP": {
+      "status": "PASS",
+      "relative_difference": {
+        "mean": -0.0015663402692716044,
+        "ci95": [
+          -0.018941191646373756,
+          0.015808511107830547
+        ]
+      },
+      "mean_difference_s": -0.02500370001265395,
+      "combined_run_std_s": 0.29187693060952713,
+      "within_run_spread": true,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "Paillier / Distributed BNP": {
+      "status": "PASS",
+      "relative_difference": {
+        "mean": -0.007298677746673661,
+        "ci95": [
+          -0.030694872397813946,
+          0.016097516904466626
+        ]
+      },
+      "mean_difference_s": -0.11961996666893171,
+      "combined_run_std_s": 0.2076964273841023,
+      "within_run_spread": true,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "Threshold BGV / Gaussian DP": {
+      "status": "PASS",
+      "relative_difference": {
+        "mean": 0.0001229852580057663,
+        "ci95": [
+          -0.09330387365277307,
+          0.09354984416878459
+        ]
+      },
+      "mean_difference_s": -0.0001414333237335086,
+      "combined_run_std_s": 0.007828060316870535,
+      "within_run_spread": true,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "Threshold BGV / BNP": {
+      "status": "PASS",
+      "relative_difference": {
+        "mean": -4.434508107905207e-05,
+        "ci95": [
+          -0.08375243399450423,
+          0.08366374383234614
+        ]
+      },
+      "mean_difference_s": -0.00016836665842373533,
+      "combined_run_std_s": 0.00743847209660109,
+      "within_run_spread": true,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    },
+    "Threshold BGV / Distributed BNP": {
+      "status": "INCONCLUSIVE",
+      "relative_difference": {
+        "mean": 0.06672524627487486,
+        "ci95": [
+          -0.02105670958493941,
+          0.15450720213468913
+        ]
+      },
+      "mean_difference_s": 0.018277766668082507,
+      "combined_run_std_s": 0.01046480175436383,
+      "within_run_spread": false,
+      "note": "Operational +/-10% equivalence margin; not proof of exact equality."
+    }
+  }
+}

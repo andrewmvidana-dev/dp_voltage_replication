@@ -624,6 +624,90 @@ def bnp_bound_scalar(sensitivity: float, delta: float) -> float:
     return sensitivity / (2.0 * delta)
 
 
+def _distributed_bnp_inputs(sensitivity: float, n: int) -> tuple[float, int]:
+    """Validate the public scalar query and the committed contributor count."""
+    from numbers import Integral
+
+    if isinstance(n, (bool, np.bool_)) or not isinstance(n, Integral) or n < 1:
+        raise ValueError("n must be a positive integer")
+    sensitivity = float(sensitivity)
+    if not np.isfinite(sensitivity) or sensitivity < 0:
+        raise ValueError("sensitivity must be finite and nonnegative")
+    return sensitivity, int(n)
+
+
+def bnp_distributed_delta(sensitivity: float, b: float, n: int) -> float:
+    """Exact-distribution TV for a sum of independent Uniform[-b, b] shares.
+
+    This is an ideal continuous (0, delta) guarantee for one scalar sum.
+    For U with the Irwin-Hall distribution, X = 2*b*U - n*b is the noise.
+    Symmetry and unimodality give TV(X, X + S) = P(-S/2 < X < S/2).
+    The Irwin-Hall CDF is evaluated numerically, without a normal approximation.
+    Sensitivity and b must use the same units. A whole trajectory would need
+    separate privacy accounting. Knowledge of individual shares changes the
+    adversary's view and does not inherit this aggregate guarantee.
+    """
+    sensitivity, n = _distributed_bnp_inputs(sensitivity, n)
+    b = float(b)
+    if not np.isfinite(b) or b < 0:
+        raise ValueError("b must be finite and nonnegative")
+    if sensitivity == 0:
+        return 0.0
+    if b == 0:
+        return 1.0
+    # Compare a ratio instead of multiplying n*b, which can overflow.
+    half_interval = (sensitivity / b) / 4.0
+    if half_interval >= n / 2.0:
+        return 1.0
+    if n == 1:
+        return float(2.0 * half_interval)
+
+    from scipy.stats import irwinhall
+
+    centre = n / 2.0
+    mass = (irwinhall.cdf(centre + half_interval, n)
+            - irwinhall.cdf(centre - half_interval, n))
+    return float(np.clip(mass, 0.0, 1.0))
+
+
+def bnp_distributed_half_width(sensitivity: float, delta: float, n: int) -> float:
+    """Calibrate each uniform share using the exact Irwin-Hall distribution.
+
+    Solve F_n(n/2+h) - F_n(n/2-h) = delta, then return b = S/(4*h).
+    Solving in dimensionless h makes calibration independent of query units.
+    The guarantee assumes every committed contributor adds independent noise.
+    This function is opt-in and does not change any existing mechanism.
+    """
+    sensitivity, n = _distributed_bnp_inputs(sensitivity, n)
+    delta = float(delta)
+    if not np.isfinite(delta) or not 0 < delta < 1:
+        raise ValueError("delta must be finite and strictly between zero and one")
+    if sensitivity == 0:
+        return 0.0
+    if n == 1:
+        width = sensitivity / (2.0 * delta)
+    else:
+        # The CDF difference cannot reliably resolve smaller targets in float64.
+        if delta < 64 * np.finfo(float).eps:
+            raise ValueError("delta is below the supported float64 CDF resolution")
+        from scipy.optimize import brentq
+        from scipy.stats import irwinhall
+
+        distribution = irwinhall(n)
+        centre = n / 2.0
+
+        def residual(h):
+            return (distribution.cdf(centre + h)
+                    - distribution.cdf(centre - h) - delta)
+
+        h = brentq(residual, 0.0, centre, xtol=np.finfo(float).tiny,
+                   rtol=8 * np.finfo(float).eps, maxiter=200)
+        width = sensitivity / (4.0 * h)
+    if not np.isfinite(width) or width <= 0:
+        raise ValueError("calibrated width is outside the finite float64 range")
+    return float(width)
+
+
 def gaussian_kl(
     mu0: np.ndarray,
     cov0: np.ndarray,
