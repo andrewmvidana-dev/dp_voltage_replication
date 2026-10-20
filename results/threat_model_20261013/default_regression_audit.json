@@ -1,0 +1,51 @@
+{
+  "label": "MEASURED",
+  "baseline": "git HEAD before threat-model edits",
+  "existing_definition_count": 25,
+  "changed_existing_asts": [],
+  "changed_existing_definition_source": [],
+  "new_definitions": {
+    "dpvolt/privacy.py": [
+      "_distributed_bnp_inputs",
+      "bnp_distributed_delta",
+      "bnp_distributed_half_width"
+    ],
+    "verify.py": []
+  },
+  "default_guard_matches_after_removing_opt_in_gate": true,
+  "legacy_reproduction": {
+    "None": {
+      "recorded_trials": 30,
+      "fresh_trials": 30,
+      "all_values_identical": true,
+      "max_absolute_differences": {
+        "raw_rmse_kw": 0.0,
+        "clipped_rmse_kw": 0.0,
+        "clipped_fraction": 0.0,
+        "voltage_rmse_pu": 0.0
+      }
+    },
+    "Gaussian DP": {
+      "recorded_trials": 30,
+      "fresh_trials": 30,
+      "all_values_identical": true,
+      "max_absolute_differences": {
+        "raw_rmse_kw": 0.0,
+        "clipped_rmse_kw": 0.0,
+        "clipped_fraction": 0.0,
+        "voltage_rmse_pu": 0.0
+      }
+    },
+    "BNP": {
+      "recorded_trials": 30,
+      "fresh_trials": 30,
+      "all_values_identical": true,
+      "max_absolute_differences": {
+        "raw_rmse_kw": 0.0,
+        "clipped_rmse_kw": 0.0,
+        "clipped_fraction": 0.0,
+        "voltage_rmse_pu": 0.0
+      }
+    }
+  }
+}

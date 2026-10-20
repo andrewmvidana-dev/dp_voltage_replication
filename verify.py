@@ -969,9 +969,14 @@ def main():
 
 
 if __name__ == "__main__":
-    if "--secure-agg-only" not in sys.argv:
+    if ("--secure-agg-only" not in sys.argv
+            and "--distributed-bnp-only" not in sys.argv):
         main()
     if "--secure-agg" in sys.argv or "--secure-agg-only" in sys.argv:
         secure_aggregation_checks()
         print(f"RESULT INCLUDING SECURE AGGREGATION: {sum(ok for _, ok in RESULTS)} of {len(RESULTS)} checks passed")
+    if "--distributed-bnp" in sys.argv or "--distributed-bnp-only" in sys.argv:
+        from dpvolt.distributed_bnp_checks import distributed_bnp_checks
+        distributed_bnp_checks(check)
+        print(f"RESULT INCLUDING DISTRIBUTED BNP: {sum(ok for _, ok in RESULTS)} of {len(RESULTS)} checks passed")
     sys.exit(1 if any(not ok for _, ok in RESULTS) else 0)

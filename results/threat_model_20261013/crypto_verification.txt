@@ -1,0 +1,12 @@
+Failed to find real location of C:\Users\15397\AppData\Local\Python\pythoncore-3.14-64\python.exe
+test_bgv_copies_preserve_original_first_meter (__main__.KeyCompromiseTests.test_bgv_copies_preserve_original_first_meter) ... ok
+test_encrypted_no_key_view_excludes_meter_plaintexts (__main__.KeyCompromiseTests.test_encrypted_no_key_view_excludes_meter_plaintexts) ... ok
+test_paillier_originals_and_service_are_actually_decrypted (__main__.KeyCompromiseTests.test_paillier_originals_and_service_are_actually_decrypted) ... ok
+test_public_release_prevents_chance_only_aggregator_claim (__main__.KeyCompromiseTests.test_public_release_prevents_chance_only_aggregator_claim) ... ok
+test_service_is_separate_from_bnp_meter_messages (__main__.KeyCompromiseTests.test_service_is_separate_from_bnp_meter_messages) ... ok
+test_wilson_handles_boundaries (__main__.KeyCompromiseTests.test_wilson_handles_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.826s
+
+OK

@@ -1,0 +1,157 @@
+{
+  "scope": "One reading of one meter at one time, ideal continuous noise",
+  "evidence": {
+    "calibration": "ANALYTIC",
+    "monte_carlo": "MEASURED",
+    "cryptography": "MEASURED",
+    "checks": "MEASURED"
+  },
+  "checks": [
+    {
+      "name": "distributed BNP exact CDF reaches the target delta",
+      "passed": true,
+      "detail": "ANALYTIC delta=0.01, target=0.01"
+    },
+    {
+      "name": "distributed BNP calibration round-trips across counts and budgets",
+      "passed": true,
+      "detail": "ANALYTIC maximum delta residual=4.72e-16"
+    },
+    {
+      "name": "one distributed BNP share equals central uniform calibration",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "two-share CDF agrees with the triangular density integral",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "distributed BNP calibration preserves a change of units",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "distributed BNP more noise decreases distinguishability",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "distributed BNP zero sensitivity and zero noise are explicit",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "distributed BNP disjoint supports return total variation one",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "distributed BNP rejects invalid public parameters",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "distributed BNP Monte Carlo TV agrees within predeclared tolerance",
+      "passed": true,
+      "detail": "MEASURED TV=0.010020, CI95=[0.009825713236696697, 0.010217132691885447]; ANALYTIC target=0.01, tolerance=0.000598"
+    },
+    {
+      "name": "every sampled distributed BNP share respects its hard bound",
+      "passed": true,
+      "detail": "MEASURED maximum=430.406811 kW; ANALYTIC bound=430.406836 kW"
+    },
+    {
+      "name": "every sampled distributed BNP sum respects its hard bound",
+      "passed": true,
+      "detail": "MEASURED maximum=3925.057941 kW; ANALYTIC bound=4304.068355 kW"
+    },
+    {
+      "name": "Paillier preserves prepared distributed BNP sums",
+      "passed": true,
+      "detail": "MEASURED max difference=1.39183109e-09 kW; ANALYTIC encoding bound=1.1e-08 kW"
+    },
+    {
+      "name": "Threshold BGV preserves prepared distributed BNP sums",
+      "passed": true,
+      "detail": "MEASURED max difference=0.00110607353 kW; ANALYTIC encoding bound=0.005000001 kW"
+    }
+  ],
+  "calibration": {
+    "sensitivity_kw": 20.0,
+    "delta": 0.01,
+    "contributors": 10,
+    "half_width_kw": 430.4068355291271,
+    "aggregate_bound_kw": 4304.068355291271,
+    "aggregate_rms_kw": 785.8117757457296,
+    "aggregate_delta": 0.010000000000000175,
+    "individual_delta": 0.023233831748295426,
+    "individual_attack_accuracy": 0.5116169158741477,
+    "formula": "delta = F_n(n/2 + S/(4*b)) - F_n(n/2 - S/(4*b))"
+  },
+  "monte_carlo": {
+    "samples": 1000000,
+    "seed": 2026101303,
+    "inside_count": 10020,
+    "tv_estimate": 0.01002,
+    "ci95_clopper_pearson": [
+      0.009825713236696697,
+      0.010217132691885447
+    ],
+    "predeclared_absolute_tolerance": 0.000597992462263972,
+    "tolerance_formula": "6*sqrt(delta*(1-delta)/samples) + 1/samples",
+    "maximum_absolute_share_kw": 430.406811341778,
+    "maximum_absolute_sum_kw": 3925.0579407963583,
+    "aggregate_rms_kw": 785.9856255671788,
+    "meaning": "Each sample is one sum of independent uniform shares"
+  },
+  "cryptography": {
+    "Paillier": {
+      "maximum_sum_difference_kw": 1.3918310948213275e-09,
+      "encoding_error_bound_kw": 1.1000000000000001e-08,
+      "timing": {
+        "key_generation_s": 0.08209209999768063,
+        "encryption_s": 1.2489298000000417,
+        "addition_s": 0.0014533000357914716,
+        "decryption_s": 0.03578040000866167,
+        "encrypted_values": 80,
+        "decrypted_values": 8
+      },
+      "releases": []
+    },
+    "Threshold BGV": {
+      "maximum_sum_difference_kw": 0.0011060735324031068,
+      "encoding_error_bound_kw": 0.0050000010000000004,
+      "timing": {
+        "key_generation_s": 0.0479356,
+        "encryption_s": 0.0804848,
+        "addition_s": 0.0,
+        "decryption_s": 0.0066346,
+        "encrypted_values": 80,
+        "decrypted_values": 8
+      },
+      "releases": [
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0066346,
+            "encryption_s": 0.0804848,
+            "key_generation_s": 0.0479356
+          },
+          "ciphertexts": 10,
+          "ciphertext_bytes": 5246220,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5e-06,
+          "wall_s": 1.4693789000157267,
+          "scalar_values": 80
+        }
+      ]
+    }
+  },
+  "passed": 14,
+  "total": 14
+}

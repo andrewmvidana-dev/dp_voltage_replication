@@ -1,0 +1,2845 @@
+{
+  "label": "MEASURED",
+  "settings": {
+    "trials": 30,
+    "steps": 6,
+    "load_rows": 91,
+    "meters_per_row": 10,
+    "service_slots": 1,
+    "seed_start": 61005,
+    "epsilon": 0,
+    "delta": 0.01,
+    "sensitivity_kw": 20,
+    "clip_kw": [
+      0,
+      200
+    ],
+    "privacy_unit": "Replace one meter reading at one time; synthetic fixed feeder"
+  },
+  "analytic": {
+    "label": "ANALYTIC",
+    "half_width_kw": 430.4068355291271,
+    "aggregate_bound_kw": 4304.0683552912715,
+    "aggregate_rms_kw": 785.8117757457296,
+    "local_delta": 0.023233831748295426,
+    "formula": "TV=F_IH(n/2+S/(4b))-F_IH(n/2-S/(4b)); RMS=b*sqrt(n/3)"
+  },
+  "acceptance": {
+    "label": "PROPOSED predeclared before measurement",
+    "max_load_error_kw": 0.003,
+    "max_voltage_difference_pu": 1.5e-06,
+    "note": "Observed historical maxima are acceptance criteria, not universal encoding bounds."
+  },
+  "trials": [
+    {
+      "mechanism": "None",
+      "trial": 0,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 1,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 2,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 3,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 4,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 5,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 6,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 7,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 8,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 9,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 10,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 11,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 12,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 13,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 14,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 15,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 16,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 17,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 18,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 19,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 20,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 21,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 22,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 23,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 24,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 25,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 26,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 27,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 28,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "None",
+      "trial": 29,
+      "raw_rmse_kw": 0.0,
+      "clipped_rmse_kw": 0.0,
+      "clipped_fraction": 0.0,
+      "voltage_rmse_pu": 0.0
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 0,
+      "raw_rmse_kw": 797.3827472293907,
+      "clipped_rmse_kw": 113.18739878380175,
+      "clipped_fraction": 0.9102564102564102,
+      "voltage_rmse_pu": 0.08994164966038697
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 1,
+      "raw_rmse_kw": 753.7209087117473,
+      "clipped_rmse_kw": 115.06543031492518,
+      "clipped_fraction": 0.8846153846153846,
+      "voltage_rmse_pu": 0.09971561996169101
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 2,
+      "raw_rmse_kw": 798.5550847361452,
+      "clipped_rmse_kw": 114.88110447452283,
+      "clipped_fraction": 0.9322344322344323,
+      "voltage_rmse_pu": 0.09878488789800786
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 3,
+      "raw_rmse_kw": 793.2854708371619,
+      "clipped_rmse_kw": 111.73465604015955,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.08903166849535338
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 4,
+      "raw_rmse_kw": 819.8896505020192,
+      "clipped_rmse_kw": 116.03050952290359,
+      "clipped_fraction": 0.9029304029304029,
+      "voltage_rmse_pu": 0.09666395181592931
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 5,
+      "raw_rmse_kw": 794.3867565526184,
+      "clipped_rmse_kw": 114.40448124682675,
+      "clipped_fraction": 0.8736263736263736,
+      "voltage_rmse_pu": 0.09398377174342619
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 6,
+      "raw_rmse_kw": 793.2669777903433,
+      "clipped_rmse_kw": 117.95843326031395,
+      "clipped_fraction": 0.9175824175824175,
+      "voltage_rmse_pu": 0.10233537871260576
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 7,
+      "raw_rmse_kw": 788.3515170558487,
+      "clipped_rmse_kw": 108.29324869322613,
+      "clipped_fraction": 0.8901098901098901,
+      "voltage_rmse_pu": 0.07947961862627798
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 8,
+      "raw_rmse_kw": 789.8769734952083,
+      "clipped_rmse_kw": 110.99965548980333,
+      "clipped_fraction": 0.8864468864468864,
+      "voltage_rmse_pu": 0.09081466907863507
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 9,
+      "raw_rmse_kw": 797.110165212072,
+      "clipped_rmse_kw": 113.02123924095906,
+      "clipped_fraction": 0.9010989010989011,
+      "voltage_rmse_pu": 0.10039469768246033
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 10,
+      "raw_rmse_kw": 820.5175133239821,
+      "clipped_rmse_kw": 112.32016418974118,
+      "clipped_fraction": 0.9065934065934066,
+      "voltage_rmse_pu": 0.09935979170736726
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 11,
+      "raw_rmse_kw": 796.2954322757605,
+      "clipped_rmse_kw": 114.11898064220651,
+      "clipped_fraction": 0.9010989010989011,
+      "voltage_rmse_pu": 0.09554068820307994
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 12,
+      "raw_rmse_kw": 763.5891340238845,
+      "clipped_rmse_kw": 114.87508239449828,
+      "clipped_fraction": 0.8992673992673993,
+      "voltage_rmse_pu": 0.0915060011150801
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 13,
+      "raw_rmse_kw": 822.792598777435,
+      "clipped_rmse_kw": 110.45915251389928,
+      "clipped_fraction": 0.8956043956043956,
+      "voltage_rmse_pu": 0.08785013122540335
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 14,
+      "raw_rmse_kw": 815.2804235940972,
+      "clipped_rmse_kw": 113.12007505074367,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.09050361516572812
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 15,
+      "raw_rmse_kw": 787.0249491142133,
+      "clipped_rmse_kw": 111.47747342492161,
+      "clipped_fraction": 0.8937728937728938,
+      "voltage_rmse_pu": 0.10200132376734293
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 16,
+      "raw_rmse_kw": 764.3067303635682,
+      "clipped_rmse_kw": 113.78492304634202,
+      "clipped_fraction": 0.9029304029304029,
+      "voltage_rmse_pu": 0.09250683822667172
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 17,
+      "raw_rmse_kw": 807.9450191206635,
+      "clipped_rmse_kw": 114.45101815497127,
+      "clipped_fraction": 0.9065934065934066,
+      "voltage_rmse_pu": 0.09717789410124597
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 18,
+      "raw_rmse_kw": 773.1011339633084,
+      "clipped_rmse_kw": 115.43217710881272,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.10102754394270189
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 19,
+      "raw_rmse_kw": 817.3117042539221,
+      "clipped_rmse_kw": 113.64329878188516,
+      "clipped_fraction": 0.8864468864468864,
+      "voltage_rmse_pu": 0.09556854043876635
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 20,
+      "raw_rmse_kw": 759.4760156683117,
+      "clipped_rmse_kw": 106.30573535458534,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.08734096906249685
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 21,
+      "raw_rmse_kw": 768.0580520084894,
+      "clipped_rmse_kw": 114.79926935003733,
+      "clipped_fraction": 0.8882783882783882,
+      "voltage_rmse_pu": 0.1017868080024242
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 22,
+      "raw_rmse_kw": 789.1702757776349,
+      "clipped_rmse_kw": 112.28410441815348,
+      "clipped_fraction": 0.8937728937728938,
+      "voltage_rmse_pu": 0.09852234929815575
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 23,
+      "raw_rmse_kw": 778.8471326418642,
+      "clipped_rmse_kw": 116.39430662267047,
+      "clipped_fraction": 0.8754578754578755,
+      "voltage_rmse_pu": 0.10504817367957305
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 24,
+      "raw_rmse_kw": 811.4865792340388,
+      "clipped_rmse_kw": 117.13306688644076,
+      "clipped_fraction": 0.891941391941392,
+      "voltage_rmse_pu": 0.10402407691206603
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 25,
+      "raw_rmse_kw": 801.4364337919632,
+      "clipped_rmse_kw": 115.4837898495957,
+      "clipped_fraction": 0.9212454212454212,
+      "voltage_rmse_pu": 0.10327172906861529
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 26,
+      "raw_rmse_kw": 837.5424300165869,
+      "clipped_rmse_kw": 110.61758264412943,
+      "clipped_fraction": 0.9175824175824175,
+      "voltage_rmse_pu": 0.09785583994895788
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 27,
+      "raw_rmse_kw": 776.625267255394,
+      "clipped_rmse_kw": 115.46936599214929,
+      "clipped_fraction": 0.8882783882783882,
+      "voltage_rmse_pu": 0.10171044857389998
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 28,
+      "raw_rmse_kw": 806.485901992628,
+      "clipped_rmse_kw": 110.62075561924925,
+      "clipped_fraction": 0.8864468864468864,
+      "voltage_rmse_pu": 0.09988789593503403
+    },
+    {
+      "mechanism": "Gaussian DP",
+      "trial": 29,
+      "raw_rmse_kw": 805.1396864928083,
+      "clipped_rmse_kw": 115.67862888399713,
+      "clipped_fraction": 0.8937728937728938,
+      "voltage_rmse_pu": 0.10250593981281979
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 0,
+      "raw_rmse_kw": 581.712087382294,
+      "clipped_rmse_kw": 113.54091124784048,
+      "clipped_fraction": 0.8956043956043956,
+      "voltage_rmse_pu": 0.08661162023432384
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 1,
+      "raw_rmse_kw": 569.539980946571,
+      "clipped_rmse_kw": 109.51518991218799,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.076571163096474
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 2,
+      "raw_rmse_kw": 569.3596827289826,
+      "clipped_rmse_kw": 118.69679697234592,
+      "clipped_fraction": 0.9102564102564102,
+      "voltage_rmse_pu": 0.10349168955166017
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 3,
+      "raw_rmse_kw": 567.8013002139929,
+      "clipped_rmse_kw": 111.08429672269826,
+      "clipped_fraction": 0.8956043956043956,
+      "voltage_rmse_pu": 0.09797123886342828
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 4,
+      "raw_rmse_kw": 574.4420130549447,
+      "clipped_rmse_kw": 116.47580221227072,
+      "clipped_fraction": 0.9139194139194139,
+      "voltage_rmse_pu": 0.09032803356196643
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 5,
+      "raw_rmse_kw": 592.9506447885526,
+      "clipped_rmse_kw": 113.27856017510369,
+      "clipped_fraction": 0.8864468864468864,
+      "voltage_rmse_pu": 0.08874628222902005
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 6,
+      "raw_rmse_kw": 575.2043327595328,
+      "clipped_rmse_kw": 111.89402239118408,
+      "clipped_fraction": 0.9065934065934066,
+      "voltage_rmse_pu": 0.093818089214268
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 7,
+      "raw_rmse_kw": 591.6007299601023,
+      "clipped_rmse_kw": 116.0497574479509,
+      "clipped_fraction": 0.9157509157509157,
+      "voltage_rmse_pu": 0.10142918451391442
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 8,
+      "raw_rmse_kw": 593.4531471721426,
+      "clipped_rmse_kw": 112.10510455630593,
+      "clipped_fraction": 0.8956043956043956,
+      "voltage_rmse_pu": 0.09309780511286915
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 9,
+      "raw_rmse_kw": 574.1594839466184,
+      "clipped_rmse_kw": 114.5359606920595,
+      "clipped_fraction": 0.9029304029304029,
+      "voltage_rmse_pu": 0.11008350308531349
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 10,
+      "raw_rmse_kw": 585.3179624100055,
+      "clipped_rmse_kw": 116.9177567352026,
+      "clipped_fraction": 0.8992673992673993,
+      "voltage_rmse_pu": 0.10645683608590202
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 11,
+      "raw_rmse_kw": 592.9030128353745,
+      "clipped_rmse_kw": 119.79519646725812,
+      "clipped_fraction": 0.9065934065934066,
+      "voltage_rmse_pu": 0.104202406685067
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 12,
+      "raw_rmse_kw": 565.5012636950756,
+      "clipped_rmse_kw": 113.07058805791823,
+      "clipped_fraction": 0.8937728937728938,
+      "voltage_rmse_pu": 0.09887981013577933
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 13,
+      "raw_rmse_kw": 562.6726444804204,
+      "clipped_rmse_kw": 113.05602523293162,
+      "clipped_fraction": 0.9120879120879121,
+      "voltage_rmse_pu": 0.08914268162338378
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 14,
+      "raw_rmse_kw": 593.2814937136844,
+      "clipped_rmse_kw": 115.6104057697427,
+      "clipped_fraction": 0.9029304029304029,
+      "voltage_rmse_pu": 0.10699563743955601
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 15,
+      "raw_rmse_kw": 575.4160054464709,
+      "clipped_rmse_kw": 117.25103679490559,
+      "clipped_fraction": 0.8846153846153846,
+      "voltage_rmse_pu": 0.10697354852842039
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 16,
+      "raw_rmse_kw": 581.5530500698069,
+      "clipped_rmse_kw": 112.87942102957744,
+      "clipped_fraction": 0.8901098901098901,
+      "voltage_rmse_pu": 0.0949962418553442
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 17,
+      "raw_rmse_kw": 582.233832512989,
+      "clipped_rmse_kw": 115.52514428716594,
+      "clipped_fraction": 0.9120879120879121,
+      "voltage_rmse_pu": 0.09645945221545187
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 18,
+      "raw_rmse_kw": 579.5528190720721,
+      "clipped_rmse_kw": 116.70675590207284,
+      "clipped_fraction": 0.9102564102564102,
+      "voltage_rmse_pu": 0.10234169520022107
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 19,
+      "raw_rmse_kw": 587.137862004172,
+      "clipped_rmse_kw": 115.161364907507,
+      "clipped_fraction": 0.9102564102564102,
+      "voltage_rmse_pu": 0.09663946833071652
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 20,
+      "raw_rmse_kw": 585.1565950858624,
+      "clipped_rmse_kw": 112.25711276016196,
+      "clipped_fraction": 0.891941391941392,
+      "voltage_rmse_pu": 0.09810795126484166
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 21,
+      "raw_rmse_kw": 583.3627403387429,
+      "clipped_rmse_kw": 114.27515491801869,
+      "clipped_fraction": 0.9194139194139194,
+      "voltage_rmse_pu": 0.1004989372716478
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 22,
+      "raw_rmse_kw": 568.0449203474333,
+      "clipped_rmse_kw": 114.60417679227334,
+      "clipped_fraction": 0.9029304029304029,
+      "voltage_rmse_pu": 0.09976815199183414
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 23,
+      "raw_rmse_kw": 578.3856649398847,
+      "clipped_rmse_kw": 111.1485343765493,
+      "clipped_fraction": 0.8663003663003663,
+      "voltage_rmse_pu": 0.09393465735571871
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 24,
+      "raw_rmse_kw": 590.7434067122571,
+      "clipped_rmse_kw": 114.17263079275911,
+      "clipped_fraction": 0.9175824175824175,
+      "voltage_rmse_pu": 0.09904212409177206
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 25,
+      "raw_rmse_kw": 578.5888023954901,
+      "clipped_rmse_kw": 111.14633508486462,
+      "clipped_fraction": 0.9065934065934066,
+      "voltage_rmse_pu": 0.08793678682327967
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 26,
+      "raw_rmse_kw": 574.8157347576256,
+      "clipped_rmse_kw": 116.82996333121964,
+      "clipped_fraction": 0.9084249084249084,
+      "voltage_rmse_pu": 0.09605176000252469
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 27,
+      "raw_rmse_kw": 602.8802583587939,
+      "clipped_rmse_kw": 111.07667990473395,
+      "clipped_fraction": 0.9120879120879121,
+      "voltage_rmse_pu": 0.09243829521137628
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 28,
+      "raw_rmse_kw": 585.1405686000124,
+      "clipped_rmse_kw": 112.67300987756899,
+      "clipped_fraction": 0.9139194139194139,
+      "voltage_rmse_pu": 0.09388559119302466
+    },
+    {
+      "mechanism": "BNP",
+      "trial": 29,
+      "raw_rmse_kw": 577.241489883357,
+      "clipped_rmse_kw": 108.15892827631781,
+      "clipped_fraction": 0.9102564102564102,
+      "voltage_rmse_pu": 0.08496841809246289
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 0,
+      "raw_rmse_kw": 781.2907654145732,
+      "clipped_rmse_kw": 112.46365991876849,
+      "clipped_fraction": 0.8974358974358975,
+      "voltage_rmse_pu": 0.09981758570607363
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 1,
+      "raw_rmse_kw": 827.350709871668,
+      "clipped_rmse_kw": 111.80407723270282,
+      "clipped_fraction": 0.9084249084249084,
+      "voltage_rmse_pu": 0.09572883923294959
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 2,
+      "raw_rmse_kw": 815.4203543963648,
+      "clipped_rmse_kw": 117.79512106067806,
+      "clipped_fraction": 0.9139194139194139,
+      "voltage_rmse_pu": 0.10199706198298941
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 3,
+      "raw_rmse_kw": 782.6447395152787,
+      "clipped_rmse_kw": 114.54464444782474,
+      "clipped_fraction": 0.8956043956043956,
+      "voltage_rmse_pu": 0.10468985794452938
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 4,
+      "raw_rmse_kw": 803.9716185903609,
+      "clipped_rmse_kw": 111.30577230729251,
+      "clipped_fraction": 0.9029304029304029,
+      "voltage_rmse_pu": 0.09589459733791075
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 5,
+      "raw_rmse_kw": 762.7222659466406,
+      "clipped_rmse_kw": 110.1208431227589,
+      "clipped_fraction": 0.8882783882783882,
+      "voltage_rmse_pu": 0.09380723033945777
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 6,
+      "raw_rmse_kw": 797.6996850140968,
+      "clipped_rmse_kw": 112.31338211367768,
+      "clipped_fraction": 0.9139194139194139,
+      "voltage_rmse_pu": 0.0993074828578636
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 7,
+      "raw_rmse_kw": 771.5905828508503,
+      "clipped_rmse_kw": 113.7481967269336,
+      "clipped_fraction": 0.8791208791208791,
+      "voltage_rmse_pu": 0.09620628804442244
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 8,
+      "raw_rmse_kw": 766.6013747849387,
+      "clipped_rmse_kw": 115.8037555437364,
+      "clipped_fraction": 0.9065934065934066,
+      "voltage_rmse_pu": 0.09840226998505347
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 9,
+      "raw_rmse_kw": 804.4904061064346,
+      "clipped_rmse_kw": 113.96186179218495,
+      "clipped_fraction": 0.8901098901098901,
+      "voltage_rmse_pu": 0.0909424962054541
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 10,
+      "raw_rmse_kw": 804.2259271614773,
+      "clipped_rmse_kw": 114.01778563386921,
+      "clipped_fraction": 0.924908424908425,
+      "voltage_rmse_pu": 0.09129599615462648
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 11,
+      "raw_rmse_kw": 781.7224066627837,
+      "clipped_rmse_kw": 115.56464433682544,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.09150279366521993
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 12,
+      "raw_rmse_kw": 755.7982613237454,
+      "clipped_rmse_kw": 108.75308036582251,
+      "clipped_fraction": 0.8901098901098901,
+      "voltage_rmse_pu": 0.08179631429641636
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 13,
+      "raw_rmse_kw": 793.4323491197,
+      "clipped_rmse_kw": 113.17587952375482,
+      "clipped_fraction": 0.8956043956043956,
+      "voltage_rmse_pu": 0.09570454803268107
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 14,
+      "raw_rmse_kw": 778.6183856495423,
+      "clipped_rmse_kw": 115.83593168766619,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.09534386482454361
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 15,
+      "raw_rmse_kw": 798.9197860064291,
+      "clipped_rmse_kw": 113.04347699810799,
+      "clipped_fraction": 0.891941391941392,
+      "voltage_rmse_pu": 0.0951366740225413
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 16,
+      "raw_rmse_kw": 791.6012458470312,
+      "clipped_rmse_kw": 114.3010883353931,
+      "clipped_fraction": 0.8864468864468864,
+      "voltage_rmse_pu": 0.09791701094131058
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 17,
+      "raw_rmse_kw": 758.4514618886348,
+      "clipped_rmse_kw": 114.4813261098967,
+      "clipped_fraction": 0.9010989010989011,
+      "voltage_rmse_pu": 0.09450378524951208
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 18,
+      "raw_rmse_kw": 817.6175139071399,
+      "clipped_rmse_kw": 116.35830971158994,
+      "clipped_fraction": 0.9157509157509157,
+      "voltage_rmse_pu": 0.10043820436660626
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 19,
+      "raw_rmse_kw": 834.5119210732884,
+      "clipped_rmse_kw": 117.54934910171754,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.10854222921866324
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 20,
+      "raw_rmse_kw": 784.250297038431,
+      "clipped_rmse_kw": 109.3325320328609,
+      "clipped_fraction": 0.9139194139194139,
+      "voltage_rmse_pu": 0.0876130847099182
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 21,
+      "raw_rmse_kw": 759.7477493413097,
+      "clipped_rmse_kw": 112.17295807270678,
+      "clipped_fraction": 0.9139194139194139,
+      "voltage_rmse_pu": 0.09681379274620926
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 22,
+      "raw_rmse_kw": 779.8953427107447,
+      "clipped_rmse_kw": 110.81788424701418,
+      "clipped_fraction": 0.9029304029304029,
+      "voltage_rmse_pu": 0.08974751927341286
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 23,
+      "raw_rmse_kw": 800.6091057589288,
+      "clipped_rmse_kw": 116.63905058417689,
+      "clipped_fraction": 0.891941391941392,
+      "voltage_rmse_pu": 0.09918652066950336
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 24,
+      "raw_rmse_kw": 778.2778666404565,
+      "clipped_rmse_kw": 115.54966335861154,
+      "clipped_fraction": 0.8846153846153846,
+      "voltage_rmse_pu": 0.1084686770321826
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 25,
+      "raw_rmse_kw": 798.2022550501384,
+      "clipped_rmse_kw": 112.34868974708847,
+      "clipped_fraction": 0.9194139194139194,
+      "voltage_rmse_pu": 0.0972339320299417
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 26,
+      "raw_rmse_kw": 798.3737447609551,
+      "clipped_rmse_kw": 109.2501450712501,
+      "clipped_fraction": 0.9120879120879121,
+      "voltage_rmse_pu": 0.09272170044036519
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 27,
+      "raw_rmse_kw": 736.4225847087333,
+      "clipped_rmse_kw": 115.83249522993559,
+      "clipped_fraction": 0.9047619047619048,
+      "voltage_rmse_pu": 0.10990348635811058
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 28,
+      "raw_rmse_kw": 775.6971784271891,
+      "clipped_rmse_kw": 114.34687182410516,
+      "clipped_fraction": 0.8974358974358975,
+      "voltage_rmse_pu": 0.10802966982041266
+    },
+    {
+      "mechanism": "Distributed BNP",
+      "trial": 29,
+      "raw_rmse_kw": 751.0510677550152,
+      "clipped_rmse_kw": 113.40204967163949,
+      "clipped_fraction": 0.9010989010989011,
+      "voltage_rmse_pu": 0.10222292385924209
+    }
+  ],
+  "utility": {
+    "None": {
+      "raw_rmse_kw": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "Gaussian DP": {
+      "raw_rmse_kw": {
+        "mean": 794.2752888604371,
+        "ci95": [
+          786.5666399079257,
+          801.9839378129484
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 113.46817026654908,
+        "ci95": [
+          112.49796303127395,
+          114.4383775018242
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.8989010989010988,
+        "ci95": [
+          0.8939812561729468,
+          0.9038209416292509
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.09653808372874013,
+        "ci95": [
+          0.09426700194279077,
+          0.0988091655146895
+        ]
+      }
+    },
+    "BNP": {
+      "raw_rmse_kw": {
+        "mean": 580.6717843537755,
+        "ci95": [
+          577.0167470738583,
+          584.3268216336927
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 113.98308745428989,
+        "ci95": [
+          112.97460548140026,
+          114.99156942717951
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.9032967032967032,
+        "ci95": [
+          0.8989550023034186,
+          0.9076384042899878
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.09639563536205209,
+        "ci95": [
+          0.09360639089527283,
+          0.09918487982883135
+        ]
+      }
+    },
+    "Distributed BNP": {
+      "raw_rmse_kw": {
+        "mean": 786.3736317774293,
+        "ci95": [
+          777.7953887512119,
+          794.9518748036467
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 113.55448419701969,
+        "ci95": [
+          112.64626135139726,
+          114.46270704264212
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.901953601953602,
+        "ci95": [
+          0.8977656876492048,
+          0.9061415162579991
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.09736388124493747,
+        "ci95": [
+          0.09495141206715985,
+          0.0997763504227151
+        ]
+      }
+    }
+  },
+  "paired": {
+    "Distributed BNP minus Gaussian DP": {
+      "raw_rmse_kw": {
+        "mean": -7.901657083007622,
+        "ci95": [
+          -18.665111502885054,
+          2.8617973368698095
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": 0.08631393047062233,
+        "ci95": [
+          -1.076651431086403,
+          1.2492792920276479
+        ]
+      },
+      "clipped_fraction": {
+        "mean": 0.003052503052503053,
+        "ci95": [
+          -0.0016354648084491094,
+          0.007740470913455215
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.0008257975161973088,
+        "ci95": [
+          -0.0019908966574714447,
+          0.0036424916898660626
+        ]
+      }
+    },
+    "Distributed BNP minus BNP": {
+      "raw_rmse_kw": {
+        "mean": 205.70184742365385,
+        "ci95": [
+          195.146777758709,
+          216.2569170885987
+        ]
+      },
+      "clipped_rmse_kw": {
+        "mean": -0.42860325727020976,
+        "ci95": [
+          -1.6547018793876909,
+          0.7974953648472712
+        ]
+      },
+      "clipped_fraction": {
+        "mean": -0.001343101343101342,
+        "ci95": [
+          -0.00663422597301661,
+          0.003948023286813926
+        ]
+      },
+      "voltage_rmse_pu": {
+        "mean": 0.0009682458828853675,
+        "ci95": [
+          -0.003116134859605416,
+          0.005052626625376151
+        ]
+      }
+    }
+  },
+  "encrypted_validation": {
+    "Paillier / None": {
+      "label": "RECORDED ciphertext output; MEASURED power-flow rerun",
+      "max_load_error_kw": 3.0718899646231534e-09,
+      "max_voltage_difference_pu": 1.3389289676979388e-12,
+      "load_test": "PASS",
+      "voltage_test": "PASS",
+      "analytic_encoding_bound_kw": null,
+      "paired_raw_rmse_difference_kw": 8.594826774862781e-10,
+      "paired_voltage_rmse_difference_pu": 4.21727352426219e-13,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    },
+    "Threshold BGV / None": {
+      "label": "RECORDED ciphertext output; MEASURED power-flow rerun",
+      "max_load_error_kw": 0.0025270123851020565,
+      "max_voltage_difference_pu": 1.5271884310497086e-06,
+      "load_test": "PASS",
+      "voltage_test": "FAIL",
+      "analytic_encoding_bound_kw": 0.0055,
+      "paired_raw_rmse_difference_kw": 0.0009230812570207845,
+      "paired_voltage_rmse_difference_pu": 5.52270452004989e-07,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    },
+    "Paillier / Gaussian DP": {
+      "label": "RECORDED ciphertext output; MEASURED power-flow rerun",
+      "max_load_error_kw": 2.3949731087213877e-09,
+      "max_voltage_difference_pu": 3.7403413699621524e-13,
+      "load_test": "PASS",
+      "voltage_test": "PASS",
+      "analytic_encoding_bound_kw": null,
+      "paired_raw_rmse_difference_kw": -1.1482370609883219e-11,
+      "paired_voltage_rmse_difference_pu": -8.1601392309949e-15,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    },
+    "Threshold BGV / Gaussian DP": {
+      "label": "RECORDED ciphertext output; MEASURED power-flow rerun",
+      "max_load_error_kw": 0.0029698240833209155,
+      "max_voltage_difference_pu": 8.568618961035668e-07,
+      "load_test": "PASS",
+      "voltage_test": "PASS",
+      "analytic_encoding_bound_kw": 0.0055,
+      "paired_raw_rmse_difference_kw": -1.3876358821107715e-05,
+      "paired_voltage_rmse_difference_pu": 8.300851978004786e-09,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    },
+    "Paillier / BNP": {
+      "label": "RECORDED ciphertext output; MEASURED power-flow rerun",
+      "max_load_error_kw": 3.257727421157597e-09,
+      "max_voltage_difference_pu": 5.030420524576584e-13,
+      "load_test": "PASS",
+      "voltage_test": "PASS",
+      "analytic_encoding_bound_kw": null,
+      "paired_raw_rmse_difference_kw": -1.5347723092418164e-11,
+      "paired_voltage_rmse_difference_pu": -1.2906342661267445e-15,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    },
+    "Threshold BGV / BNP": {
+      "label": "RECORDED ciphertext output; MEASURED power-flow rerun",
+      "max_load_error_kw": 0.0024000201429563717,
+      "max_voltage_difference_pu": 3.687411673780616e-07,
+      "load_test": "PASS",
+      "voltage_test": "PASS",
+      "analytic_encoding_bound_kw": 0.0055,
+      "paired_raw_rmse_difference_kw": 3.886210913606192e-05,
+      "paired_voltage_rmse_difference_pu": -1.034144946066018e-08,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    },
+    "Paillier / Distributed BNP": {
+      "label": "MEASURED",
+      "wall_s": 96.23471299998346,
+      "timing": {
+        "key_generation_s": 0.06010100001003593,
+        "encryption_s": 93.50155130034545,
+        "addition_s": 0.13254329981282353,
+        "decryption_s": 2.4776586000225507,
+        "encrypted_values": 6006,
+        "decrypted_values": 546
+      },
+      "releases": [],
+      "max_load_error_kw": 2.429279000182305e-09,
+      "max_voltage_difference_pu": 5.775380174100064e-13,
+      "load_test": "PASS",
+      "voltage_test": "PASS",
+      "analytic_encoding_bound_kw": null,
+      "paired_raw_rmse_difference_kw": -2.000888343900442e-11,
+      "paired_voltage_rmse_difference_pu": 1.1712852909795402e-14,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    },
+    "Threshold BGV / Distributed BNP": {
+      "label": "MEASURED",
+      "wall_s": 27.90293870001915,
+      "timing": {
+        "key_generation_s": 4.6457370000000004,
+        "encryption_s": 8.502076400000002,
+        "addition_s": 0.05143050000000001,
+        "decryption_s": 0.5845216999999997,
+        "encrypted_values": 6006,
+        "decrypted_values": 546
+      },
+      "releases": [
+        {
+          "timing": {
+            "addition_s": 0.0020098,
+            "combine_s": 0,
+            "decryption_s": 0.0082109,
+            "encryption_s": 0.0962371,
+            "key_generation_s": 0.0524013
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2690178000193555,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0020113,
+            "combine_s": 0.0011833,
+            "decryption_s": 0,
+            "encryption_s": 0.1016286,
+            "key_generation_s": 0.0483708
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.5502830000186805,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020117,
+            "decryption_s": 0.008081,
+            "encryption_s": 0.0858553,
+            "key_generation_s": 0.0480831
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.5488291000074241,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0064683,
+            "encryption_s": 0.0930123,
+            "key_generation_s": 0.051867
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3051311000017449,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0023195,
+            "combine_s": 0,
+            "decryption_s": 0.0052591,
+            "encryption_s": 0.0968007,
+            "key_generation_s": 0.0535841
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.295288299996173,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0011268,
+            "combine_s": 0,
+            "decryption_s": 0.0080993,
+            "encryption_s": 0.0943235,
+            "key_generation_s": 0.0500039
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2790566000039689,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0061641,
+            "encryption_s": 0.0949109,
+            "key_generation_s": 0.0462209
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2767479999747593,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0075107,
+            "encryption_s": 0.0867098,
+            "key_generation_s": 0.0486643
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.6012001999770291,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0102659,
+            "encryption_s": 0.0950237,
+            "key_generation_s": 0.0496688
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.7432932000083383,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0,
+            "encryption_s": 0.0937067,
+            "key_generation_s": 0.0531695
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3258388999965973,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0003487,
+            "combine_s": 0.0010097,
+            "decryption_s": 0.005577,
+            "encryption_s": 0.0946588,
+            "key_generation_s": 0.0498222
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29261200001928955,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0032254,
+            "combine_s": 0.0024927,
+            "decryption_s": 0.0047357,
+            "encryption_s": 0.0887262,
+            "key_generation_s": 0.0501296
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2855952999962028,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0072013,
+            "encryption_s": 0.0903948,
+            "key_generation_s": 0.0559805
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.39080000002286397,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0015335,
+            "combine_s": 0,
+            "decryption_s": 0.0074574,
+            "encryption_s": 0.0993105,
+            "key_generation_s": 0.0592979
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3205324999871664,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0015676,
+            "decryption_s": 0.0022477,
+            "encryption_s": 0.0872969,
+            "key_generation_s": 0.0534353
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.28850920000695623,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0104677,
+            "encryption_s": 0.1007741,
+            "key_generation_s": 0.0520694
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3032948999898508,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0048078,
+            "encryption_s": 0.0933943,
+            "key_generation_s": 0.0548231
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.30053559999214485,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0042398,
+            "combine_s": 0.0043225,
+            "decryption_s": 0.0059883,
+            "encryption_s": 0.0862985,
+            "key_generation_s": 0.0486231
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2858870000054594,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0052665,
+            "combine_s": 0,
+            "decryption_s": 0.0050761,
+            "encryption_s": 0.0932903,
+            "key_generation_s": 0.0530516
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3190712000068743,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0056625,
+            "encryption_s": 0.1000287,
+            "key_generation_s": 0.0534044
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2899510999850463,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0011394,
+            "combine_s": 0,
+            "decryption_s": 0.0042999,
+            "encryption_s": 0.0979463,
+            "key_generation_s": 0.0548309
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29991219998919405,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0020277,
+            "combine_s": 0.0010017,
+            "decryption_s": 0.0052916,
+            "encryption_s": 0.1221776,
+            "key_generation_s": 0.052462
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.32440249997307546,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0088766,
+            "encryption_s": 0.0833328,
+            "key_generation_s": 0.0513083
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2872633000079077,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020141,
+            "decryption_s": 0.0083287,
+            "encryption_s": 0.0831006,
+            "key_generation_s": 0.0674573
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.31899780000094324,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0155239,
+            "encryption_s": 0.0833402,
+            "key_generation_s": 0.0492056
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.329974599997513,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0053052,
+            "decryption_s": 0.0051907,
+            "encryption_s": 0.0988012,
+            "key_generation_s": 0.0464511
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.38347209998755716,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0079208,
+            "encryption_s": 0.0919312,
+            "key_generation_s": 0.0543647
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.31083180001587607,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0009468,
+            "decryption_s": 0.0082505,
+            "encryption_s": 0.0946364,
+            "key_generation_s": 0.0519358
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2908922999922652,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0,
+            "encryption_s": 0.0892463,
+            "key_generation_s": 0.0526974
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3497557999799028,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0064876,
+            "encryption_s": 0.096795,
+            "key_generation_s": 0.0502876
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.28935390000697225,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020254,
+            "decryption_s": 0.005163,
+            "encryption_s": 0.0926122,
+            "key_generation_s": 0.0528862
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.37511900000390597,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0124812,
+            "encryption_s": 0.1573226,
+            "key_generation_s": 0.0554373
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3973325999977533,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0057024,
+            "decryption_s": 0.0082065,
+            "encryption_s": 0.1017,
+            "key_generation_s": 0.0506799
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.4149121000082232,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0004355,
+            "decryption_s": 0.0103362,
+            "encryption_s": 0.1089928,
+            "key_generation_s": 0.0603768
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.32560330000706017,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0101858,
+            "encryption_s": 0.0917405,
+            "key_generation_s": 0.0560938
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2907015999953728,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0078234,
+            "encryption_s": 0.0891213,
+            "key_generation_s": 0.0489842
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2658710000105202,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0003965,
+            "combine_s": 0.0015413,
+            "decryption_s": 0.0053966,
+            "encryption_s": 0.0977206,
+            "key_generation_s": 0.0531058
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2981774000218138,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0024253,
+            "decryption_s": 0.0050864,
+            "encryption_s": 0.0969663,
+            "key_generation_s": 0.0604411
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.30598550001741387,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0,
+            "encryption_s": 0.0870152,
+            "key_generation_s": 0.0512121
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.262887499993667,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0042125,
+            "encryption_s": 0.0913318,
+            "key_generation_s": 0.0412686
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2637325999967288,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0010505,
+            "decryption_s": 0.0114447,
+            "encryption_s": 0.0854424,
+            "key_generation_s": 0.0573208
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29014399999869056,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0010078,
+            "combine_s": 0,
+            "decryption_s": 0.0048359,
+            "encryption_s": 0.0959422,
+            "key_generation_s": 0.0552887
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2768584000004921,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020093,
+            "decryption_s": 0.0094257,
+            "encryption_s": 0.1407417,
+            "key_generation_s": 0.0491106
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.3260761999990791,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.000552,
+            "decryption_s": 0.0042922,
+            "encryption_s": 0.0802658,
+            "key_generation_s": 0.0482247
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2765584000153467,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0105313,
+            "encryption_s": 0.0976715,
+            "key_generation_s": 0.0536529
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.28736339998431504,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0055111,
+            "encryption_s": 0.0904788,
+            "key_generation_s": 0.0497808
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26980249999905936,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0010234,
+            "combine_s": 0,
+            "decryption_s": 0.0031959,
+            "encryption_s": 0.0918715,
+            "key_generation_s": 0.0499173
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2683666000084486,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.008062,
+            "encryption_s": 0.0937595,
+            "key_generation_s": 0.0453502
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2678246999857947,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0051016,
+            "encryption_s": 0.0887162,
+            "key_generation_s": 0.0517211
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26926289999391884,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0055686,
+            "decryption_s": 0.0068674,
+            "encryption_s": 0.0884738,
+            "key_generation_s": 0.0435388
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26515910000307485,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0040961,
+            "combine_s": 0,
+            "decryption_s": 0,
+            "encryption_s": 0.0899348,
+            "key_generation_s": 0.0446039
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2714766999997664,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.003075,
+            "encryption_s": 0.0914424,
+            "key_generation_s": 0.0483116
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26892179998685606,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0020097,
+            "combine_s": 0.0010082,
+            "decryption_s": 0.0056082,
+            "encryption_s": 0.0925221,
+            "key_generation_s": 0.0530521
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.28227959998184815,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.010306,
+            "encryption_s": 0.0853531,
+            "key_generation_s": 0.0659382
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.28885840001748875,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0018052,
+            "decryption_s": 0.0051101,
+            "encryption_s": 0.0878149,
+            "key_generation_s": 0.0491654
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.27812819997780025,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0059457,
+            "encryption_s": 0.0911699,
+            "key_generation_s": 0.0517291
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.272988400014583,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0060522,
+            "encryption_s": 0.0886617,
+            "key_generation_s": 0.0576741
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.279384299996309,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0027145,
+            "decryption_s": 0.0085798,
+            "encryption_s": 0.0886104,
+            "key_generation_s": 0.0529564
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29073549999156967,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0051274,
+            "encryption_s": 0.0907711,
+            "key_generation_s": 0.0490842
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.28382959999726154,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0020126,
+            "combine_s": 0.0020142,
+            "decryption_s": 0.0043574,
+            "encryption_s": 0.0937771,
+            "key_generation_s": 0.0494293
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2908645000134129,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0009989,
+            "decryption_s": 0,
+            "encryption_s": 0.091352,
+            "key_generation_s": 0.0539126
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29967429998214357,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.000378,
+            "combine_s": 0.0081222,
+            "decryption_s": 0.0073414,
+            "encryption_s": 0.1027549,
+            "key_generation_s": 0.0480738
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29277560001355596,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0014293,
+            "decryption_s": 0.0087078,
+            "encryption_s": 0.0928261,
+            "key_generation_s": 0.0504883
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2801171999890357,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0025247,
+            "decryption_s": 0.0052327,
+            "encryption_s": 0.0882469,
+            "key_generation_s": 0.0492596
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.27079759998014197,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0083225,
+            "encryption_s": 0.1036249,
+            "key_generation_s": 0.0530767
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2917396000120789,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0106097,
+            "encryption_s": 0.0877731,
+            "key_generation_s": 0.0519584
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.28061270000762306,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020059,
+            "decryption_s": 0.0037269,
+            "encryption_s": 0.0883808,
+            "key_generation_s": 0.0448529
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.25757139999768697,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0074526,
+            "encryption_s": 0.0896769,
+            "key_generation_s": 0.0457259
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26417689997470006,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0010355,
+            "decryption_s": 0.0100624,
+            "encryption_s": 0.084453,
+            "key_generation_s": 0.0501796
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26454599999124184,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0041303,
+            "decryption_s": 0.0061046,
+            "encryption_s": 0.0863769,
+            "key_generation_s": 0.044501
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2598842000006698,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0050332,
+            "combine_s": 0,
+            "decryption_s": 0.0073882,
+            "encryption_s": 0.0888666,
+            "key_generation_s": 0.0478596
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2704385999822989,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0105703,
+            "encryption_s": 0.094924,
+            "key_generation_s": 0.0541592
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2758497000031639,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020752,
+            "decryption_s": 0.0071542,
+            "encryption_s": 0.0909171,
+            "key_generation_s": 0.0489302
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29148220000206493,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0010987,
+            "decryption_s": 0.0063026,
+            "encryption_s": 0.0870115,
+            "key_generation_s": 0.0481201
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2879053999786265,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0,
+            "encryption_s": 0.0910206,
+            "key_generation_s": 0.0448817
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2752072000002954,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0131042,
+            "encryption_s": 0.0937125,
+            "key_generation_s": 0.0467897
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29158439999446273,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0096351,
+            "encryption_s": 0.0944507,
+            "key_generation_s": 0.0482255
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29153210000367835,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0,
+            "encryption_s": 0.0896684,
+            "key_generation_s": 0.0490395
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2630738999869209,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0010532,
+            "decryption_s": 0.0081747,
+            "encryption_s": 0.085274,
+            "key_generation_s": 0.0502358
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26429550000466406,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.010976,
+            "encryption_s": 0.081412,
+            "key_generation_s": 0.0485815
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2756594000093173,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0112656,
+            "encryption_s": 0.0863148,
+            "key_generation_s": 0.0484303
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2680150000087451,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020097,
+            "decryption_s": 0.0048081,
+            "encryption_s": 0.0906927,
+            "key_generation_s": 0.0481276
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26266239999677055,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0,
+            "encryption_s": 0.0883965,
+            "key_generation_s": 0.0485786
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26927360001718625,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.00201,
+            "combine_s": 0.0015539,
+            "decryption_s": 0.0030264,
+            "encryption_s": 0.0877098,
+            "key_generation_s": 0.0500252
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.26744710002094507,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0020103,
+            "combine_s": 0.0022903,
+            "decryption_s": 0.0065483,
+            "encryption_s": 0.0854357,
+            "key_generation_s": 0.0474262
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.266516200004844,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0056678,
+            "combine_s": 0,
+            "decryption_s": 0.0075559,
+            "encryption_s": 0.0868669,
+            "key_generation_s": 0.0482526
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.27024579999851994,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0,
+            "decryption_s": 0.0067883,
+            "encryption_s": 0.0985942,
+            "key_generation_s": 0.0513548
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.29703840002184734,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.005577,
+            "decryption_s": 0.0103804,
+            "encryption_s": 0.0978721,
+            "key_generation_s": 0.0463067
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2867158000008203,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0.0005367,
+            "combine_s": 0,
+            "decryption_s": 0.0049191,
+            "encryption_s": 0.0875699,
+            "key_generation_s": 0.0472595
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2792505999968853,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0020131,
+            "decryption_s": 0,
+            "encryption_s": 0.1076346,
+            "key_generation_s": 0.06558
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.30906299999332987,
+          "scalar_values": 66
+        },
+        {
+          "timing": {
+            "addition_s": 0,
+            "combine_s": 0.0024258,
+            "decryption_s": 0.0065914,
+            "encryption_s": 0.0906328,
+            "key_generation_s": 0.0455364
+          },
+          "ciphertexts": 11,
+          "ciphertext_bytes": 5770842,
+          "decryption_share_bytes": 786504,
+          "slots": 16384,
+          "plaintext_modulus": 1099511922689,
+          "max_quantization_error": 5.5e-06,
+          "wall_s": 0.2740794999990612,
+          "scalar_values": 66
+        }
+      ],
+      "max_load_error_kw": 0.003291940941424487,
+      "max_voltage_difference_pu": 3.062348884474986e-07,
+      "load_test": "FAIL",
+      "voltage_test": "PASS",
+      "analytic_encoding_bound_kw": 0.0055,
+      "paired_raw_rmse_difference_kw": 5.72088379158231e-06,
+      "paired_voltage_rmse_difference_pu": -5.266435260109503e-09,
+      "paired_utility_test": "PASS",
+      "paired_utility_scope": "One saved encrypted trial paired with exactly the same prepared plaintext contributions; not a universal equivalence proof."
+    }
+  }
+}
